@@ -130,6 +130,17 @@ body {
     transform: translateY(-1px);
 }
 
+.nav-login {
+    border: 1px solid var(--color-border);
+    padding: var(--space-sm) var(--space-md);
+    border-radius: 4px;
+}
+
+.nav-login:hover {
+    border-color: var(--color-accent);
+    color: var(--color-text);
+}
+
 /* =============================================
    Hero Section
    ============================================= */
@@ -652,6 +663,117 @@ body {
 }
 
 /* =============================================
+   Auth Page
+   ============================================= */
+.auth-page {
+    min-height: 100vh;
+    padding: calc(80px + var(--space-2xl)) var(--space-xl) var(--space-4xl);
+}
+
+.auth-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.auth-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.auth-title {
+    font-size: 2rem;
+    margin-bottom: var(--space-sm);
+}
+
+.auth-lead {
+    color: var(--color-text-secondary);
+}
+
+.auth-storage-note {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+    margin-top: var(--space-sm);
+}
+
+.auth-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-xl);
+}
+
+.auth-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.auth-card h2 {
+    margin-bottom: var(--space-lg);
+}
+
+.auth-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.auth-form label {
+    margin-top: var(--space-sm);
+    font-size: 0.9rem;
+}
+
+.auth-form input,
+.auth-form select {
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0.7rem 0.8rem;
+    font-family: var(--font-serif);
+    background: var(--color-white);
+}
+
+.auth-form input:focus,
+.auth-form select:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.auth-checkbox {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+}
+
+.auth-checkbox input {
+    width: auto;
+}
+
+.auth-btn {
+    margin-top: var(--space-md);
+    padding: var(--space-md);
+    background: var(--color-text);
+    color: var(--color-white);
+    border: none;
+    border-radius: 6px;
+    font-family: var(--font-serif);
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.auth-btn:hover {
+    background: var(--color-accent-dark);
+}
+
+.auth-message {
+    min-height: 1.4rem;
+    margin-top: var(--space-sm);
+    font-size: 0.85rem;
+    color: var(--color-accent-dark);
+}
+
+/* =============================================
    Animations
    ============================================= */
 @keyframes fadeIn {
@@ -716,8 +838,18 @@ body {
 }
 
 @media (max-width: 600px) {
-    .nav-links a:not(.nav-cta) {
+    .nav-links a:not(.nav-cta):not(.nav-login) {
         display: none;
+    }
+
+    .nav-links {
+        gap: var(--space-sm);
+    }
+
+    .nav-login,
+    .nav-cta {
+        font-size: 0.75rem;
+        padding: var(--space-xs) var(--space-sm);
     }
 
     .hero {
@@ -741,6 +873,14 @@ body {
     }
 
     .archive-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .auth-page {
+        padding: calc(70px + var(--space-xl)) var(--space-md) var(--space-2xl);
+    }
+
+    .auth-grid {
         grid-template-columns: 1fr;
     }
 

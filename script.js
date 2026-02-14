@@ -5,6 +5,7 @@
 document.addEventListener('DOMContentLoaded', () => {
     initCountdown();
     initNewsletterForm();
+    initAuthForms();
     initSmoothScroll();
     initScrollAnimations();
 });
@@ -93,6 +94,98 @@ function initNewsletterForm() {
             }, 3000);
         }, 1000);
     });
+}
+
+// =============================================
+// Auth Forms (Demo: localStorage)
+// =============================================
+function initAuthForms() {
+    const loginForm = document.getElementById('login-form');
+    const registerForm = document.getElementById('register-form');
+
+    if (!loginForm && !registerForm) return;
+
+    if (registerForm) {
+        registerForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(registerForm);
+            const name = String(formData.get('name') || '').trim();
+            const email = String(formData.get('email') || '').trim().toLowerCase();
+            const password = String(formData.get('password') || '');
+            const passwordConfirm = String(formData.get('passwordConfirm') || '');
+            const genre = String(formData.get('genre') || '');
+            const newsletterOptIn = formData.get('newsletterOptIn') === 'on';
+
+            if (password !== passwordConfirm) {
+                setAuthMessage('register-message', 'パスワードが一致しません。');
+                return;
+            }
+
+            const users = getStoredUsers();
+            const alreadyExists = users.some((user) => user.email === email);
+            if (alreadyExists) {
+                setAuthMessage('register-message', 'このメールアドレスはすでに登録済みです。');
+                return;
+            }
+
+            users.push({
+                name,
+                email,
+                password,
+                genre,
+                newsletterOptIn,
+                createdAt: new Date().toISOString()
+            });
+
+            localStorage.setItem('shudokuUsers', JSON.stringify(users));
+            setAuthMessage('register-message', '登録が完了しました。続けてログインしてください。');
+            registerForm.reset();
+        });
+    }
+
+    if (loginForm) {
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(loginForm);
+            const email = String(formData.get('email') || '').trim().toLowerCase();
+            const password = String(formData.get('password') || '');
+
+            const users = getStoredUsers();
+            const matchedUser = users.find((user) => user.email === email && user.password === password);
+
+            if (!matchedUser) {
+                setAuthMessage('login-message', 'メールアドレスまたはパスワードが正しくありません。');
+                return;
+            }
+
+            localStorage.setItem('shudokuSession', JSON.stringify({
+                name: matchedUser.name,
+                email: matchedUser.email,
+                loggedInAt: new Date().toISOString()
+            }));
+
+            setAuthMessage('login-message', `${matchedUser.name} さん、ログインしました。`);
+            loginForm.reset();
+        });
+    }
+}
+
+function getStoredUsers() {
+    try {
+        const raw = localStorage.getItem('shudokuUsers');
+        const parsed = raw ? JSON.parse(raw) : [];
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function setAuthMessage(elementId, message) {
+    const target = document.getElementById(elementId);
+    if (!target) return;
+    target.textContent = message;
 }
 
 // =============================================

@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ログイン | 週読</title>
+    <meta name="description" content="週読のログイン・新規登録ページです。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600&family=Shippori+Mincho:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">週読</a>
+            <div class="nav-links">
+                <a href="about.html">このサイトについて</a>
+                <a href="archive.html">過去の本</a>
+                <a href="login.html" class="nav-login">ログイン</a>
+                <a href="index.html#subscribe" class="nav-cta">購読する</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="auth-page">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1 class="auth-title">アカウント</h1>
+                <p class="auth-lead">ログイン、または新規登録して読書記録を管理できます。</p>
+                <p class="auth-storage-note">このデモでは登録情報はブラウザ内（localStorage）に保存されます。</p>
+            </div>
+
+            <div class="auth-grid">
+                <section class="auth-card">
+                    <h2>ログイン</h2>
+                    <form id="login-form" class="auth-form">
+                        <label for="login-email">メールアドレス</label>
+                        <input id="login-email" name="email" type="email" autocomplete="email" required>
+
+                        <label for="login-password">パスワード</label>
+                        <input id="login-password" name="password" type="password" autocomplete="current-password" required>
+
+                        <button type="submit" class="auth-btn">ログインする</button>
+                    </form>
+                    <p id="login-message" class="auth-message" aria-live="polite"></p>
+                </section>
+
+                <section class="auth-card">
+                    <h2>新規登録</h2>
+                    <form id="register-form" class="auth-form">
+                        <label for="register-name">表示名</label>
+                        <input id="register-name" name="name" type="text" maxlength="40" autocomplete="name" required>
+
+                        <label for="register-email">メールアドレス</label>
+                        <input id="register-email" name="email" type="email" autocomplete="email" required>
+
+                        <label for="register-password">パスワード（8文字以上）</label>
+                        <input id="register-password" name="password" type="password" minlength="8" autocomplete="new-password" required>
+
+                        <label for="register-password-confirm">パスワード（確認）</label>
+                        <input id="register-password-confirm" name="passwordConfirm" type="password" minlength="8" autocomplete="new-password"
+                            required>
+
+                        <label for="register-genre">好きなジャンル</label>
+                        <select id="register-genre" name="genre" required>
+                            <option value="" selected disabled>選択してください</option>
+                            <option value="自己啓発">自己啓発</option>
+                            <option value="小説">小説</option>
+                            <option value="ビジネス">ビジネス</option>
+                            <option value="心理学">心理学</option>
+                            <option value="エッセイ">エッセイ</option>
+                        </select>
+
+                        <label class="auth-checkbox">
+                            <input type="checkbox" name="newsletterOptIn" checked>
+                            新着一冊のメールを受け取る
+                        </label>
+
+                        <label class="auth-checkbox">
+                            <input type="checkbox" name="terms" required>
+                            利用規約・プライバシーポリシーに同意する
+                        </label>
+
+                        <button type="submit" class="auth-btn">登録する</button>
+                    </form>
+                    <p id="register-message" class="auth-message" aria-live="polite"></p>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="footer-logo">週読</span>
+                <p class="footer-tagline">週に一冊、自分と向き合う時間を</p>
+            </div>
+            <div class="footer-links">
+                <a href="privacy.html">プライバシーポリシー</a>
+                <a href="about.html">お問い合わせ</a>
+                <a href="about.html">運営者情報</a>
+            </div>
+            <p class="footer-copyright">© 2026 週読 All rights reserved.</p>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+
+</html>
