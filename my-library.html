@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>読書記録DB | 週読</title>
+    <meta name="description" content="登録ユーザー向けの読書記録データベース画面です。">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600&family=Shippori+Mincho:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">週読</a>
+            <div class="nav-links">
+                <a href="about.html">このサイトについて</a>
+                <a href="archive.html">過去の本</a>
+                <a href="my-library.html">読書記録</a>
+                <a href="login.html" class="nav-login">ログイン</a>
+                <a href="index.html#subscribe" class="nav-cta">購読する</a>
+            </div>
+        </div>
+    </nav>
+
+    <main class="reading-page" id="reading-db-page">
+        <div class="reading-container">
+            <header class="reading-header">
+                <h1 class="reading-title">読書記録データベース</h1>
+                <p class="reading-lead">読了した本を、あなた専用の一覧として保存できます。</p>
+                <p class="reading-user" id="reading-user-label"></p>
+                <button type="button" class="reading-logout" id="logout-button">ログアウト</button>
+            </header>
+
+            <section class="reading-gate" id="reading-login-required" hidden>
+                <p>このページはログインユーザー専用です。</p>
+                <a href="login.html" class="auth-btn reading-gate-btn">ログインページへ</a>
+            </section>
+
+            <div class="reading-grid" id="reading-content" hidden>
+                <section class="reading-card">
+                    <h2>本を登録</h2>
+                    <form id="reading-form" class="reading-form">
+                        <label for="book-title">本のタイトル</label>
+                        <input id="book-title" name="title" type="text" maxlength="120" required>
+
+                        <label for="book-author">著者</label>
+                        <input id="book-author" name="author" type="text" maxlength="80" required>
+
+                        <label for="book-status">読書ステータス</label>
+                        <select id="book-status" name="status" required>
+                            <option value="読了" selected>読了</option>
+                            <option value="読書中">読書中</option>
+                            <option value="積読">積読</option>
+                        </select>
+
+                        <label for="book-date">読了日</label>
+                        <input id="book-date" name="completedOn" type="date">
+
+                        <label for="book-rating">評価（1〜5）</label>
+                        <input id="book-rating" name="rating" type="number" min="1" max="5" step="1" placeholder="例: 4">
+
+                        <label for="book-note">メモ</label>
+                        <textarea id="book-note" name="note" rows="4" maxlength="300"
+                            placeholder="印象に残ったことを記録"></textarea>
+
+                        <button type="submit" class="auth-btn">記録を保存</button>
+                    </form>
+                    <p id="reading-form-message" class="auth-message" aria-live="polite"></p>
+                </section>
+
+                <section class="reading-card">
+                    <div class="reading-list-head">
+                        <h2>登録済みの本</h2>
+                        <p class="reading-count" id="reading-count">0冊</p>
+                    </div>
+                    <div id="reading-list" class="reading-list"></div>
+                </section>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="footer-logo">週読</span>
+                <p class="footer-tagline">週に一冊、自分と向き合う時間を</p>
+            </div>
+            <div class="footer-links">
+                <a href="privacy.html">プライバシーポリシー</a>
+                <a href="about.html">お問い合わせ</a>
+                <a href="about.html">運営者情報</a>
+            </div>
+            <p class="footer-copyright">© 2026 週読 All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

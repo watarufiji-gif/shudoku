@@ -774,6 +774,186 @@ body {
 }
 
 /* =============================================
+   Reading Database Page
+   ============================================= */
+.reading-page {
+    min-height: 100vh;
+    padding: calc(80px + var(--space-2xl)) var(--space-xl) var(--space-4xl);
+    background: var(--color-bg-warm);
+}
+
+.reading-container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+.reading-header {
+    text-align: center;
+    margin-bottom: var(--space-2xl);
+}
+
+.reading-title {
+    font-size: 2rem;
+    margin-bottom: var(--space-sm);
+}
+
+.reading-lead {
+    color: var(--color-text-secondary);
+}
+
+.reading-user {
+    color: var(--color-accent-dark);
+    margin-top: var(--space-sm);
+    font-size: 0.9rem;
+}
+
+.reading-logout {
+    margin-top: var(--space-md);
+    border: 1px solid var(--color-border);
+    background: var(--color-white);
+    color: var(--color-text-secondary);
+    border-radius: 6px;
+    padding: 0.35rem 0.8rem;
+    font-family: var(--font-serif);
+    cursor: pointer;
+}
+
+.reading-gate {
+    max-width: 560px;
+    margin: 0 auto;
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: var(--space-xl);
+    text-align: center;
+}
+
+.reading-gate-btn {
+    display: inline-block;
+    text-decoration: none;
+    margin-top: var(--space-md);
+}
+
+.reading-grid {
+    display: grid;
+    grid-template-columns: 0.95fr 1.05fr;
+    gap: var(--space-xl);
+}
+
+.reading-card {
+    background: var(--color-white);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: var(--space-xl);
+    box-shadow: var(--shadow-sm);
+}
+
+.reading-card h2 {
+    margin-bottom: var(--space-lg);
+}
+
+.reading-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+}
+
+.reading-form input,
+.reading-form select,
+.reading-form textarea {
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 0.7rem 0.8rem;
+    font-family: var(--font-serif);
+    background: var(--color-white);
+}
+
+.reading-form input:focus,
+.reading-form select:focus,
+.reading-form textarea:focus {
+    outline: none;
+    border-color: var(--color-accent);
+}
+
+.reading-list-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--space-md);
+}
+
+.reading-count {
+    color: var(--color-text-muted);
+    font-size: 0.85rem;
+}
+
+.reading-list {
+    display: grid;
+    gap: var(--space-md);
+}
+
+.reading-item {
+    border: 1px solid var(--color-border);
+    border-radius: 10px;
+    padding: var(--space-md);
+    background: var(--color-bg);
+}
+
+.reading-item-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: var(--space-sm);
+}
+
+.reading-item-title {
+    font-size: 1.05rem;
+    margin-bottom: 0.1rem;
+}
+
+.reading-item-meta {
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.reading-item-badges {
+    display: flex;
+    gap: var(--space-sm);
+    margin-top: var(--space-sm);
+    flex-wrap: wrap;
+}
+
+.reading-badge {
+    font-size: 0.72rem;
+    border: 1px solid var(--color-border);
+    border-radius: 99px;
+    padding: 0.1rem 0.55rem;
+    color: var(--color-text-secondary);
+}
+
+.reading-note {
+    margin-top: var(--space-sm);
+    font-size: 0.88rem;
+    color: var(--color-text-secondary);
+}
+
+.reading-delete {
+    border: 1px solid #d6b6b0;
+    background: #fff4f2;
+    color: #8f3b2e;
+    border-radius: 6px;
+    padding: 0.3rem 0.65rem;
+    cursor: pointer;
+}
+
+.reading-empty {
+    color: var(--color-text-muted);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: var(--space-lg) 0;
+}
+
+/* =============================================
    Animations
    ============================================= */
 @keyframes fadeIn {
@@ -881,6 +1061,14 @@ body {
     }
 
     .auth-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .reading-page {
+        padding: calc(70px + var(--space-xl)) var(--space-md) var(--space-2xl);
+    }
+
+    .reading-grid {
         grid-template-columns: 1fr;
     }
 

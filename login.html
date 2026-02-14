@@ -21,6 +21,7 @@
             <div class="nav-links">
                 <a href="about.html">このサイトについて</a>
                 <a href="archive.html">過去の本</a>
+                <a href="my-library.html">読書記録</a>
                 <a href="login.html" class="nav-login">ログイン</a>
                 <a href="index.html#subscribe" class="nav-cta">購読する</a>
             </div>
@@ -32,7 +33,7 @@
             <div class="auth-header">
                 <h1 class="auth-title">アカウント</h1>
                 <p class="auth-lead">ログイン、または新規登録して読書記録を管理できます。</p>
-                <p class="auth-storage-note">このデモでは登録情報はブラウザ内（localStorage）に保存されます。</p>
+                <p class="auth-storage-note">本番運用では Supabase Auth / Database に保存されます。</p>
             </div>
 
             <div class="auth-grid">
@@ -108,6 +109,8 @@
             <p class="footer-copyright">© 2026 週読 All rights reserved.</p>
         </div>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="supabase-config.js"></script>
     <script src="script.js"></script>
 </body>
 

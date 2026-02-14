@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initCountdown();
     initNewsletterForm();
     initAuthForms();
+    initReadingDatabasePage();
     initSmoothScroll();
     initScrollAnimations();
 });
@@ -105,80 +106,25 @@ function initAuthForms() {
 
     if (!loginForm && !registerForm) return;
 
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+        setAuthMessage('register-message', 'Supabase未設定です。`supabase-config.js` を設定してください。');
+        setAuthMessage('login-message', 'Supabase未設定です。`supabase-config.js` を設定してください。');
+        return;
+    }
+
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
-
-            const formData = new FormData(registerForm);
-            const name = String(formData.get('name') || '').trim();
-            const email = String(formData.get('email') || '').trim().toLowerCase();
-            const password = String(formData.get('password') || '');
-            const passwordConfirm = String(formData.get('passwordConfirm') || '');
-            const genre = String(formData.get('genre') || '');
-            const newsletterOptIn = formData.get('newsletterOptIn') === 'on';
-
-            if (password !== passwordConfirm) {
-                setAuthMessage('register-message', 'パスワードが一致しません。');
-                return;
-            }
-
-            const users = getStoredUsers();
-            const alreadyExists = users.some((user) => user.email === email);
-            if (alreadyExists) {
-                setAuthMessage('register-message', 'このメールアドレスはすでに登録済みです。');
-                return;
-            }
-
-            users.push({
-                name,
-                email,
-                password,
-                genre,
-                newsletterOptIn,
-                createdAt: new Date().toISOString()
-            });
-
-            localStorage.setItem('shudokuUsers', JSON.stringify(users));
-            setAuthMessage('register-message', '登録が完了しました。続けてログインしてください。');
-            registerForm.reset();
+            handleSignUp(registerForm, supabase);
         });
     }
 
     if (loginForm) {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-
-            const formData = new FormData(loginForm);
-            const email = String(formData.get('email') || '').trim().toLowerCase();
-            const password = String(formData.get('password') || '');
-
-            const users = getStoredUsers();
-            const matchedUser = users.find((user) => user.email === email && user.password === password);
-
-            if (!matchedUser) {
-                setAuthMessage('login-message', 'メールアドレスまたはパスワードが正しくありません。');
-                return;
-            }
-
-            localStorage.setItem('shudokuSession', JSON.stringify({
-                name: matchedUser.name,
-                email: matchedUser.email,
-                loggedInAt: new Date().toISOString()
-            }));
-
-            setAuthMessage('login-message', `${matchedUser.name} さん、ログインしました。`);
-            loginForm.reset();
+            handleSignIn(loginForm, supabase);
         });
-    }
-}
-
-function getStoredUsers() {
-    try {
-        const raw = localStorage.getItem('shudokuUsers');
-        const parsed = raw ? JSON.parse(raw) : [];
-        return Array.isArray(parsed) ? parsed : [];
-    } catch (error) {
-        return [];
     }
 }
 
@@ -186,6 +132,243 @@ function setAuthMessage(elementId, message) {
     const target = document.getElementById(elementId);
     if (!target) return;
     target.textContent = message;
+}
+
+async function handleSignUp(registerForm, supabase) {
+    const formData = new FormData(registerForm);
+    const name = String(formData.get('name') || '').trim();
+    const email = String(formData.get('email') || '').trim().toLowerCase();
+    const password = String(formData.get('password') || '');
+    const passwordConfirm = String(formData.get('passwordConfirm') || '');
+    const genre = String(formData.get('genre') || '');
+    const newsletterOptIn = formData.get('newsletterOptIn') === 'on';
+
+    if (password !== passwordConfirm) {
+        setAuthMessage('register-message', 'パスワードが一致しません。');
+        return;
+    }
+
+    const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+            data: {
+                display_name: name,
+                favorite_genre: genre,
+                newsletter_opt_in: newsletterOptIn
+            }
+        }
+    });
+
+    if (error) {
+        setAuthMessage('register-message', `登録に失敗しました: ${error.message}`);
+        return;
+    }
+
+    setAuthMessage('register-message', '登録完了。確認メールをチェックしてからログインしてください。');
+    registerForm.reset();
+}
+
+async function handleSignIn(loginForm, supabase) {
+    const formData = new FormData(loginForm);
+    const email = String(formData.get('email') || '').trim().toLowerCase();
+    const password = String(formData.get('password') || '');
+
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) {
+        setAuthMessage('login-message', `ログイン失敗: ${error.message}`);
+        return;
+    }
+
+    setAuthMessage('login-message', 'ログインしました。読書記録ページへ移動します。');
+    loginForm.reset();
+    setTimeout(() => {
+        window.location.href = 'my-library.html';
+    }, 600);
+}
+
+// =============================================
+// Reading Database Page (Supabase)
+// =============================================
+function initReadingDatabasePage() {
+    const page = document.getElementById('reading-db-page');
+    if (!page) return;
+
+    const loginRequired = document.getElementById('reading-login-required');
+    const content = document.getElementById('reading-content');
+    const userLabel = document.getElementById('reading-user-label');
+    const form = document.getElementById('reading-form');
+    const list = document.getElementById('reading-list');
+    const count = document.getElementById('reading-count');
+    const message = document.getElementById('reading-form-message');
+
+    wireReadingPage(page, loginRequired, content, userLabel, form, list, count, message);
+}
+
+async function wireReadingPage(page, loginRequired, content, userLabel, form, list, count, message) {
+    const supabase = getSupabaseClient();
+    if (!supabase) {
+        if (loginRequired) {
+            loginRequired.hidden = false;
+            loginRequired.innerHTML = '<p>Supabase未設定です。`supabase-config.js` を設定してください。</p>';
+        }
+        if (content) content.hidden = true;
+        return;
+    }
+
+    const { data: userData } = await supabase.auth.getUser();
+    const user = userData ? userData.user : null;
+    if (!user) {
+        if (loginRequired) loginRequired.hidden = false;
+        if (content) content.hidden = true;
+        if (userLabel) userLabel.textContent = '';
+        return;
+    }
+
+    if (loginRequired) loginRequired.hidden = true;
+    if (content) content.hidden = false;
+    if (userLabel) {
+        const displayName = user.user_metadata && user.user_metadata.display_name
+            ? user.user_metadata.display_name
+            : user.email;
+        userLabel.textContent = `${displayName} さんの記録`;
+    }
+
+    await renderReadingEntries(supabase, user.id, list, count);
+
+    if (form) {
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            const title = String(formData.get('title') || '').trim();
+            const author = String(formData.get('author') || '').trim();
+            const status = String(formData.get('status') || '').trim();
+            const completedOn = String(formData.get('completedOn') || '').trim() || null;
+            const ratingRaw = String(formData.get('rating') || '').trim();
+            const rating = ratingRaw ? Number(ratingRaw) : null;
+            const note = String(formData.get('note') || '').trim() || null;
+
+            const { error } = await supabase.from('reading_entries').insert({
+                user_id: user.id,
+                title,
+                author,
+                status,
+                completed_on: completedOn,
+                rating,
+                note
+            });
+
+            if (error) {
+                if (message) message.textContent = `保存に失敗しました: ${error.message}`;
+                return;
+            }
+
+            if (message) message.textContent = '読書記録を保存しました。';
+            form.reset();
+            await renderReadingEntries(supabase, user.id, list, count);
+        });
+    }
+
+    if (list) {
+        list.addEventListener('click', async (e) => {
+            const deleteButton = e.target.closest('.reading-delete');
+            if (!deleteButton) return;
+
+            const entryId = deleteButton.getAttribute('data-entry-id');
+            if (!entryId) return;
+
+            const { error } = await supabase
+                .from('reading_entries')
+                .delete()
+                .eq('id', entryId)
+                .eq('user_id', user.id);
+
+            if (error) {
+                if (message) message.textContent = `削除に失敗しました: ${error.message}`;
+                return;
+            }
+            await renderReadingEntries(supabase, user.id, list, count);
+        });
+    }
+
+    const logoutButton = page.querySelector('#logout-button');
+    if (logoutButton) {
+        logoutButton.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+            window.location.href = 'login.html';
+        });
+    }
+}
+
+async function renderReadingEntries(supabase, userId, listElement, countElement) {
+    if (!listElement || !countElement) return;
+
+    const { data, error } = await supabase
+        .from('reading_entries')
+        .select('id,title,author,status,completed_on,rating,note,created_at')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+
+    if (error) {
+        listElement.innerHTML = `<p class="reading-empty">取得に失敗しました: ${escapeHtml(error.message)}</p>`;
+        countElement.textContent = '0冊';
+        return;
+    }
+
+    const userEntries = Array.isArray(data) ? data : [];
+    countElement.textContent = `${userEntries.length}冊`;
+
+    if (userEntries.length === 0) {
+        listElement.innerHTML = '<p class="reading-empty">まだ読書記録がありません。最初の1冊を登録しましょう。</p>';
+        return;
+    }
+
+    listElement.innerHTML = userEntries.map((entry) => {
+        const dateLabel = entry.completed_on ? `読了日: ${escapeHtml(entry.completed_on)}` : '読了日: 未設定';
+        const ratingLabel = entry.rating ? `評価: ${escapeHtml(entry.rating)}/5` : '評価: -';
+        const noteHtml = entry.note ? `<p class="reading-note">${escapeHtml(entry.note)}</p>` : '';
+
+        return `
+            <article class="reading-item">
+                <div class="reading-item-top">
+                    <div>
+                        <h3 class="reading-item-title">${escapeHtml(entry.title)}</h3>
+                        <p class="reading-item-meta">${escapeHtml(entry.author)}</p>
+                    </div>
+                    <button type="button" class="reading-delete" data-entry-id="${escapeHtml(entry.id)}">削除</button>
+                </div>
+                <div class="reading-item-badges">
+                    <span class="reading-badge">状態: ${escapeHtml(entry.status)}</span>
+                    <span class="reading-badge">${dateLabel}</span>
+                    <span class="reading-badge">${ratingLabel}</span>
+                </div>
+                ${noteHtml}
+            </article>
+        `;
+    }).join('');
+}
+
+function getSupabaseClient() {
+    if (!window.supabase || !window.SUPABASE_URL || !window.SUPABASE_ANON_KEY) {
+        return null;
+    }
+    if (!window._supabaseClient) {
+        window._supabaseClient = window.supabase.createClient(
+            window.SUPABASE_URL,
+            window.SUPABASE_ANON_KEY
+        );
+    }
+    return window._supabaseClient;
+}
+
+function escapeHtml(value) {
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
 }
 
 // =============================================

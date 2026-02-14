@@ -54,3 +54,63 @@
 - `style.css`: デザインのファイル（色や配置を変えたい時はここ）
 - `script.js`: 動きのファイル（カウントダウンなどの機能）
 - `README.md`: この説明書
+
+## 5. 本番DB移行（Supabase）
+
+このプロジェクトは `Supabase Auth + Postgres` で本番運用できるようにしてあります。
+
+### 5-1. 設定ファイル
+
+`supabase-config.js` を編集して、Supabase プロジェクトの値を設定します。
+
+```js
+window.SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
+window.SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+```
+
+### 5-2. テーブル作成（SQL Editor で実行）
+
+```sql
+create table if not exists public.reading_entries (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references auth.users(id) on delete cascade,
+  title text not null,
+  author text not null,
+  status text not null,
+  completed_on date,
+  rating int,
+  note text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.reading_entries enable row level security;
+
+create policy "users_can_select_own_entries"
+on public.reading_entries
+for select
+using (auth.uid() = user_id);
+
+create policy "users_can_insert_own_entries"
+on public.reading_entries
+for insert
+with check (auth.uid() = user_id);
+
+create policy "users_can_delete_own_entries"
+on public.reading_entries
+for delete
+using (auth.uid() = user_id);
+```
+
+### 5-3. Auth 設定
+
+- Supabase Dashboard > Authentication > Providers で `Email` を有効化
+- 必要に応じて `Confirm email` のON/OFFを選択
+- 本番ドメインを `URL Configuration` に登録
+
+### 5-4. 現在の実装仕様
+
+- 新規登録: Supabase Auth (`signUp`)
+- ログイン: Supabase Auth (`signInWithPassword`)
+- 読書記録: `public.reading_entries`
+- ユーザーごとにRLSでデータを分離
+
