@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>運営者情報 | 週読</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600&family=Shippori+Mincho:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .profile-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 120px 20px 80px;
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 60px;
+        }
+
+        .profile-title {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .profile-content {
+            background: var(--color-white);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .profile-section {
+            margin-bottom: 40px;
+        }
+
+        .profile-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .section-label {
+            font-size: 0.9rem;
+            color: var(--color-accent);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: 15px;
+            display: block;
+            font-weight: 600;
+        }
+
+        .contact-link {
+            display: inline-block;
+            color: var(--color-text);
+            text-decoration: underline;
+            text-decoration-color: var(--color-accent);
+            text-underline-offset: 4px;
+            transition: all 0.2s;
+        }
+
+        .contact-link:hover {
+            color: var(--color-accent);
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">週読</a>
+            <div class="nav-links">
+                <a href="about.html">このサイトについて</a>
+                <a href="archive.html">過去の本</a>
+                <a href="index.html#subscribe" class="nav-cta">購読する</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="profile-container">
+        <header class="profile-header">
+            <h1 class="profile-title">運営者情報</h1>
+            <p style="color: var(--color-text-secondary);">このサイトを作った人について</p>
+        </header>
+
+        <div class="profile-content">
+            <div class="profile-section">
+                <span class="section-label">Site Concept</span>
+                <p>
+                    <strong>「情報の洪水から抜け出し、一冊の本と深く向き合う」</strong><br><br>
+                    そんな時間を、自分自身も必要としていました。<br>
+                    忙しい毎日の中で、毎週日曜日だけはスマホを置いて、紙の手触りと活字の世界に没頭する。<br>
+                    そんな「静かな習慣」を共有したくて、このサイトを立ち上げました。
+                </p>
+            </div>
+
+            <div class="profile-section">
+                <span class="section-label">Operator</span>
+                <p>Name: W.H</p>
+                <p>Hobby: 読書、サウナ、散歩</p>
+            </div>
+
+            <div class="profile-section">
+                <span class="section-label">Contact</span>
+                <p>
+                    サイトに関するご感想、掲載書籍のリクエスト、お仕事のご依頼は以下のメールアドレスまでお願いいたします。
+                </p>
+                <div style="margin-top: 20px;">
+                    <a href="mailto:contact@example.com" class="contact-link">contact@example.com</a>
+                </div>
+                <p style="font-size: 0.8rem; color: var(--color-text-muted); margin-top: 10px;">
+                    ※ 返信にはお時間をいただく場合がございます。
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="footer-logo">週読</span>
+                <p class="footer-tagline">週に一冊、自分と向き合う時間を</p>
+            </div>
+            <div class="footer-links">
+                <a href="privacy.html">プライバシーポリシー</a>
+                <a href="about.html">お問い合わせ</a>
+                <a href="about.html">運営者情報</a>
+            </div>
+            <p class="footer-copyright">© 2026 週読 All rights reserved.</p>
+        </div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+
+</html>
