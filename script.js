@@ -98,13 +98,14 @@ function initNewsletterForm() {
 }
 
 // =============================================
-// Auth Forms (Demo: localStorage)
+// Auth Forms (Supabase)
 // =============================================
 function initAuthForms() {
     const loginForm = document.getElementById('login-form');
     const registerForm = document.getElementById('register-form');
+    const oauthButtons = document.querySelectorAll('[data-oauth-provider]');
 
-    if (!loginForm && !registerForm) return;
+    if (!loginForm && !registerForm && oauthButtons.length === 0) return;
 
     const supabase = getSupabaseClient();
     if (!supabase) {
@@ -112,6 +113,9 @@ function initAuthForms() {
         setAuthMessage('login-message', 'Supabase未設定です。`supabase-config.js` を設定してください。');
         return;
     }
+
+    bindAuthStateRedirect(supabase);
+    redirectIfAlreadySignedIn(supabase);
 
     if (registerForm) {
         registerForm.addEventListener('submit', (e) => {
@@ -124,6 +128,16 @@ function initAuthForms() {
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             handleSignIn(loginForm, supabase);
+        });
+    }
+
+    if (oauthButtons.length > 0) {
+        oauthButtons.forEach((button) => {
+            button.addEventListener('click', () => {
+                const provider = button.getAttribute('data-oauth-provider');
+                if (!provider) return;
+                handleOAuthSignIn(provider, supabase);
+            });
         });
     }
 }
@@ -185,6 +199,46 @@ async function handleSignIn(loginForm, supabase) {
     setTimeout(() => {
         window.location.href = 'my-library.html';
     }, 600);
+}
+
+async function handleOAuthSignIn(provider, supabase) {
+    const redirectTo = new URL('my-library.html', window.location.href).toString();
+    const options = {
+        redirectTo
+    };
+
+    if (provider === 'google') {
+        options.scopes = 'email profile';
+    } else if (provider === 'facebook') {
+        options.scopes = 'email';
+    } else if (provider === 'apple') {
+        options.scopes = 'name email';
+    }
+
+    const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options
+    });
+
+    if (error) {
+        setAuthMessage('login-message', `${provider}ログインに失敗しました: ${error.message}`);
+    }
+}
+
+async function redirectIfAlreadySignedIn(supabase) {
+    const { data, error } = await supabase.auth.getSession();
+    if (error || !data || !data.session) return;
+    window.location.href = 'my-library.html';
+}
+
+function bindAuthStateRedirect(supabase) {
+    supabase.auth.onAuthStateChange((event, session) => {
+        if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session) {
+            if (window.location.pathname.endsWith('login.html')) {
+                window.location.href = 'my-library.html';
+            }
+        }
+    });
 }
 
 // =============================================

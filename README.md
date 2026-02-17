@@ -104,8 +104,10 @@ using (auth.uid() = user_id);
 ### 5-3. Auth 設定
 
 - Supabase Dashboard > Authentication > Providers で `Email` を有効化
+- `Google` / `Facebook` / `Twitter (X)` / `Apple` を有効化し、各ProviderのClient ID/Secretを設定
 - 必要に応じて `Confirm email` のON/OFFを選択
 - 本番ドメインを `URL Configuration` に登録
+- Redirect URL に `https://あなたのドメイン/my-library.html` を追加
 
 ### 5-4. 現在の実装仕様
 
@@ -113,4 +115,3 @@ using (auth.uid() = user_id);
 - ログイン: Supabase Auth (`signInWithPassword`)
 - 読書記録: `public.reading_entries`
 - ユーザーごとにRLSでデータを分離
-
