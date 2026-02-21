@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // =============================================
 // Countdown Timer
-// 次の日曜日までのカウントダウン
+// 次の土曜日までのカウントダウン
 // =============================================
 function initCountdown() {
     const daysEl = document.getElementById('days');
@@ -22,21 +22,25 @@ function initCountdown() {
 
     if (!daysEl || !hoursEl || !minutesEl) return;
 
-    function getNextSunday() {
+    function getNextSaturday() {
         const now = new Date();
         const dayOfWeek = now.getDay();
-        const daysUntilSunday = dayOfWeek === 0 ? 7 : 7 - dayOfWeek;
-        
-        const nextSunday = new Date(now);
-        nextSunday.setDate(now.getDate() + daysUntilSunday);
-        nextSunday.setHours(9, 0, 0, 0); // 日曜日の朝9時に更新
+        const daysUntilSaturday = (6 - dayOfWeek + 7) % 7;
 
-        return nextSunday;
+        const nextSaturday = new Date(now);
+        nextSaturday.setDate(now.getDate() + daysUntilSaturday);
+        nextSaturday.setHours(9, 0, 0, 0); // 土曜日の朝9時に更新
+
+        if (nextSaturday <= now) {
+            nextSaturday.setDate(nextSaturday.getDate() + 7);
+        }
+
+        return nextSaturday;
     }
 
     function updateCountdown() {
         const now = new Date();
-        const target = getNextSunday();
+        const target = getNextSaturday();
         const diff = target - now;
 
         if (diff <= 0) {
