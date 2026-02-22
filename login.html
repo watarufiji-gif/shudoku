@@ -34,45 +34,8 @@
             <div class="auth-header">
                 <h1 class="auth-title">アカウント</h1>
                 <p class="auth-lead">ログイン、または新規登録して読書記録を管理できます。</p>
-                <p class="auth-storage-note">本番運用では Supabase Auth / Database に保存されます。</p>
-                <p class="auth-storage-note">当サイトは酒類の販売・発送を行わないため、配送先情報は取得しません。</p>
+                <p class="auth-storage-note">読書の記録はあなた専用の本棚として保存されます。</p>
             </div>
-
-            <section id="supabase-setup-panel" class="auth-card" hidden>
-                <h2>Supabase 接続設定（初回のみ）</h2>
-                <p class="auth-storage-note">未設定の場合はここで入力すると、このブラウザに保存されます。</p>
-                <form id="supabase-setup-form" class="auth-form">
-                    <label for="supabase-url">Supabase URL</label>
-                    <input id="supabase-url" name="supabaseUrl" type="url" placeholder="https://xxxx.supabase.co" required>
-
-                    <label for="supabase-anon-key">Supabase Anon Key</label>
-                    <input id="supabase-anon-key" name="supabaseAnonKey" type="text" placeholder="eyJ..." required>
-
-                    <button type="submit" class="auth-btn">このブラウザに保存</button>
-                </form>
-                <p id="supabase-setup-message" class="auth-message" aria-live="polite"></p>
-            </section>
-
-            <section id="microcms-setup-panel" class="auth-card" hidden>
-                <h2>microCMS 接続設定（初回のみ）</h2>
-                <p class="auth-storage-note">今週の一冊をCMSで更新する場合のみ設定してください。</p>
-                <form id="microcms-setup-form" class="auth-form">
-                    <label for="microcms-service-domain">Service Domain</label>
-                    <input id="microcms-service-domain" name="microcmsServiceDomain" type="text"
-                        placeholder="your-service-name" required>
-
-                    <label for="microcms-api-key">API Key（Read only）</label>
-                    <input id="microcms-api-key" name="microcmsApiKey" type="text" placeholder="xxxxxxxx" required>
-
-                    <button type="submit" class="auth-btn">このブラウザに保存</button>
-                </form>
-                <p id="microcms-setup-message" class="auth-message" aria-live="polite"></p>
-            </section>
-
-            <section id="affiliate-stats-panel" class="auth-card" hidden>
-                <h2>アフィリエイトクリック集計（ローカル）</h2>
-                <div id="affiliate-stats-body"></div>
-            </section>
 
             <div class="auth-grid">
                 <section class="auth-card">
@@ -153,6 +116,49 @@
                     <p id="register-message" class="auth-message" aria-live="polite"></p>
                 </section>
             </div>
+
+            <section id="operator-tools" class="auth-card" hidden>
+                <details>
+                    <summary style="cursor: pointer; font-size: 1.05rem; font-weight: 600;">運営者向け設定</summary>
+                    <p class="auth-storage-note" style="margin-top: 12px;">このセクションは運営者用です。通常ユーザーには表示されません。</p>
+
+                    <section id="supabase-setup-panel" hidden>
+                        <h2>Supabase 接続設定（初回のみ）</h2>
+                        <p class="auth-storage-note">未設定の場合はここで入力すると、このブラウザに保存されます。</p>
+                        <form id="supabase-setup-form" class="auth-form">
+                            <label for="supabase-url">Supabase URL</label>
+                            <input id="supabase-url" name="supabaseUrl" type="url" placeholder="https://xxxx.supabase.co" required>
+
+                            <label for="supabase-anon-key">Supabase Anon Key</label>
+                            <input id="supabase-anon-key" name="supabaseAnonKey" type="text" placeholder="eyJ..." required>
+
+                            <button type="submit" class="auth-btn">このブラウザに保存</button>
+                        </form>
+                        <p id="supabase-setup-message" class="auth-message" aria-live="polite"></p>
+                    </section>
+
+                    <section id="microcms-setup-panel" hidden>
+                        <h2>microCMS 接続設定（初回のみ）</h2>
+                        <p class="auth-storage-note">今週の一冊をCMSで更新する場合のみ設定してください。</p>
+                        <form id="microcms-setup-form" class="auth-form">
+                            <label for="microcms-service-domain">Service Domain</label>
+                            <input id="microcms-service-domain" name="microcmsServiceDomain" type="text"
+                                placeholder="your-service-name" required>
+
+                            <label for="microcms-api-key">API Key（Read only）</label>
+                            <input id="microcms-api-key" name="microcmsApiKey" type="text" placeholder="xxxxxxxx" required>
+
+                            <button type="submit" class="auth-btn">このブラウザに保存</button>
+                        </form>
+                        <p id="microcms-setup-message" class="auth-message" aria-live="polite"></p>
+                    </section>
+
+                    <section id="affiliate-stats-panel" hidden>
+                        <h2>アフィリエイトクリック集計（ローカル）</h2>
+                        <div id="affiliate-stats-body"></div>
+                    </section>
+                </details>
+            </section>
         </div>
     </main>
 

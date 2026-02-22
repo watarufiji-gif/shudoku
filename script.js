@@ -136,8 +136,13 @@ function initAuthForms() {
 
     const supabase = getSupabaseClient();
     if (!supabase) {
-        setAuthMessage('register-message', 'Supabase未設定です。`supabase-config.js` を設定してください。');
-        setAuthMessage('login-message', 'Supabase未設定です。`supabase-config.js` を設定してください。');
+        setAuthMessage('register-message', '現在、新規登録機能は準備中です。しばらくしてからお試しください。');
+        setAuthMessage('login-message', '現在、ログイン機能は準備中です。しばらくしてからお試しください。');
+        disableFormControls(loginForm);
+        disableFormControls(registerForm);
+        activeOAuthButtons.forEach((button) => {
+            button.disabled = true;
+        });
         return;
     }
 
@@ -169,10 +174,47 @@ function initAuthForms() {
     }
 }
 
+function disableFormControls(form) {
+    if (!form) return;
+    form.querySelectorAll('input, select, button, textarea').forEach((element) => {
+        element.disabled = true;
+    });
+}
+
+function isOperatorMode() {
+    const params = new URLSearchParams(window.location.search);
+    const adminParam = params.get('admin');
+    if (adminParam === '1') {
+        if (window.localStorage) window.localStorage.setItem('operator_mode', '1');
+        return true;
+    }
+    if (adminParam === '0') {
+        if (window.localStorage) window.localStorage.removeItem('operator_mode');
+        return false;
+    }
+
+    const host = window.location.hostname;
+    if (host === 'localhost' || host === '127.0.0.1') return true;
+
+    return Boolean(window.localStorage && window.localStorage.getItem('operator_mode') === '1');
+}
+
+function ensureOperatorToolsVisible() {
+    const wrapper = document.getElementById('operator-tools');
+    if (!wrapper) return false;
+    if (!isOperatorMode()) {
+        wrapper.hidden = true;
+        return false;
+    }
+    wrapper.hidden = false;
+    return true;
+}
+
 function initSupabaseSetupPanel() {
     const panel = document.getElementById('supabase-setup-panel');
     const form = document.getElementById('supabase-setup-form');
     if (!panel || !form) return;
+    if (!ensureOperatorToolsVisible()) return;
 
     const urlInput = document.getElementById('supabase-url');
     const keyInput = document.getElementById('supabase-anon-key');
@@ -344,7 +386,7 @@ async function wireReadingPage(page, loginRequired, content, userLabel, form, li
     if (!supabase) {
         if (loginRequired) {
             loginRequired.hidden = false;
-            loginRequired.innerHTML = '<p>Supabase未設定です。`supabase-config.js` を設定してください。</p>';
+            loginRequired.innerHTML = '<p>現在この機能は準備中です。公開までお待ちください。</p>';
         }
         if (content) content.hidden = true;
         return;
@@ -636,6 +678,7 @@ function initAffiliateStatsPanel() {
     const panel = document.getElementById('affiliate-stats-panel');
     const body = document.getElementById('affiliate-stats-body');
     if (!panel || !body) return;
+    if (!ensureOperatorToolsVisible()) return;
 
     panel.hidden = false;
     const history = getAffiliateHistory();
@@ -673,6 +716,11 @@ function initAffiliateStatsPanel() {
 function initBookMetadataEditor() {
     const form = document.getElementById('book-meta-form');
     if (!form) return;
+    if (!isOperatorMode()) {
+        form.hidden = true;
+        return;
+    }
+    form.hidden = false;
 
     const titleInput = document.getElementById('book-input-title');
     const authorInput = document.getElementById('book-input-author');
@@ -866,6 +914,7 @@ function initMicroCMSSetupPanel() {
     const panel = document.getElementById('microcms-setup-panel');
     const form = document.getElementById('microcms-setup-form');
     if (!panel || !form) return;
+    if (!ensureOperatorToolsVisible()) return;
 
     const domainInput = document.getElementById('microcms-service-domain');
     const keyInput = document.getElementById('microcms-api-key');
@@ -1065,6 +1114,7 @@ function setAffiliateLinkMeta(target, platform, title) {
 }
 
 function setCMSStatus(scope, message, isError = false) {
+    if (!isOperatorMode()) return;
     const id = scope === 'detail' ? 'detail-cms-status' : 'home-cms-status';
     const target = document.getElementById(id);
     if (!target) return;

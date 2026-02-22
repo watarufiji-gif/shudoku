@@ -78,6 +78,7 @@ window.ENABLED_OAUTH_PROVIDERS = ['google']; // 使うものだけ
 補足:
 - `staticSupabaseUrl` / `staticSupabaseAnonKey` を空欄のままでも、`login.html` の「Supabase接続設定」フォームからブラウザ保存して動かせます。
 - `window.ENABLED_OAUTH_PROVIDERS` に入っていないOAuthボタンは非表示になります。
+- 運営者向け設定は `login.html?admin=1` で表示されます（通常ユーザーには非表示）。
 
 ### 5-2. テーブル作成（SQL Editor で実行）
 
