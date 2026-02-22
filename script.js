@@ -3,6 +3,7 @@
 // =============================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    initRemainingWeeksBadge();
     initSupabaseSetupPanel();
     initMicroCMSSetupPanel();
     initAnalytics();
@@ -17,6 +18,45 @@ document.addEventListener('DOMContentLoaded', () => {
     initSmoothScroll();
     initScrollAnimations();
 });
+
+function initRemainingWeeksBadge() {
+    const targets = [
+        document.getElementById('home-year-remaining'),
+        document.getElementById('detail-year-remaining')
+    ].filter(Boolean);
+    if (targets.length === 0) return;
+
+    const remainingWeeks = getRemainingWeeksInYear();
+    const label = remainingWeeks > 0
+        ? `今年あと${remainingWeeks}週`
+        : '今年最後の一冊';
+
+    targets.forEach((target) => {
+        target.textContent = label;
+    });
+}
+
+function getRemainingWeeksInYear() {
+    const now = new Date();
+    const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
+    const cursor = new Date(now);
+    cursor.setHours(0, 0, 0, 0);
+
+    const daysUntilSaturday = (6 - cursor.getDay() + 7) % 7;
+    cursor.setDate(cursor.getDate() + daysUntilSaturday);
+
+    // 土曜の更新時間（9:00）を過ぎていれば、次週分からカウント
+    if (now.getDay() === 6 && now.getHours() >= 9) {
+        cursor.setDate(cursor.getDate() + 7);
+    }
+
+    let count = 0;
+    while (cursor <= endOfYear) {
+        count += 1;
+        cursor.setDate(cursor.getDate() + 7);
+    }
+    return count;
+}
 
 // =============================================
 // Countdown Timer
