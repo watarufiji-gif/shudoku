@@ -53,6 +53,12 @@
 - `index.html`: サイトのメインファイル（文章や構造はここ）
 - `style.css`: デザインのファイル（色や配置を変えたい時はここ）
 - `script.js`: 動きのファイル（カウントダウンなどの機能）
+- `analytics-config.js`: GA4設定
+- `microcms-config.js`: microCMS設定
+- `_headers`: Netlify向けセキュリティヘッダー
+- `sitemap.xml` / `robots.txt`: SEO用
+- `RELEASE_CHECKLIST.md`: 毎週の公開チェック
+- `SECURITY_RUNBOOK.md`: キーローテーション手順
 - `README.md`: この説明書
 
 ## 5. 本番DB移行（Supabase）
@@ -64,9 +70,14 @@
 `supabase-config.js` を編集して、Supabase プロジェクトの値を設定します。
 
 ```js
-window.SUPABASE_URL = 'https://YOUR_PROJECT_ID.supabase.co';
-window.SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const staticSupabaseUrl = 'https://YOUR_PROJECT_ID.supabase.co';
+const staticSupabaseAnonKey = 'YOUR_SUPABASE_ANON_KEY';
+window.ENABLED_OAUTH_PROVIDERS = ['google']; // 使うものだけ
 ```
+
+補足:
+- `staticSupabaseUrl` / `staticSupabaseAnonKey` を空欄のままでも、`login.html` の「Supabase接続設定」フォームからブラウザ保存して動かせます。
+- `window.ENABLED_OAUTH_PROVIDERS` に入っていないOAuthボタンは非表示になります。
 
 ### 5-2. テーブル作成（SQL Editor で実行）
 
@@ -99,6 +110,12 @@ create policy "users_can_delete_own_entries"
 on public.reading_entries
 for delete
 using (auth.uid() = user_id);
+
+create policy "users_can_update_own_entries"
+on public.reading_entries
+for update
+using (auth.uid() = user_id)
+with check (auth.uid() = user_id);
 ```
 
 ### 5-3. Auth 設定
@@ -107,6 +124,7 @@ using (auth.uid() = user_id);
 - `Google` / `Facebook` / `Twitter (X)` / `Apple` を有効化し、各ProviderのClient ID/Secretを設定
 - 必要に応じて `Confirm email` のON/OFFを選択
 - 本番ドメインを `URL Configuration` に登録
+- ローカル確認用に `http://127.0.0.1:5500/login.html` と `http://127.0.0.1:5500/my-library.html` も Redirect URL に追加
 - Redirect URL に `https://あなたのドメイン/my-library.html` を追加
 
 ### 5-4. 現在の実装仕様
@@ -115,3 +133,110 @@ using (auth.uid() = user_id);
 - ログイン: Supabase Auth (`signInWithPassword`)
 - 読書記録: `public.reading_entries`
 - ユーザーごとにRLSでデータを分離
+
+## 6. セキュリティ設定（5分チェック）
+
+### 6-1. Netlify ヘッダーを有効化
+
+- ルートにある `_headers` をそのままデプロイする
+- 含まれているヘッダー:
+  - `Strict-Transport-Security`
+  - `X-Frame-Options`
+  - `X-Content-Type-Options`
+  - `Referrer-Policy`
+  - `Permissions-Policy`
+  - `Content-Security-Policy`
+
+### 6-2. Supabase 側の最終確認
+
+- API Keys で公開してよいのは `anon` キーのみ（`service_role` は絶対に置かない）
+- Authentication > URL Configuration に本番URL/ローカルURLを登録
+- SQL Editor で `5-2` のRLSポリシーまで適用済みか確認
+
+### 6-3. 本番前に動作確認
+
+- 未ログインで `my-library.html` に直接アクセスし、閲覧できないことを確認
+- ログイン後に自分のレコードだけ表示・削除できることを確認
+- ブラウザ開発者ツールのNetworkで、`http://` リソース混在がないことを確認
+
+## 7. microCMS 連携（今週の一冊を自動反映）
+
+### 7-1. 設定ファイル
+
+- `microcms-config.js` にサービス情報を設定します。
+- 優先順位は `localStorage`（ブラウザ保存） > 固定値です。
+
+```js
+const staticMicrocmsServiceDomain = 'YOUR_SERVICE_DOMAIN';
+const staticMicrocmsApiKey = 'YOUR_READ_ONLY_API_KEY';
+window.MICROCMS_ENDPOINT = 'books';
+window.MICROCMS_QUERY = 'limit=1&orders=-publishedAt';
+```
+
+または `login.html` の「microCMS 接続設定（初回のみ）」から保存可能です。
+
+### 7-2. APIスキーマ（推奨）
+
+`books` エンドポイントに以下フィールドを用意すると、`index.html` と `book-22.html` が自動更新されます。
+
+- `title`（テキスト）
+- `author`（テキスト）
+- `category`（テキスト）
+- `quote`（テキスト）
+- `description`（テキストエリア）
+- `coverImage`（画像）
+- `amazonUrl`（URL）
+- `rakutenUrl`（URL）
+- `weekLabel`（例: `第1週`）
+- `weekDate`（例: `2026年2月22日〜2月28日`）
+
+### 7-3. 運用ルール
+
+- APIキーは **読み取り専用キー** を使う（書き込みキー禁止）
+- `script.js` は「最新1件（`publishedAt`降順）」を表示
+- CMS未設定時はHTMLの既定文面がそのまま表示される
+
+## 8. クリック計測（GA4）
+
+### 8-1. 設定
+
+`analytics-config.js` に Measurement ID を設定します。
+
+```js
+window.GA4_MEASUREMENT_ID = 'G-XXXXXXXXXX';
+```
+
+### 8-2. 動作
+
+- Amazon / 楽天リンククリック時に `affiliate_click` イベントを送信
+- `login.html` にローカル集計（簡易ダッシュボード）を表示
+
+## 9. リンク監視（週次）
+
+- 週1回、以下を実行:
+
+```bash
+bash scripts/check-affiliate-links.sh
+```
+
+- 結果は `reports/affiliate-link-check-*.txt` に保存
+- `curl_error` や 4xx/5xx はURLを修正して再確認
+
+## 10. SEOの基本設定
+
+- `sitemap.xml` と `robots.txt` の `YOUR_DOMAIN` を本番ドメインに置換
+- `index.html` / `book-22.html` の canonical / OGP を本番ドメインに合わせる
+- 新しい記事ページを追加した場合は `sitemap.xml` にURLを追記
+- 一括反映する場合は次を実行:
+
+```bash
+bash scripts/apply-production-values.sh <domain> <amazon_tag> <rakuten_id> [ga4_measurement_id]
+```
+
+## 11. セキュリティ運用
+
+- キー運用の詳細は `SECURITY_RUNBOOK.md`
+- 特に以下を厳守:
+  - `supabase` の `service_role` はフロントで使わない
+  - microCMSは Read only キーを使用
+  - キー更新後はログイン・CMS反映・計測イベントを再確認

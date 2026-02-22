@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.microcms.io https://api.openbd.jp https://www.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com; form-action 'self'; upgrade-insecure-requests">
     <title>ログイン | 週読</title>
     <meta name="description" content="週読のログイン・新規登録ページです。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -36,6 +37,42 @@
                 <p class="auth-storage-note">本番運用では Supabase Auth / Database に保存されます。</p>
                 <p class="auth-storage-note">当サイトは酒類の販売・発送を行わないため、配送先情報は取得しません。</p>
             </div>
+
+            <section id="supabase-setup-panel" class="auth-card" hidden>
+                <h2>Supabase 接続設定（初回のみ）</h2>
+                <p class="auth-storage-note">未設定の場合はここで入力すると、このブラウザに保存されます。</p>
+                <form id="supabase-setup-form" class="auth-form">
+                    <label for="supabase-url">Supabase URL</label>
+                    <input id="supabase-url" name="supabaseUrl" type="url" placeholder="https://xxxx.supabase.co" required>
+
+                    <label for="supabase-anon-key">Supabase Anon Key</label>
+                    <input id="supabase-anon-key" name="supabaseAnonKey" type="text" placeholder="eyJ..." required>
+
+                    <button type="submit" class="auth-btn">このブラウザに保存</button>
+                </form>
+                <p id="supabase-setup-message" class="auth-message" aria-live="polite"></p>
+            </section>
+
+            <section id="microcms-setup-panel" class="auth-card" hidden>
+                <h2>microCMS 接続設定（初回のみ）</h2>
+                <p class="auth-storage-note">今週の一冊をCMSで更新する場合のみ設定してください。</p>
+                <form id="microcms-setup-form" class="auth-form">
+                    <label for="microcms-service-domain">Service Domain</label>
+                    <input id="microcms-service-domain" name="microcmsServiceDomain" type="text"
+                        placeholder="your-service-name" required>
+
+                    <label for="microcms-api-key">API Key（Read only）</label>
+                    <input id="microcms-api-key" name="microcmsApiKey" type="text" placeholder="xxxxxxxx" required>
+
+                    <button type="submit" class="auth-btn">このブラウザに保存</button>
+                </form>
+                <p id="microcms-setup-message" class="auth-message" aria-live="polite"></p>
+            </section>
+
+            <section id="affiliate-stats-panel" class="auth-card" hidden>
+                <h2>アフィリエイトクリック集計（ローカル）</h2>
+                <div id="affiliate-stats-body"></div>
+            </section>
 
             <div class="auth-grid">
                 <section class="auth-card">
@@ -134,7 +171,9 @@
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="analytics-config.js"></script>
     <script src="supabase-config.js"></script>
+    <script src="microcms-config.js"></script>
     <script src="script.js"></script>
 </body>
 

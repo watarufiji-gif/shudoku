@@ -1,0 +1,14 @@
+{
+  "title": "本のタイトル",
+  "author": "著者名",
+  "category": "ジャンル",
+  "quote": "印象的な一文",
+  "description": "1段落目\n2段落目\n3段落目",
+  "weekLabel": "第1週",
+  "weekDate": "2026年2月22日〜2月28日",
+  "coverImage": {
+    "url": "https://images.microcms-assets.io/assets/.../cover.jpg"
+  },
+  "amazonUrl": "https://www.amazon.co.jp/dp/XXXXXXXXXX?tag=YOUR_AMAZON_ID",
+  "rakutenUrl": "https://books.rakuten.co.jp/rb/XXXXXXX/?a_id=YOUR_RAKUTEN_ID"
+}

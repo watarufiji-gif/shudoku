@@ -4,12 +4,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.microcms.io https://api.openbd.jp https://www.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com; form-action 'self'; upgrade-insecure-requests">
     <title>週読 | 週に一冊、自分と向き合う時間を</title>
     <meta name="description" content="忙しい毎日に、週に一冊だけ。厳選された本との出会いが、あなたの心に余白を作ります。">
     <meta name="keywords" content="読書, 本, おすすめ, 週刊, ブックレビュー, 自己啓発">
+    <link rel="canonical" href="https://YOUR_DOMAIN/">
     <meta property="og:title" content="週読 | 週に一冊、自分と向き合う時間を">
     <meta property="og:description" content="忙しい毎日に、週に一冊だけ。厳選された本との出会いが、あなたの心に余白を作ります。">
     <meta property="og:type" content="website">
+    <meta property="og:url" content="https://YOUR_DOMAIN/">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=1200">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -37,8 +41,9 @@
         <div class="hero-container">
             <!-- 週のカウンター -->
             <div class="week-badge">
-                <span class="week-number">第23週</span>
-                <span class="week-date">2026年2月9日〜15日</span>
+                <span id="home-week-number" class="week-number">第23週</span>
+                <span id="home-week-date" class="week-date">2026年2月9日〜15日</span>
+                <p id="home-cms-status" style="margin-top: 8px; font-size: 0.8rem; color: var(--color-text-muted);" hidden></p>
             </div>
 
             <!-- メインコンテンツ -->
@@ -46,24 +51,24 @@
                 <!-- 本の画像 -->
                 <div class="book-visual">
                     <div class="book-glow"></div>
-                    <img src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800"
+                    <img id="home-book-cover" src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800"
                         alt="今週の一冊: 嫌われる勇気" class="book-cover">
                     <div class="book-shadow"></div>
                 </div>
 
                 <!-- 本の情報 -->
                 <div class="book-info">
-                    <p class="book-category">心理学・自己啓発</p>
-                    <h1 class="book-title">嫌われる勇気</h1>
-                    <p class="book-author">岸見一郎・古賀史健</p>
+                    <p id="home-book-category" class="book-category">心理学・自己啓発</p>
+                    <h1 id="home-book-title" class="book-title">嫌われる勇気</h1>
+                    <p id="home-book-author" class="book-author">岸見一郎・古賀史健</p>
 
                     <!-- 引用 -->
                     <blockquote class="book-quote">
-                        <p>「あなたが変われないでいるのは、自らに対して「変わらない」という決心を下しているからなのです」</p>
+                        <p id="home-book-quote">「あなたが変われないでいるのは、自らに対して「変わらない」という決心を下しているからなのです」</p>
                     </blockquote>
 
                     <!-- 紹介文 -->
-                    <div class="book-description">
+                    <div id="home-book-description" class="book-description">
                         <p>
                             スマートフォンの通知、SNSの評価、他人の目。
                             私たちは日々、「誰かにどう思われるか」に縛られすぎていないでしょうか。
@@ -82,12 +87,14 @@
                     <div class="book-cta">
                         <div class="cta-group">
                             <a href="https://www.amazon.co.jp/dp/4478025819?tag=YOUR_AMAZON_ID" target="_blank"
-                                rel="noopener noreferrer" class="btn btn-amazon" id="buy-amazon">
+                                rel="noopener noreferrer" class="btn btn-amazon" id="buy-amazon" data-track-type="affiliate"
+                                data-platform="amazon" data-book-title="嫌われる勇気">
                                 <span class="btn-icon">📦</span>
                                 <span class="btn-text">Amazon</span>
                             </a>
                             <a href="https://books.rakuten.co.jp/rb/12562092/?a_id=YOUR_RAKUTEN_ID" target="_blank"
-                                rel="noopener noreferrer" class="btn btn-rakuten" id="buy-rakuten">
+                                rel="noopener noreferrer" class="btn btn-rakuten" id="buy-rakuten" data-track-type="affiliate"
+                                data-platform="rakuten" data-book-title="嫌われる勇気">
                                 <span class="btn-icon">🔴</span>
                                 <span class="btn-text">楽天ブックス</span>
                             </a>
@@ -194,6 +201,8 @@
             <p class="footer-copyright">© 2026 週読 All rights reserved.</p>
         </div>
     </footer>
+    <script src="analytics-config.js"></script>
+    <script src="microcms-config.js"></script>
     <script src="script.js"></script>
 </body>
 
