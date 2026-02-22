@@ -6,6 +6,7 @@
   "description": "1段落目\n2段落目\n3段落目",
   "weekLabel": "第1週",
   "weekDate": "2026年2月22日〜2月28日",
+  "slug": "week-1",
   "coverImage": {
     "url": "https://images.microcms-assets.io/assets/.../cover.jpg"
   },

@@ -164,12 +164,6 @@ body {
     animation: fadeInDown 0.8s ease;
 }
 
-.week-badge-row {
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-sm);
-}
-
 .week-number {
     display: inline-block;
     background: linear-gradient(135deg, var(--color-gold), var(--color-accent));
@@ -197,6 +191,12 @@ body {
     border-radius: 999px;
     padding: 0.2rem 0.5rem;
     background: var(--color-white);
+}
+
+.week-remaining-below {
+    display: block;
+    width: fit-content;
+    margin: 6px auto 0;
 }
 
 /* Book Showcase */

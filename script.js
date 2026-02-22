@@ -906,14 +906,18 @@ async function initMicroCMSContent() {
     if (!config) {
         setCMSStatus('home', 'CMS未接続のため、固定表示を使用しています。');
         setCMSStatus('detail', 'CMS未接続のため、固定表示を使用しています。');
+        renderArchiveLists([]);
         return;
     }
 
     try {
-        const latestBook = await fetchLatestBookFromMicroCMS(config);
+        const books = await fetchBooksFromMicroCMS(config);
+        const latestBook = books[0] || null;
+
         if (!latestBook) {
             setCMSStatus('home', 'CMSからデータを取得できませんでした。固定表示を使用しています。');
             setCMSStatus('detail', 'CMSからデータを取得できませんでした。固定表示を使用しています。');
+            renderArchiveLists([]);
             return;
         }
 
@@ -922,16 +926,19 @@ async function initMicroCMSContent() {
             const message = `CMS必須項目不足: ${missingFields.join(', ')}`;
             setCMSStatus('home', `${message}（固定表示を維持）`, true);
             setCMSStatus('detail', `${message}（固定表示を維持）`, true);
+            renderArchiveLists(books.slice(1));
             return;
         }
 
         applyMicroCMSBookToHome(latestBook);
         applyMicroCMSBookToDetail(latestBook);
+        renderArchiveLists(books.slice(1));
         setCMSStatus('home', 'CMSの最新データを反映中');
         setCMSStatus('detail', 'CMSの最新データを反映中');
     } catch (error) {
         setCMSStatus('home', 'CMS取得エラーのため固定表示を使用しています。', true);
         setCMSStatus('detail', 'CMS取得エラーのため固定表示を使用しています。', true);
+        renderArchiveLists([]);
         console.error('microCMS fetch failed:', error);
     }
 }
@@ -940,7 +947,7 @@ function getMicroCMSConfig() {
     const serviceDomain = String(window.MICROCMS_SERVICE_DOMAIN || '').trim();
     const apiKey = String(window.MICROCMS_API_KEY || '').trim();
     const endpoint = String(window.MICROCMS_ENDPOINT || 'books').trim();
-    const query = String(window.MICROCMS_QUERY || 'limit=1&orders=-publishedAt').trim();
+    const query = String(window.MICROCMS_QUERY || 'limit=50&orders=-publishedAt').trim();
 
     if (!serviceDomain || !apiKey) return null;
     if (serviceDomain.includes('YOUR_SERVICE_DOMAIN') || apiKey.includes('YOUR_READ_ONLY_API_KEY')) return null;
@@ -994,7 +1001,7 @@ function initMicroCMSSetupPanel() {
     });
 }
 
-async function fetchLatestBookFromMicroCMS(config) {
+async function fetchBooksFromMicroCMS(config) {
     const apiUrl = `https://${config.serviceDomain}.microcms.io/api/v1/${config.endpoint}?${config.query}`;
     const response = await fetch(apiUrl, {
         headers: {
@@ -1006,13 +1013,13 @@ async function fetchLatestBookFromMicroCMS(config) {
     }
 
     const payload = await response.json();
-    if (!payload) return null;
+    if (!payload) return [];
 
     // List API: { contents: [...] } / Object API: { ... }
     if (Array.isArray(payload.contents)) {
-        return payload.contents[0] || null;
+        return payload.contents;
     }
-    return payload;
+    return [payload];
 }
 
 function applyMicroCMSBookToHome(book) {
@@ -1092,6 +1099,79 @@ function applyMicroCMSBookToDetail(book) {
             metaDescription.setAttribute('content', `${weekLabel || '今週'}の一冊：${title}${author ? `。著者：${author}` : ''}`);
         }
     }
+}
+
+function renderArchiveLists(books) {
+    const homeGrid = document.getElementById('home-archive-grid');
+    const archiveGrid = document.getElementById('archive-page-grid');
+
+    if (homeGrid) {
+        renderArchiveItems(homeGrid, books.slice(0, 6), {
+            emptyId: 'home-archive-empty'
+        });
+    }
+    if (archiveGrid) {
+        renderArchiveItems(archiveGrid, books, {
+            emptyId: 'archive-page-empty'
+        });
+    }
+}
+
+function renderArchiveItems(container, books, options = {}) {
+    if (!container) return;
+    const items = Array.isArray(books) ? books : [];
+    const emptyEl = options.emptyId ? document.getElementById(options.emptyId) : null;
+
+    // 動的に生成した項目だけ消す
+    container.querySelectorAll('[data-generated="archive-item"]').forEach((node) => {
+        node.remove();
+    });
+
+    if (items.length === 0) {
+        if (emptyEl) emptyEl.hidden = false;
+        return;
+    }
+    if (emptyEl) emptyEl.hidden = true;
+
+    items.forEach((book, index) => {
+        const title = firstNonEmpty(book.title, book.bookTitle, 'タイトル未設定');
+        const author = firstNonEmpty(book.author, book.bookAuthor, '著者未設定');
+        const weekLabel = firstNonEmpty(
+            book.weekLabel,
+            book.week,
+            book.weekNumber ? `第${book.weekNumber}週` : `第${index + 2}週`
+        );
+        const coverUrl = resolveImageUrl(book);
+        const detailUrl = firstNonEmpty(book.pageUrl, book.detailUrl, book.url, '#');
+
+        const link = document.createElement('a');
+        link.href = /^https?:\/\//i.test(detailUrl) || detailUrl.startsWith('/') || detailUrl === '#'
+            ? detailUrl
+            : '#';
+        link.className = 'archive-item';
+        link.setAttribute('data-generated', 'archive-item');
+
+        const img = document.createElement('img');
+        img.className = 'archive-cover';
+        img.alt = title;
+        if (isOfficialImageUrl(coverUrl)) {
+            img.src = coverUrl;
+        } else {
+            img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+        }
+
+        const info = document.createElement('div');
+        info.className = 'archive-info';
+        info.innerHTML = `
+            <span class="archive-week">${escapeHtml(weekLabel)}</span>
+            <h3 class="archive-book-title">${escapeHtml(title)}</h3>
+            <p class="archive-author">${escapeHtml(author)}</p>
+        `;
+
+        link.appendChild(img);
+        link.appendChild(info);
+        container.appendChild(link);
+    });
 }
 
 function validateRequiredBookFields(book) {

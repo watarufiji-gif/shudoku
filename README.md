@@ -171,7 +171,7 @@ with check (auth.uid() = user_id);
 const staticMicrocmsServiceDomain = 'YOUR_SERVICE_DOMAIN';
 const staticMicrocmsApiKey = 'YOUR_READ_ONLY_API_KEY';
 window.MICROCMS_ENDPOINT = 'books';
-window.MICROCMS_QUERY = 'limit=1&orders=-publishedAt';
+window.MICROCMS_QUERY = 'limit=50&orders=-publishedAt';
 ```
 
 または `login.html` の「microCMS 接続設定（初回のみ）」から保存可能です。
@@ -190,6 +190,8 @@ window.MICROCMS_QUERY = 'limit=1&orders=-publishedAt';
 - `rakutenUrl`（URL）
 - `weekLabel`（例: `第1週`）
 - `weekDate`（例: `2026年2月22日〜2月28日`）
+- `slug`（任意、個別ページURL管理用）
+- `publishedAt`（公開日時、並び順の基準）
 
 ### 7-3. 運用ルール
 

@@ -32,16 +32,16 @@
 
     <!-- アーカイブヘッダー -->
     <header class="page-header" style="padding: 120px 20px 60px; text-align: center;">
-        <h1 class="page-title" style="font-family: var(--font-serif); font-size: 2rem; margin-bottom: 20px;">バックナンバー（準備中）</h1>
-        <p style="color: var(--color-text-secondary);">第1週の配信後、順次公開します。</p>
+        <h1 class="page-title" style="font-family: var(--font-serif); font-size: 2rem; margin-bottom: 20px;">バックナンバー</h1>
+        <p style="color: var(--color-text-secondary);">これまでに紹介した一冊を一覧で読めます。</p>
     </header>
 
     <!-- アーカイブ一覧 -->
     <section class="archive" style="background: transparent; padding-top: 0;">
         <div class="archive-container">
-            <div class="archive-grid">
-                <p style="grid-column: 1 / -1; text-align: center; color: var(--color-text-secondary); margin: 20px 0;">
-                    バックナンバーは第1週の配信後に公開予定です。
+            <div class="archive-grid" id="archive-page-grid">
+                <p id="archive-page-empty" style="grid-column: 1 / -1; text-align: center; color: var(--color-text-secondary); margin: 20px 0;">
+                    まだバックナンバーはありません。公開をお待ちください。
                 </p>
             </div>
 
@@ -67,6 +67,7 @@
         </div>
     </footer>
     <script src="analytics-config.js"></script>
+    <script src="microcms-config.js"></script>
     <script src="script.js"></script>
 </body>
 
