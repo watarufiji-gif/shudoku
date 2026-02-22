@@ -30,8 +30,8 @@
             <div class="nav-links">
                 <a href="#about">このサイトについて</a>
                 <a href="archive.html">過去の本</a>
-                <a href="login.html" class="nav-login">ログイン</a>
-                <a href="#subscribe" class="nav-cta">購読する</a>
+                <a href="login.html" class="nav-login" hidden aria-hidden="true">ログイン</a>
+                <a href="#subscribe" class="nav-cta" hidden aria-hidden="true">購読する</a>
             </div>
         </div>
     </nav>
@@ -41,8 +41,8 @@
         <div class="hero-container">
             <!-- 週のカウンター -->
             <div class="week-badge">
-                <span id="home-week-number" class="week-number">第23週</span>
-                <span id="home-week-date" class="week-date">2026年2月9日〜15日</span>
+                <span id="home-week-number" class="week-number">第1週</span>
+                <span id="home-week-date" class="week-date">毎週土曜日 9:00 更新</span>
                 <p id="home-cms-status" style="margin-top: 8px; font-size: 0.8rem; color: var(--color-text-muted);" hidden></p>
             </div>
 
@@ -127,7 +127,7 @@
     </main>
 
     <!-- ニュースレター登録セクション -->
-    <section class="newsletter" id="subscribe">
+    <section class="newsletter" id="subscribe" hidden aria-hidden="true">
         <div class="newsletter-container">
             <div class="newsletter-content">
                 <h2 class="newsletter-title">毎週土曜日、静かな朝に届く一冊</h2>
@@ -176,10 +176,10 @@
     <!-- 過去の本アーカイブ -->
     <section class="archive" id="archive">
         <div class="archive-container">
-            <h2 class="archive-title">過去の一冊</h2>
+            <h2 class="archive-title">バックナンバー（公開予定）</h2>
             <div class="archive-grid">
                 <p style="grid-column: 1 / -1; text-align: center; color: var(--color-text-secondary); margin: 20px 0;">
-                    過去の選書は現在準備中です。公開までお待ちください。
+                    第1週の配信後、バックナンバーを順次公開します。
                 </p>
             </div>
             <a href="archive.html" class="archive-more">すべての本を見る →</a>

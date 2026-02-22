@@ -756,7 +756,7 @@ function initBookMetadataEditor() {
         authorDisplay.textContent = author;
         coverImage.alt = `今週の一冊: ${title}`;
 
-        if (coverUrl) {
+        if (coverUrl && isOfficialImageUrl(coverUrl)) {
             coverImage.src = coverUrl;
         }
 
@@ -1095,9 +1095,31 @@ function setTextIfValue(target, value) {
 
 function setImageIfSafe(target, url, alt) {
     if (!target || !url) return;
-    if (!/^https:\/\//i.test(url)) return;
+    if (!isOfficialImageUrl(url)) return;
     target.src = url;
     if (alt) target.alt = alt;
+}
+
+function isOfficialImageUrl(url) {
+    let parsedUrl;
+    try {
+        parsedUrl = new URL(url);
+    } catch (_) {
+        return false;
+    }
+
+    if (parsedUrl.protocol !== 'https:') return false;
+
+    const host = parsedUrl.hostname.toLowerCase();
+    const allowedHostPatterns = [
+        /(^|\.)images\.microcms-assets\.io$/,
+        /(^|\.)openbd\.jp$/,
+        /(^|\.)books\.google\.com$/,
+        /(^|\.)books\.googleusercontent\.com$/,
+        /(^|\.)googleusercontent\.com$/
+    ];
+
+    return allowedHostPatterns.some((pattern) => pattern.test(host));
 }
 
 function setLinkIfSafe(target, url) {

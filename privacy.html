@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.microcms.io https://api.openbd.jp https://www.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com; form-action 'self'; upgrade-insecure-requests">
-    <title>統合利用規約・プライバシーポリシー | 週読</title>
+    <title>利用規約・プライバシーポリシー | 週読</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -28,19 +28,19 @@
 
         .policy-content h1 {
             font-family: var(--font-serif);
-            font-size: 2rem;
-            margin-bottom: 60px;
+            font-size: 1.75rem;
+            margin-bottom: 40px;
             text-align: center;
             border-bottom: 1px solid #eee;
-            padding-bottom: 20px;
+            padding-bottom: 14px;
         }
 
         .policy-content h2 {
-            font-size: 1.3rem;
-            margin-top: 50px;
-            margin-bottom: 25px;
+            font-size: 1.12rem;
+            margin-top: 34px;
+            margin-bottom: 16px;
             border-left: 4px solid var(--color-accent);
-            padding-left: 15px;
+            padding-left: 12px;
             color: #2c3e50;
         }
 
@@ -69,7 +69,8 @@
             padding: 20px;
             border-radius: 4px;
             margin-top: 10px;
-            font-family: monospace;
+            font-family: var(--font-sans);
+            line-height: 1.8;
         }
     </style>
 </head>
@@ -81,16 +82,16 @@
             <div class="nav-links">
                 <a href="about.html">このサイトについて</a>
                 <a href="archive.html">過去の本</a>
-                <a href="my-library.html">読書記録</a>
-                <a href="login.html" class="nav-login">ログイン</a>
-                <a href="index.html#subscribe" class="nav-cta">購読する</a>
+                <a href="my-library.html" hidden aria-hidden="true">読書記録</a>
+                <a href="login.html" class="nav-login" hidden aria-hidden="true">ログイン</a>
+                <a href="index.html#subscribe" class="nav-cta" hidden aria-hidden="true">購読する</a>
             </div>
         </div>
     </nav>
 
     <div class="policy-container">
         <div class="policy-content">
-            <h1>週読 統合利用規約・プライバシーポリシー・免責規定（完全版）</h1>
+            <h1>週読 利用規約・プライバシーポリシー・免責規定</h1>
 
             <h2>第1章 総則</h2>
             <p><strong>第1条 目的</strong><br>本規約は、週読（以下「当サイト」といいます。）が提供する書籍紹介サービス（以下「本サービス」といいます。）の利用条件を定めるものです。</p>
