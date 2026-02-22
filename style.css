@@ -146,9 +146,9 @@ body {
    ============================================= */
 .hero {
     min-height: 100vh;
-    padding: calc(80px + var(--space-3xl)) var(--space-xl) var(--space-3xl);
+    padding: calc(80px + var(--space-2xl)) var(--space-xl) var(--space-3xl);
     display: flex;
-    align-items: center;
+    align-items: flex-start;
 }
 
 .hero-container {
@@ -188,7 +188,8 @@ body {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: var(--space-4xl);
-    align-items: center;
+    align-items: flex-start;
+    margin-top: calc(var(--space-md) * -1);
     animation: fadeIn 1s ease 0.3s both;
 }
 
@@ -238,7 +239,7 @@ body {
 
 /* Book Info */
 .book-info {
-    padding: var(--space-xl) 0;
+    padding: 0;
 }
 
 .book-category {
