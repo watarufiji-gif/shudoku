@@ -3,12 +3,12 @@
 // =============================================
 
 document.addEventListener('DOMContentLoaded', () => {
+    if (enforcePrivateAuthPages()) return;
     initRemainingWeeksBadge();
     initSupabaseSetupPanel();
     initMicroCMSSetupPanel();
     initAnalytics();
     initAffiliateTracking();
-    initAffiliateStatsPanel();
     initMicroCMSContent();
     initCountdown();
     initNewsletterForm();
@@ -18,6 +18,21 @@ document.addEventListener('DOMContentLoaded', () => {
     initSmoothScroll();
     initScrollAnimations();
 });
+
+function isAuthPagesPublicEnabled() {
+    return window.AUTH_PAGES_PUBLIC_ENABLED === true;
+}
+
+function enforcePrivateAuthPages() {
+    const currentPage = (window.location.pathname.split('/').pop() || 'index.html').toLowerCase();
+    const privatePages = new Set(['login.html', 'my-library.html']);
+    if (!privatePages.has(currentPage)) return false;
+    if (isAuthPagesPublicEnabled()) return false;
+    if (isOperatorMode()) return false;
+
+    window.location.replace('index.html');
+    return true;
+}
 
 function initRemainingWeeksBadge() {
     const targets = [
@@ -649,10 +664,9 @@ function initAnalytics() {
 }
 
 function initAffiliateTracking() {
-    document.querySelectorAll('a[href*="amazon.co.jp"], a[href*="books.rakuten.co.jp"]').forEach((link) => {
+    document.querySelectorAll('a[href*="amazon.co.jp"]').forEach((link) => {
         if (!link.dataset.platform) {
             if (link.href.includes('amazon.co.jp')) link.dataset.platform = 'amazon';
-            if (link.href.includes('books.rakuten.co.jp')) link.dataset.platform = 'rakuten';
         }
         if (!link.dataset.trackType) link.dataset.trackType = 'affiliate';
     });
@@ -665,14 +679,17 @@ function initAffiliateTracking() {
         const bookTitle = String(link.dataset.bookTitle || getActiveBookTitle() || 'unknown').trim();
         const page = window.location.pathname.split('/').pop() || 'index.html';
         const href = link.href;
+        const shouldStoreLocal = isOperatorMode() && window.localStorage && window.localStorage.getItem('enable_local_affiliate_stats') === '1';
 
-        saveAffiliateClick({
-            platform,
-            page,
-            bookTitle,
-            href,
-            at: new Date().toISOString()
-        });
+        if (shouldStoreLocal) {
+            saveAffiliateClick({
+                platform,
+                page,
+                bookTitle,
+                href,
+                at: new Date().toISOString()
+            });
+        }
 
         if (typeof window.gtag === 'function') {
             window.gtag('event', 'affiliate_click', {
@@ -947,7 +964,7 @@ function getMicroCMSConfig() {
     const serviceDomain = String(window.MICROCMS_SERVICE_DOMAIN || '').trim();
     const apiKey = String(window.MICROCMS_API_KEY || '').trim();
     const endpoint = String(window.MICROCMS_ENDPOINT || 'books').trim();
-    const query = String(window.MICROCMS_QUERY || 'limit=50&orders=-publishedAt').trim();
+    const query = String(window.MICROCMS_QUERY || 'limit=100&orders=-publishedAt').trim();
 
     if (!serviceDomain || !apiKey) return null;
     if (serviceDomain.includes('YOUR_SERVICE_DOMAIN') || apiKey.includes('YOUR_READ_ONLY_API_KEY')) return null;
@@ -1002,7 +1019,34 @@ function initMicroCMSSetupPanel() {
 }
 
 async function fetchBooksFromMicroCMS(config) {
-    const apiUrl = `https://${config.serviceDomain}.microcms.io/api/v1/${config.endpoint}?${config.query}`;
+    const pageSize = 100;
+    const firstPayload = await fetchMicroCMSPayload(config, { offset: 0, limit: pageSize });
+    if (!firstPayload) return [];
+
+    // Object API: { ... }
+    if (!Array.isArray(firstPayload.contents)) {
+        return [firstPayload];
+    }
+
+    const totalCount = Number(firstPayload.totalCount || firstPayload.contents.length || 0);
+    const books = Array.isArray(firstPayload.contents) ? [...firstPayload.contents] : [];
+    let offset = books.length;
+    const maxFetch = 500;
+
+    while (offset < totalCount && offset < maxFetch) {
+        const payload = await fetchMicroCMSPayload(config, { offset, limit: pageSize });
+        if (!payload || !Array.isArray(payload.contents) || payload.contents.length === 0) break;
+        books.push(...payload.contents);
+        offset += payload.contents.length;
+    }
+
+    return books
+        .filter(isBookPublishedNow)
+        .sort((a, b) => toTimestamp(b.publishedAt) - toTimestamp(a.publishedAt));
+}
+
+async function fetchMicroCMSPayload(config, options) {
+    const apiUrl = buildMicroCMSApiUrl(config, options);
     const response = await fetch(apiUrl, {
         headers: {
             'X-MICROCMS-API-KEY': config.apiKey
@@ -1011,15 +1055,38 @@ async function fetchBooksFromMicroCMS(config) {
     if (!response.ok) {
         throw new Error(`microCMS response ${response.status}`);
     }
+    return response.json();
+}
 
-    const payload = await response.json();
-    if (!payload) return [];
+function buildMicroCMSApiUrl(config, options = {}) {
+    const params = new URLSearchParams(config.query || '');
+    const limit = Number(options.limit || params.get('limit') || 100);
+    const offset = Number(options.offset || 0);
 
-    // List API: { contents: [...] } / Object API: { ... }
-    if (Array.isArray(payload.contents)) {
-        return payload.contents;
+    params.set('limit', String(Math.min(Math.max(limit, 1), 100)));
+    params.set('offset', String(Math.max(offset, 0)));
+    if (!params.has('orders')) params.set('orders', '-publishedAt');
+
+    // 予約投稿の表示タイミングを安定化するため、公開日時が現在以前のみ取得
+    const existingFilters = String(params.get('filters') || '').trim();
+    if (!existingFilters) {
+        params.set('filters', `publishedAt[less_than]${new Date().toISOString()}`);
     }
-    return [payload];
+
+    return `https://${config.serviceDomain}.microcms.io/api/v1/${config.endpoint}?${params.toString()}`;
+}
+
+function isBookPublishedNow(book) {
+    if (!book || !book.publishedAt) return true;
+    const publishedAt = new Date(book.publishedAt);
+    if (Number.isNaN(publishedAt.getTime())) return true;
+    return publishedAt.getTime() <= Date.now();
+}
+
+function toTimestamp(value) {
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return 0;
+    return date.getTime();
 }
 
 function applyMicroCMSBookToHome(book) {
@@ -1034,7 +1101,6 @@ function applyMicroCMSBookToHome(book) {
     const descriptionEl = document.getElementById('home-book-description');
     const coverEl = document.getElementById('home-book-cover');
     const amazonEl = document.getElementById('buy-amazon');
-    const rakutenEl = document.getElementById('buy-rakuten');
 
     const title = firstNonEmpty(book.title, book.bookTitle);
     const author = firstNonEmpty(book.author, book.bookAuthor);
@@ -1042,7 +1108,7 @@ function applyMicroCMSBookToHome(book) {
     const quote = firstNonEmpty(book.quote, book.catchCopy);
     const description = firstNonEmpty(book.description, book.summary, book.body);
     const weekLabel = firstNonEmpty(book.weekLabel, book.week, book.weekNumber);
-    const weekDate = firstNonEmpty(book.weekDate, book.dateRange);
+    const weekDate = resolveWeekDateLabel(book);
     const coverUrl = resolveImageUrl(book);
 
     setTextIfValue(titleEl, title);
@@ -1053,10 +1119,8 @@ function applyMicroCMSBookToHome(book) {
     setTextIfValue(weekDateEl, weekDate);
     setDescriptionParagraphs(descriptionEl, description);
     setImageIfSafe(coverEl, coverUrl, title ? `今週の一冊: ${title}` : '');
-    setLinkIfSafe(amazonEl, firstNonEmpty(book.amazonUrl, book.amazon_link));
-    setLinkIfSafe(rakutenEl, firstNonEmpty(book.rakutenUrl, book.rakuten_link));
+    setAmazonAffiliateLink(amazonEl, firstNonEmpty(book.AmazonURL, book.amazonUrl, book.amazonURL, book.amazon_link), 'home');
     setAffiliateLinkMeta(amazonEl, 'amazon', title);
-    setAffiliateLinkMeta(rakutenEl, 'rakuten', title);
 }
 
 function applyMicroCMSBookToDetail(book) {
@@ -1070,7 +1134,6 @@ function applyMicroCMSBookToDetail(book) {
     const descriptionEl = document.getElementById('detail-book-description');
     const coverEl = document.getElementById('book-cover-image');
     const amazonEl = document.getElementById('detail-buy-amazon');
-    const rakutenEl = document.getElementById('detail-buy-rakuten');
     const metaDescription = document.querySelector('meta[name="description"]');
 
     const title = firstNonEmpty(book.title, book.bookTitle);
@@ -1088,10 +1151,8 @@ function applyMicroCMSBookToDetail(book) {
     setTextIfValue(weekEl, weekLabel);
     setDescriptionParagraphs(descriptionEl, description);
     setImageIfSafe(coverEl, coverUrl, title ? `今週の一冊: ${title}` : '');
-    setLinkIfSafe(amazonEl, firstNonEmpty(book.amazonUrl, book.amazon_link));
-    setLinkIfSafe(rakutenEl, firstNonEmpty(book.rakutenUrl, book.rakuten_link));
+    setAmazonAffiliateLink(amazonEl, firstNonEmpty(book.AmazonURL, book.amazonUrl, book.amazonURL, book.amazon_link), 'detail');
     setAffiliateLinkMeta(amazonEl, 'amazon', title);
-    setAffiliateLinkMeta(rakutenEl, 'rakuten', title);
 
     if (title) {
         document.title = `${title} | 週読`;
@@ -1175,6 +1236,7 @@ function renderArchiveItems(container, books, options = {}) {
 }
 
 function validateRequiredBookFields(book) {
+    const amazonUrl = firstNonEmpty(book.AmazonURL, book.amazonUrl, book.amazonURL, book.amazon_link);
     const required = [
         ['title', firstNonEmpty(book.title, book.bookTitle)],
         ['author', firstNonEmpty(book.author, book.bookAuthor)],
@@ -1182,11 +1244,50 @@ function validateRequiredBookFields(book) {
         ['quote', firstNonEmpty(book.quote, book.catchCopy)],
         ['description', firstNonEmpty(book.description, book.summary, book.body)],
         ['coverImage', resolveImageUrl(book)],
-        ['amazonUrl', firstNonEmpty(book.amazonUrl, book.amazon_link)],
-        ['rakutenUrl', firstNonEmpty(book.rakutenUrl, book.rakuten_link)],
+        ['AmazonURL', normalizeAmazonAffiliateUrl(amazonUrl)],
         ['weekLabel', firstNonEmpty(book.weekLabel, book.week, book.weekNumber)]
     ];
     return required.filter((entry) => !entry[1]).map((entry) => entry[0]);
+}
+
+function resolveWeekDateLabel(book) {
+    const explicit = firstNonEmpty(book.weekDate, book.dateRange);
+    if (explicit) return explicit;
+
+    const baseDate = parseCmsDate(book.publishedAt, book.createdAt, book.revisedAt) || getCurrentWeeklyBaseDateJst();
+    if (!baseDate) return '';
+
+    const start = toJstDateOnly(baseDate);
+    const end = new Date(start.getTime() + (6 * 24 * 60 * 60 * 1000));
+    return `${formatJpDate(start)}〜${formatJpDate(end)}`;
+}
+
+function parseCmsDate(...values) {
+    for (const value of values) {
+        if (typeof value !== 'string' || !value.trim()) continue;
+        const parsed = new Date(value);
+        if (!Number.isNaN(parsed.getTime())) return parsed;
+    }
+    return null;
+}
+
+function getCurrentWeeklyBaseDateJst() {
+    const dayMs = 24 * 60 * 60 * 1000;
+    const jstNowMs = Date.now() + (9 * 60 * 60 * 1000);
+    const jstNow = new Date(jstNowMs);
+    const dayOfWeek = jstNow.getUTCDay(); // 0:Sun ... 6:Sat (JST換算)
+    const daysFromSaturday = (dayOfWeek + 1) % 7; // Sat:0, Sun:1 ... Fri:6
+    return new Date(jstNowMs - (daysFromSaturday * dayMs));
+}
+
+function toJstDateOnly(date) {
+    const jstMs = date.getTime() + (9 * 60 * 60 * 1000);
+    const jst = new Date(jstMs);
+    return new Date(Date.UTC(jst.getUTCFullYear(), jst.getUTCMonth(), jst.getUTCDate()));
+}
+
+function formatJpDate(date) {
+    return `${date.getUTCFullYear()}年${date.getUTCMonth() + 1}月${date.getUTCDate()}日`;
 }
 
 function firstNonEmpty(...values) {
@@ -1246,6 +1347,32 @@ function setLinkIfSafe(target, url) {
     if (!target || !url) return;
     if (!/^https:\/\//i.test(url)) return;
     target.href = url;
+}
+
+function setAmazonAffiliateLink(target, url, scope) {
+    const normalized = normalizeAmazonAffiliateUrl(url);
+    if (!target || !normalized) {
+        setCMSStatus(scope, 'AmazonURLが無効です（https://www.amazon.co.jp と tag が必要）', true);
+        return;
+    }
+    target.href = normalized;
+}
+
+function normalizeAmazonAffiliateUrl(url) {
+    if (typeof url !== 'string' || !url.trim()) return '';
+    let parsed;
+    try {
+        parsed = new URL(url.trim());
+    } catch (_) {
+        return '';
+    }
+
+    if (parsed.protocol !== 'https:') return '';
+    if (parsed.hostname.toLowerCase() !== 'www.amazon.co.jp') return '';
+
+    const tag = String(parsed.searchParams.get('tag') || '').trim();
+    if (!tag || tag === 'YOUR_AMAZON_ID') return '';
+    return parsed.toString();
 }
 
 function setAffiliateLinkMeta(target, platform, title) {

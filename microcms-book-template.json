@@ -10,6 +10,5 @@
   "coverImage": {
     "url": "https://images.microcms-assets.io/assets/.../cover.jpg"
   },
-  "amazonUrl": "https://www.amazon.co.jp/dp/XXXXXXXXXX?tag=YOUR_AMAZON_ID",
-  "rakutenUrl": "https://books.rakuten.co.jp/rb/XXXXXXX/?a_id=YOUR_RAKUTEN_ID"
+  "AmazonURL": "https://www.amazon.co.jp/dp/XXXXXXXXXX?tag=YOUR_AMAZON_ID"
 }

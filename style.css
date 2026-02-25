@@ -348,11 +348,6 @@ body {
     color: var(--color-white);
 }
 
-.btn-rakuten {
-    background: linear-gradient(135deg, #BF0000 0%, #990000 100%);
-    color: var(--color-white);
-}
-
 .btn-icon {
     font-size: 1.25rem;
 }

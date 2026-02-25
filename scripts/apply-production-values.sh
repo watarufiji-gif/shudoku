@@ -1,29 +1,28 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-if [[ $# -lt 3 ]]; then
+if [[ $# -lt 2 ]]; then
   cat <<USAGE
 Usage:
-  bash scripts/apply-production-values.sh <domain> <amazon_tag> <rakuten_id> [ga4_measurement_id]
+  bash scripts/apply-production-values.sh <domain> <amazon_tag> [ga4_measurement_id]
 
 Example:
-  bash scripts/apply-production-values.sh shudoku.jp mybook-22 your_rakuten_id G-XXXXXXXXXX
+  bash scripts/apply-production-values.sh shudoku.jp mybook-22 G-XXXXXXXXXX
 USAGE
   exit 1
 fi
 
 DOMAIN="$1"
 AMAZON_TAG="$2"
-RAKUTEN_ID="$3"
-GA4_ID="${4:-}"
+GA4_ID="${3:-}"
 
 if [[ ! "$DOMAIN" =~ ^[A-Za-z0-9.-]+$ ]]; then
   echo "Invalid domain: $DOMAIN" >&2
   exit 1
 fi
 
-if [[ -z "$AMAZON_TAG" || -z "$RAKUTEN_ID" ]]; then
-  echo "amazon_tag and rakuten_id are required" >&2
+if [[ -z "$AMAZON_TAG" ]]; then
+  echo "amazon_tag is required" >&2
   exit 1
 fi
 
@@ -45,7 +44,6 @@ done
 for file in index.html book-22.html microcms-book-template.json; do
   if [[ -f "$file" ]]; then
     replace_in_file "$file" "YOUR_AMAZON_ID" "$AMAZON_TAG"
-    replace_in_file "$file" "YOUR_RAKUTEN_ID" "$RAKUTEN_ID"
   fi
 done
 
@@ -57,7 +55,6 @@ fi
 echo "Applied production values:"
 echo "  domain=$DOMAIN"
 echo "  amazon_tag=$AMAZON_TAG"
-echo "  rakuten_id=$RAKUTEN_ID"
 if [[ -n "$GA4_ID" ]]; then
   echo "  ga4=$GA4_ID"
 else

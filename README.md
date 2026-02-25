@@ -56,6 +56,7 @@
 - `analytics-config.js`: GA4設定
 - `microcms-config.js`: microCMS設定
 - `_headers`: Netlify向けセキュリティヘッダー
+- `_redirects`: 非公開ページの公開ブロック設定
 - `sitemap.xml` / `robots.txt`: SEO用
 - `RELEASE_CHECKLIST.md`: 毎週の公開チェック
 - `SECURITY_RUNBOOK.md`: キーローテーション手順
@@ -79,6 +80,7 @@ window.ENABLED_OAUTH_PROVIDERS = ['google']; // 使うものだけ
 - `staticSupabaseUrl` / `staticSupabaseAnonKey` を空欄のままでも、`login.html` の「Supabase接続設定」フォームからブラウザ保存して動かせます。
 - `window.ENABLED_OAUTH_PROVIDERS` に入っていないOAuthボタンは非表示になります。
 - 運営者向け設定は `login.html?admin=1` で表示されます（通常ユーザーには非表示）。
+- ただし本番では `_redirects` により `login.html` / `my-library.html` はトップへリダイレクトされます。
 
 ### 5-2. テーブル作成（SQL Editor で実行）
 
@@ -171,7 +173,7 @@ with check (auth.uid() = user_id);
 const staticMicrocmsServiceDomain = 'YOUR_SERVICE_DOMAIN';
 const staticMicrocmsApiKey = 'YOUR_READ_ONLY_API_KEY';
 window.MICROCMS_ENDPOINT = 'books';
-window.MICROCMS_QUERY = 'limit=50&orders=-publishedAt';
+window.MICROCMS_QUERY = 'limit=100&orders=-publishedAt';
 ```
 
 または `login.html` の「microCMS 接続設定（初回のみ）」から保存可能です。
@@ -186,8 +188,7 @@ window.MICROCMS_QUERY = 'limit=50&orders=-publishedAt';
 - `quote`（テキスト）
 - `description`（テキストエリア）
 - `coverImage`（画像）
-- `amazonUrl`（URL）
-- `rakutenUrl`（URL）
+- `AmazonURL`（URL）
 - `weekLabel`（例: `第1週`）
 - `weekDate`（例: `2026年2月22日〜2月28日`）
 - `slug`（任意、個別ページURL管理用）
@@ -197,6 +198,8 @@ window.MICROCMS_QUERY = 'limit=50&orders=-publishedAt';
 
 - APIキーは **読み取り専用キー** を使う（書き込みキー禁止）
 - `script.js` は「最新1件（`publishedAt`降順）」を表示
+- `publishedAt` が未来日時の記事は表示対象外（予約投稿公開時刻までは非表示）
+- 一覧はページネーション取得（50件超でも取得）
 - CMS未設定時はHTMLの既定文面がそのまま表示される
 
 ## 8. クリック計測（GA4）
@@ -211,8 +214,8 @@ window.GA4_MEASUREMENT_ID = 'G-XXXXXXXXXX';
 
 ### 8-2. 動作
 
-- Amazon / 楽天リンククリック時に `affiliate_click` イベントを送信
-- `login.html` にローカル集計（簡易ダッシュボード）を表示
+- Amazonリンククリック時に `affiliate_click` イベントを送信
+- 管理画面向けローカル集計UIはデフォルト非表示（一般公開時は表示しない）
 
 ## 9. リンク監視（週次）
 
@@ -223,7 +226,12 @@ bash scripts/check-affiliate-links.sh
 ```
 
 - 結果は `reports/affiliate-link-check-*.txt` に保存
-- `curl_error` や 4xx/5xx はURLを修正して再確認
+- `curl_error` や 4xx/5xx、`missing_tag` / `placeholder_tag` はURLを修正して再確認
+- 本番前は以下を実行（推奨）:
+
+```bash
+bash scripts/preflight-check.sh
+```
 
 ## 10. SEOの基本設定
 
@@ -233,7 +241,7 @@ bash scripts/check-affiliate-links.sh
 - 一括反映する場合は次を実行:
 
 ```bash
-bash scripts/apply-production-values.sh <domain> <amazon_tag> <rakuten_id> [ga4_measurement_id]
+bash scripts/apply-production-values.sh <domain> <amazon_tag> [ga4_measurement_id]
 ```
 
 ## 11. セキュリティ運用

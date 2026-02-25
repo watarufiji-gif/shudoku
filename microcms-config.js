@@ -11,4 +11,4 @@ const staticMicrocmsApiKey = '';
 window.MICROCMS_SERVICE_DOMAIN = storedMicrocmsServiceDomain || staticMicrocmsServiceDomain;
 window.MICROCMS_API_KEY = storedMicrocmsApiKey || staticMicrocmsApiKey;
 window.MICROCMS_ENDPOINT = 'books';
-window.MICROCMS_QUERY = 'limit=50&orders=-publishedAt';
+window.MICROCMS_QUERY = 'limit=100&orders=-publishedAt';
