@@ -1119,7 +1119,7 @@ function applyMicroCMSBookToHome(book) {
     const author = firstNonEmpty(book.author, book.bookAuthor);
     const category = firstNonEmpty(book.category, book.genre);
     const quote = firstNonEmpty(book.quote, book.catchCopy);
-    const description = firstNonEmpty(book.description, book.summary, book.body);
+    const description = normalizeBookDescription(firstNonEmpty(book.description, book.summary, book.body));
     const weekLabel = firstNonEmpty(book.weekLabel, book.week, book.weekNumber);
     const weekDate = resolveWeekDateLabel(book);
     const coverUrl = resolveImageUrl(book);
@@ -1156,7 +1156,7 @@ function applyMicroCMSBookToDetail(book) {
     const author = firstNonEmpty(book.author, book.bookAuthor);
     const category = firstNonEmpty(book.category, book.genre);
     const quote = firstNonEmpty(book.quote, book.catchCopy);
-    const description = firstNonEmpty(book.description, book.summary, book.body);
+    const description = normalizeBookDescription(firstNonEmpty(book.description, book.summary, book.body));
     const weekLabel = firstNonEmpty(book.weekLabel, book.week, book.weekNumber);
     const coverUrl = resolveImageUrl(book);
 
@@ -1276,9 +1276,17 @@ function resolveWeekDateLabel(book) {
     const baseDate = parseCmsDate(book.publishedAt, book.createdAt, book.revisedAt) || getCurrentWeeklyBaseDateJst();
     if (!baseDate) return '';
 
-    const start = toJstDateOnly(baseDate);
+    const start = getWeekStartSaturdayJst(baseDate);
     const end = new Date(start.getTime() + (6 * 24 * 60 * 60 * 1000));
     return `${formatJpDate(start)}〜${formatJpDate(end)}`;
+}
+
+function getWeekStartSaturdayJst(date) {
+    const dayMs = 24 * 60 * 60 * 1000;
+    const jstDateOnly = toJstDateOnly(date);
+    const dayOfWeek = jstDateOnly.getUTCDay(); // 0:Sun ... 6:Sat
+    const daysFromSaturday = (dayOfWeek + 1) % 7; // Sat:0, Sun:1 ... Fri:6
+    return new Date(jstDateOnly.getTime() - (daysFromSaturday * dayMs));
 }
 
 function parseCmsDate(...values) {
@@ -1307,6 +1315,24 @@ function toJstDateOnly(date) {
 
 function formatJpDate(date) {
     return `${date.getUTCFullYear()}年${date.getUTCMonth() + 1}月${date.getUTCDate()}日`;
+}
+
+function normalizeBookDescription(value) {
+    if (typeof value !== 'string') return '';
+    const raw = value.trim();
+    if (!raw) return '';
+
+    // CMSのテンプレ文が1行で混入した場合は「本の紹介」区間のみを抽出。
+    if (/本の紹介[:：]/.test(raw)) {
+        const extracted = raw
+            .replace(/\s+/g, ' ')
+            .replace(/^.*本の紹介[:：]\s*/u, '')
+            .replace(/\s*Amazonリンク[:：].*$/u, '')
+            .trim();
+        if (extracted) return extracted;
+    }
+
+    return raw;
 }
 
 function firstNonEmpty(...values) {
