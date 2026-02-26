@@ -91,12 +91,48 @@ body {
 }
 
 .nav-logo {
-    font-family: var(--font-serif);
-    font-size: 1.5rem;
-    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
     color: var(--color-text);
     text-decoration: none;
-    letter-spacing: 0.1em;
+}
+
+.nav-logo-mark {
+    display: none;
+    width: 128px;
+    height: 46px;
+    background-image: url('assets/shudoku-logo.png');
+    background-repeat: no-repeat;
+    background-position: left center;
+    background-size: contain;
+    flex-shrink: 0;
+}
+
+.nav-logo-word {
+    font-family: var(--font-serif);
+    font-size: 1.2rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+}
+
+html.has-brand-logo .nav-logo-mark {
+    display: inline-block;
+}
+
+html.has-brand-logo .nav-logo-word {
+    display: none;
+}
+
+@media (max-width: 640px) {
+    .nav-logo-mark {
+        width: 102px;
+        height: 38px;
+    }
+
+    .nav-logo-word {
+        font-size: 1rem;
+    }
 }
 
 .nav-links {

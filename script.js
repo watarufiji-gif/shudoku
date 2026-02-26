@@ -4,6 +4,7 @@
 
 document.addEventListener('DOMContentLoaded', () => {
     if (enforcePrivateAuthPages()) return;
+    initNavLogoAsset();
     initRemainingWeeksBadge();
     initSupabaseSetupPanel();
     initMicroCMSSetupPanel();
@@ -18,6 +19,17 @@ document.addEventListener('DOMContentLoaded', () => {
     initSmoothScroll();
     initScrollAnimations();
 });
+
+function initNavLogoAsset() {
+    const probe = new Image();
+    probe.onload = () => {
+        document.documentElement.classList.add('has-brand-logo');
+    };
+    probe.onerror = () => {
+        document.documentElement.classList.remove('has-brand-logo');
+    };
+    probe.src = 'assets/shudoku-logo.png';
+}
 
 function isAuthPagesPublicEnabled() {
     return window.AUTH_PAGES_PUBLIC_ENABLED === true;
@@ -938,18 +950,19 @@ async function initMicroCMSContent() {
             return;
         }
 
-        const missingFields = validateRequiredBookFields(latestBook);
-        if (missingFields.length > 0) {
-            const message = `CMS必須項目不足: ${missingFields.join(', ')}`;
-            setCMSStatus('home', `${message}（固定表示を維持）`, true);
-            setCMSStatus('detail', `${message}（固定表示を維持）`, true);
-            renderArchiveLists(books.slice(1));
-            return;
-        }
-
         applyMicroCMSBookToHome(latestBook);
         applyMicroCMSBookToDetail(latestBook);
         renderArchiveLists(books.slice(1));
+
+        const missingFields = validateRequiredBookFields(latestBook);
+        if (missingFields.length > 0) {
+            const message = `CMS必須項目不足: ${missingFields.join(', ')}（入力済み項目のみ反映）`;
+            setCMSStatus('home', message, true);
+            setCMSStatus('detail', message, true);
+            console.warn('microCMS required fields missing:', missingFields);
+            return;
+        }
+
         setCMSStatus('home', 'CMSの最新データを反映中');
         setCMSStatus('detail', 'CMSの最新データを反映中');
     } catch (error) {
