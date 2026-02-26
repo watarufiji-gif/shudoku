@@ -1131,7 +1131,10 @@ function applyMicroCMSBookToHome(book) {
     setTextIfValue(weekNumberEl, weekLabel);
     setTextIfValue(weekDateEl, weekDate);
     setDescriptionParagraphs(descriptionEl, description);
-    setImageIfSafe(coverEl, coverUrl, title ? `今週の一冊: ${title}` : '');
+    const imageApplied = setImageIfSafe(coverEl, coverUrl, title ? `今週の一冊: ${title}` : '');
+    if (!imageApplied && coverUrl) {
+        setCMSStatus('home', 'coverImageのURL形式またはドメインが許可条件外です。', true);
+    }
     setAmazonAffiliateLink(amazonEl, firstNonEmpty(book.AmazonURL, book.amazonUrl, book.amazonURL, book.amazon_link), 'home');
     setAffiliateLinkMeta(amazonEl, 'amazon', title);
 }
@@ -1163,7 +1166,10 @@ function applyMicroCMSBookToDetail(book) {
     setTextIfValue(quoteEl, quote);
     setTextIfValue(weekEl, weekLabel);
     setDescriptionParagraphs(descriptionEl, description);
-    setImageIfSafe(coverEl, coverUrl, title ? `今週の一冊: ${title}` : '');
+    const imageApplied = setImageIfSafe(coverEl, coverUrl, title ? `今週の一冊: ${title}` : '');
+    if (!imageApplied && coverUrl) {
+        setCMSStatus('detail', 'coverImageのURL形式またはドメインが許可条件外です。', true);
+    }
     setAmazonAffiliateLink(amazonEl, firstNonEmpty(book.AmazonURL, book.amazonUrl, book.amazonURL, book.amazon_link), 'detail');
     setAffiliateLinkMeta(amazonEl, 'amazon', title);
 
@@ -1311,14 +1317,25 @@ function firstNonEmpty(...values) {
 }
 
 function resolveImageUrl(book) {
-    if (book.coverImage && typeof book.coverImage === 'object' && typeof book.coverImage.url === 'string') {
-        return book.coverImage.url;
+    if (!book || typeof book !== 'object') return '';
+
+    // microCMS image field can be object({url}) or plain string depending on schema/migration.
+    const candidates = [
+        book.coverImage,
+        book.cover_image,
+        book.eyecatch,
+        book.thumbnail,
+        book.cover,
+        book.image
+    ];
+
+    for (const candidate of candidates) {
+        if (typeof candidate === 'string' && candidate.trim()) return candidate.trim();
+        if (candidate && typeof candidate === 'object' && typeof candidate.url === 'string' && candidate.url.trim()) {
+            return candidate.url.trim();
+        }
     }
-    if (typeof book.cover === 'string') return book.cover;
-    if (typeof book.image === 'string') return book.image;
-    if (book.image && typeof book.image === 'object' && typeof book.image.url === 'string') {
-        return book.image.url;
-    }
+
     return '';
 }
 
@@ -1328,10 +1345,11 @@ function setTextIfValue(target, value) {
 }
 
 function setImageIfSafe(target, url, alt) {
-    if (!target || !url) return;
-    if (!isOfficialImageUrl(url)) return;
+    if (!target || !url) return false;
+    if (!isOfficialImageUrl(url)) return false;
     target.src = url;
     if (alt) target.alt = alt;
+    return true;
 }
 
 function isOfficialImageUrl(url) {
