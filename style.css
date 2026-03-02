@@ -93,19 +93,21 @@ body {
 .nav-logo {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
+    gap: 9px;
     color: var(--color-text);
     text-decoration: none;
 }
 
 .nav-logo-mark {
     display: none;
-    width: 128px;
-    height: 46px;
+    width: 56px;
+    height: 56px;
     background-image: url('assets/shudoku-logo.png');
     background-repeat: no-repeat;
-    background-position: left center;
-    background-size: contain;
+    background-position: center 18%;
+    background-size: 84% auto;
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: crisp-edges;
     flex-shrink: 0;
 }
 
@@ -121,13 +123,13 @@ html.has-brand-logo .nav-logo-mark {
 }
 
 html.has-brand-logo .nav-logo-word {
-    display: none;
+    display: inline-block;
 }
 
 @media (max-width: 640px) {
     .nav-logo-mark {
-        width: 102px;
-        height: 38px;
+        width: 46px;
+        height: 46px;
     }
 
     .nav-logo-word {
@@ -401,9 +403,7 @@ html.has-brand-logo .nav-logo-word {
 }
 
 .affiliate-note {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
-    margin-top: var(--space-md);
+    display: none;
 }
 
 /* Countdown */

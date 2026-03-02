@@ -6,3 +6,4 @@ Recommended:
 - Square image
 - At least 256x256 px
 - Transparent background (PNG)
+![alt text](shudoku-logo.png)

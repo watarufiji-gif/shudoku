@@ -1270,6 +1270,14 @@ function validateRequiredBookFields(book) {
 }
 
 function resolveWeekDateLabel(book) {
+    const weekLabel = firstNonEmpty(book.weekLabel, book.week, book.weekNumber);
+    if (isFirstWeekLabel(weekLabel)) {
+        const nowBase = getCurrentWeeklyBaseDateJst();
+        const start = getWeekStartSaturdayJst(nowBase);
+        const end = new Date(start.getTime() + (6 * 24 * 60 * 60 * 1000));
+        return `${formatJpDate(start)}〜${formatJpDate(end)}`;
+    }
+
     const explicit = firstNonEmpty(book.weekDate, book.dateRange);
     if (explicit) return explicit;
 
@@ -1279,6 +1287,12 @@ function resolveWeekDateLabel(book) {
     const start = getWeekStartSaturdayJst(baseDate);
     const end = new Date(start.getTime() + (6 * 24 * 60 * 60 * 1000));
     return `${formatJpDate(start)}〜${formatJpDate(end)}`;
+}
+
+function isFirstWeekLabel(value) {
+    if (typeof value !== 'string') return false;
+    const normalized = value.replace(/\s+/g, '');
+    return normalized === '第1週' || normalized === '1週目' || normalized === '1';
 }
 
 function getWeekStartSaturdayJst(date) {
@@ -1322,17 +1336,49 @@ function normalizeBookDescription(value) {
     const raw = value.trim();
     if (!raw) return '';
 
-    // CMSのテンプレ文が1行で混入した場合は「本の紹介」区間のみを抽出。
-    if (/本の紹介[:：]/.test(raw)) {
-        const extracted = raw
-            .replace(/\s+/g, ' ')
-            .replace(/^.*本の紹介[:：]\s*/u, '')
-            .replace(/\s*Amazonリンク[:：].*$/u, '')
+    const compact = raw.replace(/\r\n/g, '\n');
+    const normalizedLineBreaks = compact
+        .replace(/([。！？])\s*(?=[^\s])/g, '$1\n')
+        .replace(/\n{3,}/g, '\n\n');
+
+    // テンプレっぽい管理文言は除去
+    const bannedLinePatterns = [
+        /^第\s*\d+\s*週/u,
+        /掲載期間/u,
+        /本のタイトル/u,
+        /^著者名/u,
+        /^カテゴリ/u,
+        /表紙画像/u,
+        /心に響く一節/u,
+        /Amazonリンク/u,
+        /https?:\/\/\S+/iu,
+        /適当に/u
+    ];
+
+    let lines = normalizedLineBreaks
+        .split(/\n+/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .filter((line) => !bannedLinePatterns.some((pattern) => pattern.test(line)));
+
+    // 「本の紹介: ...」が含まれていたらその後ろを優先
+    const introMatch = raw.match(/本の紹介[:：]\s*([\s\S]+)/u);
+    if (introMatch && introMatch[1]) {
+        const introOnly = introMatch[1]
+            .replace(/Amazonリンク[:：][\s\S]*$/u, '')
+            .replace(/https?:\/\/\S+/giu, '')
             .trim();
-        if (extracted) return extracted;
+        if (introOnly) {
+            lines = introOnly
+                .split(/\r?\n+/)
+                .map((line) => line.trim())
+                .filter(Boolean)
+                .filter((line) => !bannedLinePatterns.some((pattern) => pattern.test(line)));
+        }
     }
 
-    return raw;
+    if (lines.length === 0) return '';
+    return lines.join('\n');
 }
 
 function firstNonEmpty(...values) {

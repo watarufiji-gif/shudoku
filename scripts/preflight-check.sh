@@ -50,6 +50,12 @@ if [[ -f "microcms-config.js" ]]; then
   fi
 fi
 
+if [[ -f "assets/shudoku-logo.png" ]]; then
+  ok "Logo asset exists: assets/shudoku-logo.png"
+else
+  warn "Logo asset missing: assets/shudoku-logo.png"
+fi
+
 node --check script.js >/dev/null && ok "script.js syntax check passed" || err "script.js syntax check failed"
 bash -n scripts/check-affiliate-links.sh && ok "check-affiliate-links.sh syntax check passed" || err "check-affiliate-links.sh syntax check failed"
 bash -n scripts/apply-production-values.sh && ok "apply-production-values.sh syntax check passed" || err "apply-production-values.sh syntax check failed"
