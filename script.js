@@ -1115,14 +1115,15 @@ function applyMicroCMSBookToHome(book) {
     const coverEl = document.getElementById('home-book-cover');
     const amazonEl = document.getElementById('buy-amazon');
 
-    const title = firstNonEmpty(book.title, book.bookTitle);
-    const author = firstNonEmpty(book.author, book.bookAuthor);
-    const category = firstNonEmpty(book.category, book.genre);
-    const quote = firstNonEmpty(book.quote, book.catchCopy);
-    const description = normalizeBookDescription(firstNonEmpty(book.description, book.summary, book.body));
-    const weekLabel = firstNonEmpty(book.weekLabel, book.week, book.weekNumber);
+    const normalized = normalizeBookPayload(book);
+    const title = normalized.title;
+    const author = normalized.author;
+    const category = normalized.category;
+    const quote = normalized.quote;
+    const description = normalized.description;
+    const weekLabel = normalized.weekLabel;
     const weekDate = resolveWeekDateLabel(book);
-    const coverUrl = resolveImageUrl(book);
+    const coverUrl = normalized.coverUrl;
 
     setTextIfValue(titleEl, title);
     setTextIfValue(authorEl, author);
@@ -1135,7 +1136,7 @@ function applyMicroCMSBookToHome(book) {
     if (!imageApplied && coverUrl) {
         setCMSStatus('home', 'coverImageのURL形式またはドメインが許可条件外です。', true);
     }
-    setAmazonAffiliateLink(amazonEl, firstNonEmpty(book.AmazonURL, book.amazonUrl, book.amazonURL, book.amazon_link), 'home');
+    setAmazonAffiliateLink(amazonEl, normalized.amazonUrl, 'home');
     setAffiliateLinkMeta(amazonEl, 'amazon', title);
 }
 
@@ -1152,13 +1153,14 @@ function applyMicroCMSBookToDetail(book) {
     const amazonEl = document.getElementById('detail-buy-amazon');
     const metaDescription = document.querySelector('meta[name="description"]');
 
-    const title = firstNonEmpty(book.title, book.bookTitle);
-    const author = firstNonEmpty(book.author, book.bookAuthor);
-    const category = firstNonEmpty(book.category, book.genre);
-    const quote = firstNonEmpty(book.quote, book.catchCopy);
-    const description = normalizeBookDescription(firstNonEmpty(book.description, book.summary, book.body));
-    const weekLabel = firstNonEmpty(book.weekLabel, book.week, book.weekNumber);
-    const coverUrl = resolveImageUrl(book);
+    const normalized = normalizeBookPayload(book);
+    const title = normalized.title;
+    const author = normalized.author;
+    const category = normalized.category;
+    const quote = normalized.quote;
+    const description = normalized.description;
+    const weekLabel = normalized.weekLabel;
+    const coverUrl = normalized.coverUrl;
 
     setTextIfValue(titleEl, title);
     setTextIfValue(authorEl, author);
@@ -1170,7 +1172,7 @@ function applyMicroCMSBookToDetail(book) {
     if (!imageApplied && coverUrl) {
         setCMSStatus('detail', 'coverImageのURL形式またはドメインが許可条件外です。', true);
     }
-    setAmazonAffiliateLink(amazonEl, firstNonEmpty(book.AmazonURL, book.amazonUrl, book.amazonURL, book.amazon_link), 'detail');
+    setAmazonAffiliateLink(amazonEl, normalized.amazonUrl, 'detail');
     setAffiliateLinkMeta(amazonEl, 'amazon', title);
 
     if (title) {
@@ -1214,14 +1216,14 @@ function renderArchiveItems(container, books, options = {}) {
     if (emptyEl) emptyEl.hidden = true;
 
     items.forEach((book, index) => {
-        const title = firstNonEmpty(book.title, book.bookTitle, 'タイトル未設定');
-        const author = firstNonEmpty(book.author, book.bookAuthor, '著者未設定');
+        const normalized = normalizeBookPayload(book);
+        const title = firstNonEmpty(normalized.title, 'タイトル未設定');
+        const author = firstNonEmpty(normalized.author, '著者未設定');
         const weekLabel = firstNonEmpty(
-            book.weekLabel,
-            book.week,
+            normalized.weekLabel,
             book.weekNumber ? `第${book.weekNumber}週` : `第${index + 2}週`
         );
-        const coverUrl = resolveImageUrl(book);
+        const coverUrl = normalized.coverUrl;
         const detailUrl = firstNonEmpty(book.pageUrl, book.detailUrl, book.url, '#');
 
         const link = document.createElement('a');
@@ -1255,18 +1257,80 @@ function renderArchiveItems(container, books, options = {}) {
 }
 
 function validateRequiredBookFields(book) {
-    const amazonUrl = firstNonEmpty(book.AmazonURL, book.amazonUrl, book.amazonURL, book.amazon_link);
+    const normalized = normalizeBookPayload(book);
     const required = [
-        ['title', firstNonEmpty(book.title, book.bookTitle)],
-        ['author', firstNonEmpty(book.author, book.bookAuthor)],
-        ['category', firstNonEmpty(book.category, book.genre)],
-        ['quote', firstNonEmpty(book.quote, book.catchCopy)],
-        ['description', firstNonEmpty(book.description, book.summary, book.body)],
-        ['coverImage', resolveImageUrl(book)],
-        ['AmazonURL', normalizeAmazonAffiliateUrl(amazonUrl)],
-        ['weekLabel', firstNonEmpty(book.weekLabel, book.week, book.weekNumber)]
+        ['title', normalized.title],
+        ['author', normalized.author],
+        ['category', normalized.category],
+        ['quote', normalized.quote],
+        ['description', normalized.description],
+        ['coverImage', normalized.coverUrl],
+        ['AmazonURL', normalizeAmazonAffiliateUrl(normalized.amazonUrl)],
+        ['weekLabel', normalized.weekLabel]
     ];
     return required.filter((entry) => !entry[1]).map((entry) => entry[0]);
+}
+
+function normalizeBookPayload(book) {
+    const rawText = firstNonEmpty(book.description, book.summary, book.body, book.content, book.text);
+    const extracted = extractBookMetaFromText(rawText);
+
+    return {
+        title: normalizeDisplayText(firstNonEmpty(book.title, book.bookTitle, extracted.title)),
+        author: normalizeDisplayText(firstNonEmpty(book.author, book.bookAuthor, extracted.author)),
+        category: normalizeDisplayText(firstNonEmpty(book.category, book.genre, extracted.category)),
+        quote: normalizeDisplayText(firstNonEmpty(book.quote, book.catchCopy, extracted.quote)),
+        description: normalizeBookDescription(firstNonEmpty(book.description, book.summary, book.body, extracted.description)),
+        weekLabel: normalizeWeekLabel(firstNonEmpty(book.weekLabel, book.week, book.weekNumber, extracted.weekLabel)),
+        amazonUrl: firstNonEmpty(book.AmazonURL, book.amazonUrl, book.amazonURL, book.amazon_link, extracted.amazonUrl),
+        coverUrl: resolveImageUrl(book)
+    };
+}
+
+function extractBookMetaFromText(value) {
+    const raw = typeof value === 'string' ? value : '';
+    if (!raw.trim()) {
+        return { title: '', author: '', category: '', quote: '', description: '', weekLabel: '', amazonUrl: '' };
+    }
+
+    const compact = raw.replace(/\r/g, '');
+    const pick = (patterns) => {
+        for (const pattern of patterns) {
+            const m = compact.match(pattern);
+            if (m && m[1]) return m[1].trim();
+        }
+        return '';
+    };
+
+    return {
+        weekLabel: pick([/(第\s*\d+\s*週)/u]),
+        title: pick([/(?:本のタイトル|title)[:：]\s*([^\n]+)/iu]),
+        author: pick([/(?:著者名|author)[:：]\s*([^\n]+)/iu]),
+        category: pick([/(?:カテゴリ|category)[:：]\s*([^\n]+)/iu]),
+        quote: pick([/(?:心に響く一節|quote)[:：]\s*([^\n]+)/iu]),
+        amazonUrl: pick([/(?:Amazonリンク|AmazonURL)[:：]\s*(https?:\/\/\S+)/iu]),
+        description: pick([/(?:本の紹介|紹介文|description)[:：]\s*([\s\S]+)/iu])
+            .replace(/(?:Amazonリンク|AmazonURL)[:：][\s\S]*$/iu, '')
+            .trim()
+    };
+}
+
+function normalizeDisplayText(value) {
+    if (typeof value !== 'string') return '';
+    const labelPrefix = /^(?:本のタイトル|title|著者名|author|カテゴリ|category|心に響く一節|quote|本の紹介|紹介文|description|Amazonリンク|AmazonURL)\s*[:：]\s*/iu;
+    return value
+        .replace(/https?:\/\/\S+/giu, '')
+        .replace(labelPrefix, '')
+        .replace(/\s+/g, ' ')
+        .trim();
+}
+
+function normalizeWeekLabel(value) {
+    const raw = normalizeDisplayText(value);
+    if (!raw) return '';
+    const m = raw.match(/第?\s*(\d+)\s*週?/u);
+    if (m && m[1]) return `第${m[1]}週`;
+    return raw;
 }
 
 function resolveWeekDateLabel(book) {
