@@ -6,9 +6,9 @@ const storedMicrocmsApiKey = window.localStorage ? window.localStorage.getItem('
 
 // 例: your-service-name（https://your-service-name.microcms.io）
 const staticMicrocmsServiceDomain = 'shudoku';
-const staticMicrocmsApiKey = 'GxeCbIFM7tivN2fLwqdejFeRxWYmeRWYd6Dr';
+const staticMicrocmsApiKey = '';
 
 window.MICROCMS_SERVICE_DOMAIN = storedMicrocmsServiceDomain || staticMicrocmsServiceDomain;
 window.MICROCMS_API_KEY = storedMicrocmsApiKey || staticMicrocmsApiKey;
-window.MICROCMS_ENDPOINT = 'news';
+window.MICROCMS_ENDPOINT = 'books';
 window.MICROCMS_QUERY = 'limit=100&orders=-publishedAt';

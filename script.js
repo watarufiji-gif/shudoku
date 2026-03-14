@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (enforcePrivateAuthPages()) return;
     initNavLogoAsset();
     initRemainingWeeksBadge();
+    initCurrentWeekBadge();
     initSupabaseSetupPanel();
     initMicroCMSSetupPanel();
     initAnalytics();
@@ -65,6 +66,45 @@ function initRemainingWeeksBadge() {
     targets.forEach((target) => {
         target.textContent = label;
     });
+}
+
+function initCurrentWeekBadge() {
+    applyCurrentWeekBadge();
+
+    window.setInterval(() => {
+        if (document.hidden) return;
+        if (latestMicroCMSBook) return;
+        applyCurrentWeekBadge();
+    }, WEEK_DATE_REFRESH_INTERVAL_MS);
+}
+
+function applyCurrentWeekBadge() {
+    const weekNumber = getCurrentWeekNumberJst();
+    const weekLabel = `第${weekNumber}週`;
+    const start = getCurrentWeeklyBaseDateJst();
+    const end = new Date(start.getTime() + (6 * 24 * 60 * 60 * 1000));
+    const weekDate = `${formatJpDate(start)}〜${formatJpDate(end)}`;
+
+    const homeWeekNumberEl = document.getElementById('home-week-number');
+    const homeWeekDateEl = document.getElementById('home-week-date');
+    const detailWeekNumberEl = document.getElementById('detail-week-number');
+
+    setTextIfValue(homeWeekNumberEl, weekLabel);
+    setTextIfValue(homeWeekDateEl, weekDate);
+    setTextIfValue(detailWeekNumberEl, weekLabel);
+}
+
+function getCurrentWeekNumberJst() {
+    const dayMs = 24 * 60 * 60 * 1000;
+    const baseDate = toJstDateOnly(getCurrentWeeklyBaseDateJst());
+    const currentYear = baseDate.getUTCFullYear();
+    const firstSaturday = new Date(Date.UTC(currentYear, 0, 1));
+    const offsetToSaturday = (6 - firstSaturday.getUTCDay() + 7) % 7;
+    firstSaturday.setUTCDate(firstSaturday.getUTCDate() + offsetToSaturday);
+
+    const diffMs = baseDate.getTime() - firstSaturday.getTime();
+    if (diffMs < 0) return 1;
+    return Math.floor(diffMs / (7 * dayMs)) + 1;
 }
 
 function getRemainingWeeksInYear() {
@@ -1409,11 +1449,18 @@ function parseCmsDate(...values) {
 
 function getCurrentWeeklyBaseDateJst() {
     const dayMs = 24 * 60 * 60 * 1000;
-    const jstNowMs = Date.now() + (9 * 60 * 60 * 1000);
-    const jstNow = new Date(jstNowMs);
-    const dayOfWeek = jstNow.getUTCDay(); // 0:Sun ... 6:Sat (JST換算)
+    const jstNow = new Date(Date.now() + (9 * 60 * 60 * 1000));
+    const jstDateOnly = new Date(Date.UTC(jstNow.getUTCFullYear(), jstNow.getUTCMonth(), jstNow.getUTCDate()));
+    const dayOfWeek = jstDateOnly.getUTCDay(); // 0:Sun ... 6:Sat (JST換算)
     const daysFromSaturday = (dayOfWeek + 1) % 7; // Sat:0, Sun:1 ... Fri:6
-    return new Date(jstNowMs - (daysFromSaturday * dayMs));
+    const baseDate = new Date(jstDateOnly.getTime() - (daysFromSaturday * dayMs));
+
+    // 土曜の公開時刻(9:00 JST)までは前週を表示する。
+    if (dayOfWeek === 6 && jstNow.getUTCHours() < 9) {
+        baseDate.setUTCDate(baseDate.getUTCDate() - 7);
+    }
+
+    return baseDate;
 }
 
 function toJstDateOnly(date) {
