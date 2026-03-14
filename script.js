@@ -10,7 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initMicroCMSSetupPanel();
     initAnalytics();
     initAffiliateTracking();
-    initMicroCMSContent();
+    initMicroCMSContentAutoRefresh();
     initCountdown();
     initNewsletterForm();
     initAuthForms();
@@ -19,6 +19,10 @@ document.addEventListener('DOMContentLoaded', () => {
     initSmoothScroll();
     initScrollAnimations();
 });
+
+const CMS_REFRESH_INTERVAL_MS = 5 * 60 * 1000;
+const WEEK_DATE_REFRESH_INTERVAL_MS = 60 * 1000;
+let latestMicroCMSBook = null;
 
 function initNavLogoAsset() {
     const probe = new Image();
@@ -933,10 +937,11 @@ function initBookMetadataEditor() {
 async function initMicroCMSContent() {
     const config = getMicroCMSConfig();
     if (!config) {
+        latestMicroCMSBook = null;
         setCMSStatus('home', 'CMS未接続のため、固定表示を使用しています。');
         setCMSStatus('detail', 'CMS未接続のため、固定表示を使用しています。');
         renderArchiveLists([]);
-        return;
+        return null;
     }
 
     try {
@@ -944,12 +949,14 @@ async function initMicroCMSContent() {
         const latestBook = books[0] || null;
 
         if (!latestBook) {
+            latestMicroCMSBook = null;
             setCMSStatus('home', 'CMSからデータを取得できませんでした。固定表示を使用しています。');
             setCMSStatus('detail', 'CMSからデータを取得できませんでした。固定表示を使用しています。');
             renderArchiveLists([]);
-            return;
+            return null;
         }
 
+        latestMicroCMSBook = latestBook;
         applyMicroCMSBookToHome(latestBook);
         applyMicroCMSBookToDetail(latestBook);
         renderArchiveLists(books.slice(1));
@@ -960,17 +967,41 @@ async function initMicroCMSContent() {
             setCMSStatus('home', message, true);
             setCMSStatus('detail', message, true);
             console.warn('microCMS required fields missing:', missingFields);
-            return;
+            return latestBook;
         }
 
         setCMSStatus('home', 'CMSの最新データを反映中');
         setCMSStatus('detail', 'CMSの最新データを反映中');
+        return latestBook;
     } catch (error) {
+        latestMicroCMSBook = null;
         setCMSStatus('home', 'CMS取得エラーのため固定表示を使用しています。', true);
         setCMSStatus('detail', 'CMS取得エラーのため固定表示を使用しています。', true);
         renderArchiveLists([]);
         console.error('microCMS fetch failed:', error);
+        return null;
     }
+}
+
+function initMicroCMSContentAutoRefresh() {
+    initMicroCMSContent();
+
+    // 予約投稿や週切り替えに追従するため、表示中のみ定期再取得する。
+    window.setInterval(() => {
+        if (document.hidden) return;
+        initMicroCMSContent();
+    }, CMS_REFRESH_INTERVAL_MS);
+
+    // weekDate未入力時の自動算出表示を、ページを開きっぱなしでも更新する。
+    window.setInterval(() => {
+        if (!latestMicroCMSBook) return;
+        if (document.hidden) return;
+
+        const weekDateEl = document.getElementById('home-week-date');
+        if (!weekDateEl) return;
+        const weekDate = resolveWeekDateLabel(latestMicroCMSBook);
+        setTextIfValue(weekDateEl, weekDate);
+    }, WEEK_DATE_REFRESH_INTERVAL_MS);
 }
 
 function getMicroCMSConfig() {
