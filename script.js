@@ -294,21 +294,9 @@ function disableFormControls(form) {
 }
 
 function isOperatorMode() {
-    const params = new URLSearchParams(window.location.search);
-    const adminParam = params.get('admin');
-    if (adminParam === '1') {
-        if (window.localStorage) window.localStorage.setItem('operator_mode', '1');
-        return true;
-    }
-    if (adminParam === '0') {
-        if (window.localStorage) window.localStorage.removeItem('operator_mode');
-        return false;
-    }
-
     const host = window.location.hostname;
     if (host === 'localhost' || host === '127.0.0.1') return true;
-
-    return Boolean(window.localStorage && window.localStorage.getItem('operator_mode') === '1');
+    return window.OPERATOR_MODE_ENABLED === true;
 }
 
 function ensureOperatorToolsVisible() {
@@ -356,9 +344,9 @@ function initSupabaseSetupPanel() {
             return;
         }
 
-        if (window.localStorage) {
-            window.localStorage.setItem('supabase_url', url);
-            window.localStorage.setItem('supabase_anon_key', key);
+        if (window.sessionStorage) {
+            window.sessionStorage.setItem('supabase_url', url);
+            window.sessionStorage.setItem('supabase_anon_key', key);
         }
         if (messageEl) messageEl.textContent = '保存しました。ページを再読み込みします。';
         setTimeout(() => {
@@ -1092,9 +1080,9 @@ function initMicroCMSSetupPanel() {
             return;
         }
 
-        if (window.localStorage) {
-            window.localStorage.setItem('microcms_service_domain', domain);
-            window.localStorage.setItem('microcms_api_key', key);
+        if (window.sessionStorage) {
+            window.sessionStorage.setItem('microcms_service_domain', domain);
+            window.sessionStorage.setItem('microcms_api_key', key);
         }
         if (messageEl) messageEl.textContent = '保存しました。ページを再読み込みします。';
         setTimeout(() => {
