@@ -93,7 +93,7 @@ body {
 .nav-logo {
     display: inline-flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
     padding: 0;
     color: var(--color-text);
     text-decoration: none;
@@ -101,8 +101,8 @@ body {
 
 .nav-logo-mark {
     display: none;
-    width: 72px;
-    height: 72px;
+    width: 76px;
+    height: 76px;
     background-image: url('assets/shudoku-logo.png');
     background-color: transparent;
     background-repeat: no-repeat;
@@ -136,11 +136,11 @@ html.has-brand-logo .nav-logo-word {
 
 @media (max-width: 640px) {
     .nav-logo {
-        gap: 7px;
+        gap: 6px;
     }
     .nav-logo-mark {
-        width: 56px;
-        height: 56px;
+        width: 58px;
+        height: 58px;
     }
     .nav-logo-word {
         font-size: 0.95rem;
