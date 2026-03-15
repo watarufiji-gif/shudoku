@@ -101,8 +101,8 @@ body {
 
 .nav-logo-mark {
     display: none;
-    width: 56px;
-    height: 42px;
+    width: 62px;
+    height: 46px;
     background-image: url('assets/shudoku-logo.png');
     background-repeat: no-repeat;
     background-position: center;
@@ -135,8 +135,8 @@ html.has-brand-logo .nav-logo-word {
         gap: 7px;
     }
     .nav-logo-mark {
-        width: 42px;
-        height: 32px;
+        width: 46px;
+        height: 34px;
     }
     .nav-logo-word {
         font-size: 1.05rem;
