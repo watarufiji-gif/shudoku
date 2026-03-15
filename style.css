@@ -5,7 +5,7 @@
 /* CSS Variables */
 :root {
     /* Colors - Warm, Paper-like palette */
-    --color-bg: #FAF8F5;
+    --color-bg: #F6F5F1;
     --color-bg-warm: #F5F2ED;
     --color-bg-accent: #EDE8E0;
     --color-text: #2C2824;
@@ -76,7 +76,7 @@ body {
     left: 0;
     right: 0;
     z-index: 100;
-    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(250, 248, 245, 0.96) 100%);
+    background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(246, 245, 241, 0.96) 100%);
     backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--color-border);
 }
