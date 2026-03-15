@@ -93,7 +93,7 @@ body {
 .nav-logo {
     display: inline-flex;
     align-items: center;
-    gap: 0;
+    gap: 10px;
     padding: 0;
     color: var(--color-text);
     text-decoration: none;
@@ -118,12 +118,12 @@ body {
 .nav-logo-word {
     display: inline-block;
     font-family: var(--font-serif);
-    font-size: 1.28rem;
+    font-size: 1.2rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     color: var(--color-text);
     line-height: 1;
-    transform: translateY(1px);
+    transform: translateY(0);
 }
 
 html.has-brand-logo .nav-logo-mark {
@@ -131,19 +131,19 @@ html.has-brand-logo .nav-logo-mark {
 }
 
 html.has-brand-logo .nav-logo-word {
-    display: none;
+    display: inline-block;
 }
 
 @media (max-width: 640px) {
     .nav-logo {
-        gap: 0;
+        gap: 7px;
     }
     .nav-logo-mark {
         width: 56px;
         height: 56px;
     }
     .nav-logo-word {
-        font-size: 1rem;
+        font-size: 0.95rem;
     }
 }
 

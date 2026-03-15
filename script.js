@@ -981,6 +981,7 @@ async function initMicroCMSContent() {
         latestMicroCMSBook = null;
         setCMSStatus('home', 'CMS未接続のため、固定表示を使用しています。');
         setCMSStatus('detail', 'CMS未接続のため、固定表示を使用しています。');
+        renderArchiveLists([]);
         return null;
     }
 
@@ -992,12 +993,14 @@ async function initMicroCMSContent() {
             latestMicroCMSBook = null;
             setCMSStatus('home', 'CMSからデータを取得できませんでした。固定表示を使用しています。');
             setCMSStatus('detail', 'CMSからデータを取得できませんでした。固定表示を使用しています。');
+            renderArchiveLists([]);
             return null;
         }
 
         latestMicroCMSBook = latestBook;
         applyMicroCMSBookToHome(latestBook);
         applyMicroCMSBookToDetail(latestBook);
+        renderArchiveLists(books);
 
         const missingFields = validateRequiredBookFields(latestBook);
         if (missingFields.length > 0) {
@@ -1015,6 +1018,7 @@ async function initMicroCMSContent() {
         latestMicroCMSBook = null;
         setCMSStatus('home', 'CMS取得エラーのため固定表示を使用しています。', true);
         setCMSStatus('detail', 'CMS取得エラーのため固定表示を使用しています。', true);
+        renderArchiveLists([]);
         console.error('microCMS fetch failed:', error);
         return null;
     }
@@ -1264,7 +1268,119 @@ function applyMicroCMSBookToDetail(book) {
 }
 
 function renderArchiveLists(books) {
-    void books;
+    const allBooks = Array.isArray(books) ? books : [];
+    const latestBook = allBooks[0] || null;
+    const archiveBooks = allBooks.slice(1);
+    const homeGrid = document.getElementById('home-archive-grid');
+    const archiveGrid = document.getElementById('archive-page-grid');
+
+    if (homeGrid) {
+        const prioritizedHomeBooks = prioritizePreviousWeekBooks(archiveBooks, latestBook);
+        renderArchiveItems(homeGrid, prioritizedHomeBooks.slice(0, 6), {
+            emptyId: 'home-archive-empty'
+        });
+    }
+    if (archiveGrid) {
+        renderArchiveItems(archiveGrid, archiveBooks, {
+            emptyId: 'archive-page-empty'
+        });
+    }
+}
+
+function prioritizePreviousWeekBooks(archiveBooks, latestBook) {
+    const items = Array.isArray(archiveBooks) ? [...archiveBooks] : [];
+    if (items.length <= 1 || !latestBook) return items;
+
+    const latestWeekNumber = getBookWeekNumber(latestBook);
+    if (!Number.isFinite(latestWeekNumber) || latestWeekNumber <= 1) return items;
+
+    const targetWeek = latestWeekNumber - 1;
+    const previousWeekIndex = items.findIndex((book) => getBookWeekNumber(book) === targetWeek);
+    if (previousWeekIndex <= 0) return items;
+
+    const previousWeekBook = items[previousWeekIndex];
+    items.splice(previousWeekIndex, 1);
+    items.unshift(previousWeekBook);
+    return items;
+}
+
+function getBookWeekNumber(book) {
+    if (!book) return null;
+    const normalized = normalizeBookPayload(book);
+    const weekLabel = firstNonEmpty(normalized.weekLabel, book.weekLabel, book.week, book.weekNumber);
+    if (typeof weekLabel === 'number' && Number.isFinite(weekLabel)) return weekLabel;
+    const raw = String(weekLabel || '');
+    const match = raw.match(/(\d+)/u);
+    if (!match) return null;
+    const parsed = Number(match[1]);
+    return Number.isFinite(parsed) ? parsed : null;
+}
+
+function renderArchiveItems(container, books, options = {}) {
+    if (!container) return;
+    const items = Array.isArray(books) ? books : [];
+    const emptyEl = options.emptyId ? document.getElementById(options.emptyId) : null;
+    const fallbackItems = container.querySelectorAll('[data-fallback="archive-item"]');
+
+    container.querySelectorAll('[data-generated="archive-item"]').forEach((node) => {
+        node.remove();
+    });
+
+    if (items.length === 0) {
+        fallbackItems.forEach((node) => {
+            node.hidden = false;
+        });
+        if (emptyEl) emptyEl.hidden = fallbackItems.length > 0;
+        return;
+    }
+
+    fallbackItems.forEach((node) => {
+        node.hidden = true;
+    });
+    if (emptyEl) emptyEl.hidden = true;
+
+    items.forEach((book, index) => {
+        const normalized = normalizeBookPayload(book);
+        const title = firstNonEmpty(normalized.title, 'タイトル未設定');
+        const author = firstNonEmpty(normalized.author, '著者未設定');
+        const weekLabel = firstNonEmpty(
+            normalized.weekLabel,
+            book.weekNumber ? `第${book.weekNumber}週` : `第${index + 2}週`
+        );
+        const coverUrl = normalized.coverUrl;
+        const detailUrl = firstNonEmpty(book.pageUrl, book.detailUrl, book.url, '#');
+
+        const link = document.createElement('a');
+        link.href = /^https?:\/\//i.test(detailUrl) || detailUrl.startsWith('/') || detailUrl === '#'
+            ? detailUrl
+            : '#';
+        link.className = 'archive-item';
+        link.setAttribute('data-generated', 'archive-item');
+
+        const img = document.createElement('img');
+        img.className = 'archive-cover';
+        img.alt = title;
+        if (isOfficialImageUrl(coverUrl)) {
+            img.src = coverUrl;
+        } else {
+            img.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw==';
+            hydrateMissingCoverImage(img, book, {
+                alt: title
+            });
+        }
+
+        const info = document.createElement('div');
+        info.className = 'archive-info';
+        info.innerHTML = `
+            <span class="archive-week">${escapeHtml(weekLabel)}</span>
+            <h3 class="archive-book-title">${escapeHtml(title)}</h3>
+            <p class="archive-author">${escapeHtml(author)}</p>
+        `;
+
+        link.appendChild(img);
+        link.appendChild(info);
+        container.appendChild(link);
+    });
 }
 
 function validateRequiredBookFields(book) {

@@ -11,6 +11,11 @@
     <priority>0.5</priority>
   </url>
   <url>
+    <loc>https://shudoku.jp/archive.html</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://shudoku.jp/book-22.html</loc>
     <changefreq>weekly</changefreq>
     <priority>0.8</priority>
