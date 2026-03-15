@@ -5,8 +5,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.microcms.io https://api.openbd.jp https://www.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com; form-action 'self'; upgrade-insecure-requests">
-    <title>バックナンバー | 週読</title>
-    <meta name="description" content="週読のバックナンバーは第1週の配信後に順次公開します。">
+    <title>週読 | お知らせ</title>
+    <meta name="description" content="週読は今週の一冊に集中して配信しています。">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
@@ -25,7 +25,6 @@
             </a>
             <div class="nav-links">
                 <a href="about.html">このサイトについて</a>
-                <a href="archive.html">過去の本</a>
                 <a href="my-library.html" hidden aria-hidden="true">読書記録</a>
                 <a href="login.html" class="nav-login" hidden aria-hidden="true">ログイン</a>
                 <a href="index.html#subscribe" class="nav-cta" hidden aria-hidden="true">購読する</a>
@@ -33,34 +32,19 @@
         </div>
     </nav>
 
-    <!-- アーカイブヘッダー -->
+    <!-- お知らせ -->
     <header class="page-header" style="padding: 120px 20px 60px; text-align: center;">
-        <h1 class="page-title" style="font-family: var(--font-serif); font-size: 2rem; margin-bottom: 20px;">バックナンバー</h1>
-        <p style="color: var(--color-text-secondary);">これまでに紹介した一冊を一覧で読めます。</p>
+        <h1 class="page-title" style="font-family: var(--font-serif); font-size: 2rem; margin-bottom: 20px;">お知らせ</h1>
+        <p style="color: var(--color-text-secondary);">現在は「今週の一冊」のみ掲載しています。</p>
     </header>
 
-    <!-- アーカイブ一覧 -->
-    <section class="archive" style="background: transparent; padding-top: 0;">
-        <div class="archive-container">
-            <div class="archive-grid" id="archive-page-grid">
-                <a href="book-1.html" class="archive-item" data-fallback="archive-item">
-                    <img class="archive-cover"
-                        src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800"
-                        alt="嫌われる勇気">
-                    <div class="archive-info">
-                        <span class="archive-week">第1週</span>
-                        <h3 class="archive-book-title">嫌われる勇気</h3>
-                        <p class="archive-author">岸見一郎・古賀史健</p>
-                    </div>
-                </a>
-                <p id="archive-page-empty" style="grid-column: 1 / -1; text-align: center; color: var(--color-text-secondary); margin: 20px 0;">
-                    まだバックナンバーはありません。公開をお待ちください。
+    <section class="about" style="padding-top: 0;">
+        <div class="about-container" style="max-width: 760px;">
+            <div class="about-content" style="text-align: center;">
+                <p style="color: var(--color-text-secondary); margin-bottom: 20px;">
+                    以前のバックナンバー一覧は終了しました。
                 </p>
-            </div>
-
-            <!-- ページネーション（将来的用） -->
-            <div style="text-align: center; margin-top: 60px;">
-                <p style="color: var(--color-text-muted); font-size: 0.9rem;">1 / 1</p>
+                <a href="index.html" class="archive-more">トップへ戻る</a>
             </div>
         </div>
     </section>
