@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.microcms.io https://api.openbd.jp https://www.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com; form-action 'self'; upgrade-insecure-requests">
+    <title>嫌われる勇気 | 週読</title>
+    <meta name="description" content="第1週の一冊：嫌われる勇気。他者の評価に縛られず、自分の人生を生きる勇気を問い直す一冊。">
+    <link rel="canonical" href="https://shudoku.jp/book-1.html">
+    <meta property="og:title" content="嫌われる勇気 | 週読">
+    <meta property="og:description" content="第1週の一冊：嫌われる勇気。他者の評価に縛られず、自分の人生を生きる勇気を問い直す一冊。">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://shudoku.jp/book-1.html">
+    <meta property="og:image" content="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=1200">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600&family=Shippori+Mincho:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <!-- ナビゲーション -->
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo" aria-label="週読 ホーム">
+                <span class="nav-logo-mark" aria-hidden="true"></span>
+                <span class="nav-logo-word">週読</span>
+            </a>
+            <div class="nav-links">
+                <a href="about.html">このサイトについて</a>
+                <a href="archive.html">過去の本</a>
+                <a href="my-library.html" hidden aria-hidden="true">読書記録</a>
+                <a href="login.html" class="nav-login" hidden aria-hidden="true">ログイン</a>
+                <a href="index.html#subscribe" class="nav-cta" hidden aria-hidden="true">購読する</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 個別記事（詳細版ヒーロー） -->
+    <main class="hero" style="min-height: auto; padding-bottom: 60px;">
+        <div class="hero-container">
+            <!-- 週のバッジ -->
+            <div class="week-badge">
+                <span id="detail-week-number" class="week-number" style="background: var(--color-text-secondary);">第1週</span>
+                <span id="detail-year-remaining" class="week-remaining week-remaining-below">今年あと--週</span>
+                <!-- 過去の日付はあえて入れないか、小さく -->
+                <p id="detail-cms-status" style="margin-top: 8px; font-size: 0.8rem; color: var(--color-text-muted);" hidden></p>
+            </div>
+
+            <!-- 運営者向け: 書籍情報の差し替え -->
+            <form id="book-meta-form" hidden
+                style="margin: 0 0 28px; padding: 18px; border: 1px solid var(--color-border); border-radius: 10px; background: var(--color-bg-warm);">
+                <p style="margin: 0 0 12px; font-size: 0.9rem; color: var(--color-text-secondary);">
+                    タイトル / 著者 / ISBNを入力すると、書影を自動取得して表示を更新します。
+                </p>
+                <div
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-bottom: 10px;">
+                    <input id="book-input-title" name="title" type="text" value="嫌われる勇気" required
+                        placeholder="タイトル"
+                        style="padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-white);">
+                    <input id="book-input-author" name="author" type="text" value="岸見一郎・古賀史健" required placeholder="著者"
+                        style="padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-white);">
+                    <input id="book-input-isbn" name="isbn" type="text" required placeholder="ISBN（例: 9784480020478）"
+                        style="padding: 10px 12px; border: 1px solid var(--color-border); border-radius: 8px; background: var(--color-white);">
+                </div>
+                <button type="submit" class="btn btn-amazon" style="min-width: 220px; border: 0;">情報を反映して書影取得</button>
+                <p id="book-meta-message" style="margin: 10px 0 0; font-size: 0.85rem; color: var(--color-text-muted);">
+                    OpenBD優先、見つからない場合はGoogle Booksから取得します。
+                </p>
+            </form>
+
+            <!-- メインコンテンツ -->
+            <div class="book-showcase">
+                <!-- 本の画像 -->
+                <div class="book-visual">
+                    <img id="book-cover-image"
+                        src="https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&q=80&w=800"
+                        alt="今週の一冊: 嫌われる勇気" class="book-cover">
+                    <div class="book-shadow"></div>
+                </div>
+
+                <!-- 本の情報 -->
+                <div class="book-info">
+                    <p id="detail-book-category" class="book-category">心理学・自己啓発</p>
+                    <h1 id="book-title-display" class="book-title">嫌われる勇気</h1>
+                    <p id="book-author-display" class="book-author">岸見一郎・古賀史健</p>
+
+                    <!-- 引用 -->
+                    <blockquote class="book-quote">
+                        <p id="detail-book-quote">「あなたが変われないでいるのは、自らに対して『変わらない』という決心を下しているからなのです」</p>
+                    </blockquote>
+
+                    <!-- 紹介文 -->
+                    <div id="detail-book-description" class="book-description">
+                        <p>
+                            スマートフォンの通知、SNSの評価、他人の目。
+                            私たちは日々、「誰かにどう思われるか」に縛られすぎていないでしょうか。
+                        </p>
+                        <p>
+                            アドラー心理学の教えを対話形式で紐解くこの本は、
+                            「すべての悩みは対人関係の悩みである」という核心から、
+                            真の自由とは何かを問いかけてきます。
+                        </p>
+                        <p>
+                            今週はこの一冊と共に、「自分の人生を生きる」ことについて考えてみませんか。
+                        </p>
+                    </div>
+
+                    <!-- CTA: 購入ボタン -->
+                    <div class="book-cta">
+                        <div class="cta-group">
+                            <a id="detail-buy-amazon" href="https://www.amazon.co.jp/dp/4478025819?tag=shudoku-22" target="_blank"
+                                rel="noopener noreferrer" class="btn btn-amazon" data-track-type="affiliate" data-platform="amazon"
+                                data-book-title="嫌われる勇気">
+                                <span class="btn-icon">📦</span>
+                                <span class="btn-text">Amazon</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 戻るリンク -->
+            <div style="text-align: center; margin-top: 60px;">
+                <a href="archive.html"
+                    style="color: var(--color-text-secondary); text-decoration: none; border-bottom: 1px solid var(--color-border);">一覧に戻る</a>
+            </div>
+        </div>
+    </main>
+
+    <!-- フッター -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="footer-logo">週読</span>
+                <p class="footer-tagline">週に一冊、自分と向き合う時間を</p>
+            </div>
+            <div class="footer-links">
+                <a href="privacy.html">プライバシーポリシー</a>
+                <a href="about.html">お問い合わせ</a>
+            </div>
+            <p class="footer-copyright">© 2026 週読 All rights reserved.</p>
+        </div>
+    </footer>
+    <script src="analytics-config.js"></script>
+    <script src="microcms-config.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

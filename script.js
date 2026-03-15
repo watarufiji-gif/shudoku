@@ -999,7 +999,7 @@ async function initMicroCMSContent() {
         latestMicroCMSBook = latestBook;
         applyMicroCMSBookToHome(latestBook);
         applyMicroCMSBookToDetail(latestBook);
-        renderArchiveLists(books.slice(1));
+        renderArchiveLists(books);
 
         const missingFields = validateRequiredBookFields(latestBook);
         if (missingFields.length > 0) {
@@ -1255,25 +1255,59 @@ function applyMicroCMSBookToDetail(book) {
 }
 
 function renderArchiveLists(books) {
+    const allBooks = Array.isArray(books) ? books : [];
+    const latestBook = allBooks[0] || null;
+    const archiveBooks = allBooks.slice(1);
     const homeGrid = document.getElementById('home-archive-grid');
     const archiveGrid = document.getElementById('archive-page-grid');
 
     if (homeGrid) {
-        renderArchiveItems(homeGrid, books.slice(0, 6), {
+        const prioritizedHomeBooks = prioritizePreviousWeekBooks(archiveBooks, latestBook);
+        renderArchiveItems(homeGrid, prioritizedHomeBooks.slice(0, 6), {
             emptyId: 'home-archive-empty'
         });
     }
     if (archiveGrid) {
-        renderArchiveItems(archiveGrid, books, {
+        renderArchiveItems(archiveGrid, archiveBooks, {
             emptyId: 'archive-page-empty'
         });
     }
+}
+
+function prioritizePreviousWeekBooks(archiveBooks, latestBook) {
+    const items = Array.isArray(archiveBooks) ? [...archiveBooks] : [];
+    if (items.length <= 1 || !latestBook) return items;
+
+    const latestWeekNumber = getBookWeekNumber(latestBook);
+    if (!Number.isFinite(latestWeekNumber) || latestWeekNumber <= 1) return items;
+
+    const targetWeek = latestWeekNumber - 1;
+    const previousWeekIndex = items.findIndex((book) => getBookWeekNumber(book) === targetWeek);
+    if (previousWeekIndex <= 0) return items;
+
+    const previousWeekBook = items[previousWeekIndex];
+    items.splice(previousWeekIndex, 1);
+    items.unshift(previousWeekBook);
+    return items;
+}
+
+function getBookWeekNumber(book) {
+    if (!book) return null;
+    const normalized = normalizeBookPayload(book);
+    const weekLabel = firstNonEmpty(normalized.weekLabel, book.weekLabel, book.week, book.weekNumber);
+    if (typeof weekLabel === 'number' && Number.isFinite(weekLabel)) return weekLabel;
+    const raw = String(weekLabel || '');
+    const match = raw.match(/(\d+)/u);
+    if (!match) return null;
+    const parsed = Number(match[1]);
+    return Number.isFinite(parsed) ? parsed : null;
 }
 
 function renderArchiveItems(container, books, options = {}) {
     if (!container) return;
     const items = Array.isArray(books) ? books : [];
     const emptyEl = options.emptyId ? document.getElementById(options.emptyId) : null;
+    const fallbackItems = container.querySelectorAll('[data-fallback="archive-item"]');
 
     // 動的に生成した項目だけ消す
     container.querySelectorAll('[data-generated="archive-item"]').forEach((node) => {
@@ -1281,9 +1315,15 @@ function renderArchiveItems(container, books, options = {}) {
     });
 
     if (items.length === 0) {
-        if (emptyEl) emptyEl.hidden = false;
+        fallbackItems.forEach((node) => {
+            node.hidden = false;
+        });
+        if (emptyEl) emptyEl.hidden = fallbackItems.length > 0;
         return;
     }
+    fallbackItems.forEach((node) => {
+        node.hidden = true;
+    });
     if (emptyEl) emptyEl.hidden = true;
 
     items.forEach((book, index) => {
@@ -1550,6 +1590,10 @@ function resolveImageUrl(book) {
         }
     }
 
+    const amazonUrl = firstNonEmpty(book.AmazonURL, book.amazonUrl, book.amazonURL, book.amazon_link);
+    const amazonCoverUrl = resolveAmazonCoverUrl(amazonUrl);
+    if (amazonCoverUrl) return amazonCoverUrl;
+
     return '';
 }
 
@@ -1582,7 +1626,10 @@ function isOfficialImageUrl(url) {
         /(^|\.)openbd\.jp$/,
         /(^|\.)books\.google\.com$/,
         /(^|\.)books\.googleusercontent\.com$/,
-        /(^|\.)googleusercontent\.com$/
+        /(^|\.)googleusercontent\.com$/,
+        /(^|\.)m\.media-amazon\.com$/,
+        /(^|\.)images-na\.ssl-images-amazon\.com$/,
+        /(^|\.)images-fe\.ssl-images-amazon\.com$/
     ];
 
     return allowedHostPatterns.some((pattern) => pattern.test(host));
@@ -1613,11 +1660,60 @@ function normalizeAmazonAffiliateUrl(url) {
     }
 
     if (parsed.protocol !== 'https:') return '';
-    if (parsed.hostname.toLowerCase() !== 'www.amazon.co.jp') return '';
+    const host = parsed.hostname.toLowerCase();
+    if (host !== 'www.amazon.co.jp' && host !== 'amazon.co.jp') return '';
 
     const tag = String(parsed.searchParams.get('tag') || '').trim();
     if (!tag || tag === 'YOUR_AMAZON_ID') return '';
     return parsed.toString();
+}
+
+function resolveAmazonCoverUrl(amazonUrl) {
+    const asin = extractAmazonAsin(amazonUrl);
+    if (!asin) return '';
+    return `https://m.media-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`;
+}
+
+function extractAmazonAsin(amazonUrl) {
+    if (typeof amazonUrl !== 'string' || !amazonUrl.trim()) return '';
+
+    let parsed;
+    try {
+        parsed = new URL(amazonUrl.trim());
+    } catch (_) {
+        return '';
+    }
+
+    const host = parsed.hostname.toLowerCase();
+    const allowedHosts = new Set(['www.amazon.co.jp', 'amazon.co.jp']);
+    if (!allowedHosts.has(host)) return '';
+
+    const path = parsed.pathname || '';
+    const patterns = [
+        /\/dp\/([A-Z0-9]{10})(?:[/?]|$)/i,
+        /\/gp\/product\/([A-Z0-9]{10})(?:[/?]|$)/i,
+        /\/gp\/aw\/d\/([A-Z0-9]{10})(?:[/?]|$)/i,
+        /\/product-reviews\/([A-Z0-9]{10})(?:[/?]|$)/i,
+        /\/exec\/obidos\/ASIN\/([A-Z0-9]{10})(?:[/?]|$)/i,
+        /\/o\/ASIN\/([A-Z0-9]{10})(?:[/?]|$)/i
+    ];
+
+    for (const pattern of patterns) {
+        const match = path.match(pattern);
+        if (match && match[1]) return match[1].toUpperCase();
+    }
+
+    const queryCandidates = [
+        parsed.searchParams.get('asin'),
+        parsed.searchParams.get('ASIN'),
+        parsed.searchParams.get('pd_rd_i')
+    ];
+    for (const candidate of queryCandidates) {
+        const normalized = String(candidate || '').trim().toUpperCase();
+        if (/^[A-Z0-9]{10}$/.test(normalized)) return normalized;
+    }
+
+    return '';
 }
 
 function setAffiliateLinkMeta(target, platform, title) {

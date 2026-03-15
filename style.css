@@ -93,26 +93,20 @@ body {
 .nav-logo {
     display: inline-flex;
     align-items: center;
-    gap: 12px;
-    padding: 6px 10px 6px 8px;
-    border-radius: 999px;
-    background: var(--color-bg-warm);
-    border: 1px solid #dcd5ca;
+    gap: 10px;
+    padding: 0;
     color: var(--color-text);
     text-decoration: none;
 }
 
 .nav-logo-mark {
     display: none;
-    width: 40px;
-    height: 40px;
+    width: 56px;
+    height: 42px;
     background-image: url('assets/shudoku-logo.png');
     background-repeat: no-repeat;
     background-position: center;
-    background-size: 158% auto;
-    border-radius: 999px;
-    background-color: #f1ece3;
-    border: 1px solid #d7cfbf;
+    background-size: contain;
     image-rendering: -webkit-optimize-contrast;
     image-rendering: crisp-edges;
     flex-shrink: 0;
@@ -121,10 +115,11 @@ body {
 .nav-logo-word {
     display: inline-block;
     font-family: var(--font-serif);
-    font-size: 1.28rem;
+    font-size: 1.35rem;
     font-weight: 600;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.06em;
     color: var(--color-text);
+    line-height: 1;
 }
 
 html.has-brand-logo .nav-logo-mark {
@@ -137,15 +132,14 @@ html.has-brand-logo .nav-logo-word {
 
 @media (max-width: 640px) {
     .nav-logo {
-        padding: 5px 8px 5px 6px;
-        gap: 8px;
+        gap: 7px;
     }
     .nav-logo-mark {
-        width: 32px;
+        width: 42px;
         height: 32px;
     }
     .nav-logo-word {
-        font-size: 0.98rem;
+        font-size: 1.05rem;
     }
 }
 
