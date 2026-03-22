@@ -100,19 +100,15 @@ body {
 }
 
 .nav-logo-mark {
-    display: none;
-    width: 76px;
-    height: 76px;
-    background-image: url('assets/shudoku-logo.png');
-    background-color: transparent;
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    background-image: url("data:image/svg+xml,%3Csvg width='24' height='24' viewBox='0 0 24 24' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M12 6.5C10.5 5 7.5 4.5 4 5.5L4 20.5C7.5 19.5 10.5 20 12 21.5C13.5 20 16.5 19.5 20 20.5L20 5.5C16.5 4.5 13.5 5 12 6.5Z' fill='%23EDE8E0' stroke='%239A8F84' stroke-width='1.2' stroke-linejoin='round'/%3E%3Cline x1='12' y1='6.5' x2='12' y2='21.5' stroke='%238B7355' stroke-width='1.2'/%3E%3Cline x1='5.5' y1='9.5' x2='10.5' y2='9' stroke='%23C4B49A' stroke-width='0.9'/%3E%3Cline x1='5.5' y1='12.5' x2='10.5' y2='12' stroke='%23C4B49A' stroke-width='0.9'/%3E%3Cline x1='5.5' y1='15.5' x2='10.5' y2='15' stroke='%23C4B49A' stroke-width='0.9'/%3E%3Cline x1='18.5' y1='9' x2='13.5' y2='9.5' stroke='%23C4B49A' stroke-width='0.9'/%3E%3Cline x1='18.5' y1='12' x2='13.5' y2='12.5' stroke='%23C4B49A' stroke-width='0.9'/%3E%3Cline x1='18.5' y1='15' x2='13.5' y2='15.5' stroke='%23C4B49A' stroke-width='0.9'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-    border: 0;
-    box-shadow: none;
-    image-rendering: -webkit-optimize-contrast;
-    image-rendering: crisp-edges;
     flex-shrink: 0;
+    opacity: 0.85;
 }
 
 .nav-logo-word {
@@ -123,15 +119,6 @@ body {
     letter-spacing: 0.06em;
     color: var(--color-text);
     line-height: 1;
-    transform: translateY(0);
-}
-
-html.has-brand-logo .nav-logo-mark {
-    display: inline-block;
-}
-
-html.has-brand-logo .nav-logo-word {
-    display: inline-block;
 }
 
 @media (max-width: 640px) {
@@ -139,8 +126,8 @@ html.has-brand-logo .nav-logo-word {
         gap: 6px;
     }
     .nav-logo-mark {
-        width: 58px;
-        height: 58px;
+        width: 18px;
+        height: 18px;
     }
     .nav-logo-word {
         font-size: 0.95rem;
