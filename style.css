@@ -84,7 +84,7 @@ body {
 .nav-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: var(--space-md) var(--space-xl);
+    padding: var(--space-lg) var(--space-xl);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -101,8 +101,8 @@ body {
 
 .nav-logo-mark {
     display: inline-block;
-    width: 32px;
-    height: 32px;
+    width: 42px;
+    height: 42px;
     background-image: url('assets/logo.svg');
     background-repeat: no-repeat;
     background-position: center;
