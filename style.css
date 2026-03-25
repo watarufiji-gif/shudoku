@@ -103,7 +103,7 @@ body {
     display: inline-block;
     width: 42px;
     height: 42px;
-    background-image: url('assets/logo.svg');
+    background-image: url('assets/logo.png');
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
