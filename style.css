@@ -103,12 +103,10 @@ body {
     display: inline-block;
     width: 42px;
     height: 42px;
-    background-image: url('assets/logo.png');
+    background-image: url('assets/logo-mark.png');
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-    background-color: transparent;
-    mix-blend-mode: multiply;
     flex-shrink: 0;
 }
 
