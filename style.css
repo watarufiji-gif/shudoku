@@ -76,7 +76,7 @@ body {
     left: 0;
     right: 0;
     z-index: 100;
-    background: #FFFFFF;
+    background: var(--color-bg);
     backdrop-filter: none;
     border-bottom: 1px solid var(--color-border);
 }
