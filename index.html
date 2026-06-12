@@ -34,7 +34,7 @@
                 <a href="#about">このサイトについて</a>
                 <a href="archive.html">過去の本</a>
                 <a href="login.html" class="nav-login" hidden aria-hidden="true">ログイン</a>
-                <a href="#subscribe" class="nav-cta" hidden aria-hidden="true">購読する</a>
+                <a href="#subscribe" class="nav-cta">購読する</a>
             </div>
         </div>
     </nav>
@@ -123,7 +123,7 @@
     </main>
 
     <!-- ニュースレター登録セクション -->
-    <section class="newsletter" id="subscribe" hidden aria-hidden="true">
+    <section class="newsletter" id="subscribe">
         <div class="newsletter-container">
             <div class="newsletter-content">
                 <h2 class="newsletter-title">毎週土曜日、静かな朝に届く一冊</h2>
@@ -132,11 +132,12 @@
                     広告なし。セールも勧誘もありません。<br>
                     ただ、一冊の本との出会いだけを。
                 </p>
-                <form class="newsletter-form" id="newsletter-form">
-                    <input type="email" placeholder="メールアドレス" class="newsletter-input" required>
-                    <button type="submit" class="newsletter-btn">購読する</button>
+                <form class="newsletter-form" id="newsletter-form" novalidate>
+                    <input type="email" id="newsletter-email" placeholder="メールアドレス" class="newsletter-input" required autocomplete="email">
+                    <button type="submit" class="newsletter-btn" id="newsletter-submit">購読する</button>
                 </form>
-                <p class="newsletter-privacy">案内のみ新規登録でございません。なおいつでも解除できます。</p>
+                <p class="newsletter-status" id="newsletter-status" aria-live="polite"></p>
+                <p class="newsletter-privacy">案内のみ。広告・セールはありません。いつでも解除できます。</p>
             </div>
         </div>
     </section>
@@ -199,6 +200,7 @@
     <script src="analytics-config.js"></script>
     <script src="microcms-config.js"></script>
     <script src="script.js"></script>
+    <script src="newsletter.js"></script>
 </body>
 
 </html>

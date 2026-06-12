@@ -529,6 +529,20 @@ body {
     color: var(--color-text-muted);
 }
 
+.newsletter-status {
+    min-height: 1.4em;
+    font-size: 0.875rem;
+    margin: 8px 0 0;
+}
+
+.newsletter-status--success {
+    color: #4a7c59;
+}
+
+.newsletter-status--error {
+    color: #c0392b;
+}
+
 /* =============================================
    About Section
    ============================================= */
