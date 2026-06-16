@@ -5,6 +5,9 @@
   "engines": {
     "node": "18"
   },
+  "scripts": {
+    "build": "node scripts/generate-pages.js"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.0.0",
     "resend": "^3.0.0"

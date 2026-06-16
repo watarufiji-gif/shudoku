@@ -16,12 +16,13 @@ exports.handler = async function (event) {
     return { statusCode: 405, body: JSON.stringify({ error: 'Method Not Allowed' }) };
   }
 
-  let email;
+  let email, source;
   try {
-    ({ email } = JSON.parse(event.body));
+    ({ email, source } = JSON.parse(event.body));
   } catch {
     return { statusCode: 400, body: JSON.stringify({ error: 'リクエストが不正です。' }) };
   }
+  const safeSource = ['web', 'sns', 'referral', 'company', 'search'].includes(source) ? source : 'web';
 
   if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return { statusCode: 400, body: JSON.stringify({ error: 'メールアドレスが無効です。' }) };
@@ -45,7 +46,7 @@ exports.handler = async function (event) {
   // upsert: 新規→全カラム挿入、再登録→confirm_token だけ更新
   const upsertData = existing
     ? { email, confirmed: false, confirm_token: confirmToken }
-    : { email, confirmed: false, confirm_token: confirmToken, unsubscribe_token: randomUUID() };
+    : { email, confirmed: false, confirm_token: confirmToken, unsubscribe_token: randomUUID(), source: safeSource };
 
   const { error: dbError } = await supabase
     .from('subscribers')

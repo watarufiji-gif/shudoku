@@ -22,10 +22,11 @@
     statusEl.textContent = '';
     statusEl.className = 'newsletter-status';
 
+    var source = form.dataset.source || 'web';
     fetch('/.netlify/functions/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email: email }),
+      body: JSON.stringify({ email: email, source: source }),
     })
       .then(function (res) {
         return res.json().then(function (data) {

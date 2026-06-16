@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
+Disallow: /admin.html
+Disallow: /.netlify/
 
-Sitemap: https://shudoku.jp/sitemap.xml
+Sitemap: https://syudoku.com/sitemap.xml

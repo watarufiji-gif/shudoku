@@ -1,77 +1,97 @@
 <!DOCTYPE html>
 <html lang="ja">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.microcms.io https://api.openbd.jp https://www.googleapis.com https://www.google-analytics.com https://region1.google-analytics.com; form-action 'self'; upgrade-insecure-requests">
-    <title>バックナンバー | 週読</title>
-    <meta name="description" content="週読のバックナンバーは第1週の配信後に順次公開します。">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600&family=Shippori+Mincho:wght@400;500;600&display=swap"
-        rel="stylesheet">
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; script-src 'self' https://cdn.jsdelivr.net https://www.googletagmanager.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com data:; img-src 'self' data: https:; connect-src 'self' https://*.supabase.co https://*.netlify.app https://www.google-analytics.com https://region1.google-analytics.com; form-action 'self'; upgrade-insecure-requests">
+  <title>バックナンバー | 週読</title>
+  <meta name="description" content="週読がこれまでに届けてきた本の一覧。ジャンル別に絞り込んで読めます。">
+  <link rel="canonical" href="https://syudoku.com/archive.html">
+  <meta property="og:type"        content="website">
+  <meta property="og:title"       content="バックナンバー | 週読">
+  <meta property="og:description" content="週読がこれまでに届けてきた本の一覧。">
+  <meta property="og:url"         content="https://syudoku.com/archive.html">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600&family=Shippori+Mincho:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .archive-filter-btn {
+      padding: 7px 18px;
+      border: 1px solid var(--color-border);
+      border-radius: 20px;
+      background: var(--color-white);
+      color: var(--color-text-secondary);
+      font-size: 0.82rem;
+      cursor: pointer;
+      transition: all .15s;
+    }
+    .archive-filter-btn:hover,
+    .archive-filter-btn.active {
+      background: var(--color-text);
+      color: var(--color-white);
+      border-color: var(--color-text);
+    }
+    .archive-card:hover {
+      box-shadow: 0 4px 16px rgba(0,0,0,.1);
+    }
+  </style>
 </head>
-
 <body>
-    <!-- ナビゲーション -->
-    <nav class="nav">
-        <div class="nav-container">
-            <a href="index.html" class="nav-logo" aria-label="週読 ホーム">
-                <span class="nav-logo-mark" aria-hidden="true"></span>
-                <span class="nav-logo-word">週読</span>
-            </a>
-            <div class="nav-links">
-                <a href="about.html">このサイトについて</a>
-                <a href="archive.html">過去の本</a>
-                <a href="my-library.html" hidden aria-hidden="true">読書記録</a>
-                <a href="login.html" class="nav-login" hidden aria-hidden="true">ログイン</a>
-                <a href="index.html#subscribe" class="nav-cta" hidden aria-hidden="true">購読する</a>
-            </div>
-        </div>
-    </nav>
+  <!-- ナビゲーション -->
+  <nav class="nav">
+    <div class="nav-container">
+      <a href="/" class="nav-logo" aria-label="週読 ホーム">
+        <span class="nav-logo-mark" aria-hidden="true"></span>
+        <span class="nav-logo-word">週読</span>
+      </a>
+      <div class="nav-links">
+        <a href="/about.html">このサイトについて</a>
+        <a href="/archive.html" aria-current="page">過去の本</a>
+        <a href="/#subscribe" class="nav-cta">購読する</a>
+      </div>
+    </div>
+  </nav>
 
-    <!-- アーカイブヘッダー -->
-    <header class="page-header" style="padding: 120px 20px 60px; text-align: center;">
-        <h1 class="page-title" style="font-family: var(--font-serif); font-size: 2rem; margin-bottom: 20px;">バックナンバー</h1>
-        <p style="color: var(--color-text-secondary);">これまでに紹介した一冊を一覧で読めます。</p>
-    </header>
+  <!-- ヘッダー -->
+  <header style="padding:100px 20px 40px;text-align:center;background:var(--color-bg);">
+    <h1 style="font-family:var(--font-serif);font-size:2rem;margin-bottom:12px;">バックナンバー</h1>
+    <p style="color:var(--color-text-secondary);margin-bottom:0;">
+      これまでに届けてきた本の一覧です。
+      <span id="archive-count" style="margin-left:6px;font-weight:500;">0冊</span>
+    </p>
+  </header>
 
-    <!-- アーカイブ一覧 -->
-    <section class="archive" style="background: transparent; padding-top: 0;">
-        <div class="archive-container">
-            <div class="archive-grid" id="archive-page-grid">
-                <p id="archive-page-empty" style="grid-column: 1 / -1; text-align: center; color: var(--color-text-secondary); margin: 20px 0;">
-                    まだバックナンバーはありません。公開をお待ちください。
-                </p>
-            </div>
+  <!-- ジャンルフィルター -->
+  
 
-            <!-- ページネーション（将来的用） -->
-            <div style="text-align: center; margin-top: 60px;">
-                <p style="color: var(--color-text-muted); font-size: 0.9rem;">1 / 1</p>
-            </div>
-        </div>
-    </section>
+  <!-- 一覧グリッド -->
+  <section style="padding:0 20px 80px;">
+    <div class="archive-container">
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;" id="archive-grid">
+        <p style="grid-column:1/-1;text-align:center;color:var(--color-text-secondary);padding:40px 0;">
+        まだバックナンバーはありません。公開をお待ちください。
+      </p>
+      </div>
+    </div>
+  </section>
 
-    <!-- フッター -->
-    <footer class="footer">
-        <div class="footer-container">
-            <div class="footer-brand">
-                <span class="footer-logo">週読</span>
-                <p class="footer-tagline">週に一冊、自分と向き合う時間を</p>
-            </div>
-            <div class="footer-links">
-                <a href="privacy.html">プライバシーポリシー</a>
-                <a href="about.html">お問い合わせ</a>
-            </div>
-            <p class="footer-copyright">© 2026 週読 All rights reserved.</p>
-        </div>
-    </footer>
-    <script src="analytics-config.js"></script>
-    <script src="microcms-config.js"></script>
-    <script src="script.js"></script>
+  <!-- フッター -->
+  <footer class="footer">
+    <div class="footer-container">
+      <div class="footer-brand">
+        <span class="footer-logo">週読</span>
+        <p class="footer-tagline">週に一冊、自分と向き合う時間を</p>
+      </div>
+      <div class="footer-links">
+        <a href="/privacy.html">プライバシーポリシー</a>
+        <a href="/about.html">お問い合わせ</a>
+      </div>
+      <p class="footer-copyright">© 2026 週読 All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="/analytics-config.js"></script>
+  <script src="/archive-filter.js"></script>
 </body>
-
 </html>
