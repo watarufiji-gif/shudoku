@@ -3,6 +3,10 @@
 
 [functions]
   node_bundler = "esbuild"
+  node_bundler_options = { target = "node18" }
+
+[build.environment]
+  NODE_VERSION = "18"
 
 [[headers]]
   for = "/.netlify/functions/*"

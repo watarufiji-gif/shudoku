@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
+const { randomUUID } = require('node:crypto');
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -7,8 +8,8 @@ const supabase = createClient(
 );
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-const SITE_URL = process.env.URL || 'https://syudoku.com';
-const FROM_ADDRESS = 'noreply@syudoku.com';
+const SITE_URL = process.env.SITE_URL || 'https://syudoku.com';
+const FROM_ADDRESS = process.env.MAIL_FROM || '週読 <contact@syudoku.com>';
 
 exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
@@ -26,33 +27,55 @@ exports.handler = async function (event) {
     return { statusCode: 400, body: JSON.stringify({ error: 'メールアドレスが無効です。' }) };
   }
 
-  // Supabaseに登録（重複は無視）
+  // すでに確認済みなら何もしない
+  const { data: existing } = await supabase
+    .from('subscribers')
+    .select('confirmed')
+    .eq('email', email)
+    .maybeSingle();
+
+  if (existing?.confirmed) {
+    return { statusCode: 200, body: JSON.stringify({ message: 'already_confirmed' }) };
+  }
+
+  // トークン生成（Node 15+ / Netlify Functions 環境で利用可能）
+  const confirmToken = randomUUID();
+  const unsubscribeToken = existing ? undefined : randomUUID();
+
+  // upsert: 新規→全カラム挿入、再登録→confirm_token だけ更新
+  const upsertData = existing
+    ? { email, confirmed: false, confirm_token: confirmToken }
+    : { email, confirmed: false, confirm_token: confirmToken, unsubscribe_token: randomUUID() };
+
   const { error: dbError } = await supabase
     .from('subscribers')
-    .upsert({ email, confirmed: false }, { onConflict: 'email', ignoreDuplicates: true });
+    .upsert(upsertData, { onConflict: 'email' });
 
   if (dbError) {
     console.error('Supabase error:', dbError);
     return { statusCode: 500, body: JSON.stringify({ error: 'データベースエラーが発生しました。' }) };
   }
 
-  // 確認メール送信
-  const confirmUrl = `${SITE_URL}/.netlify/functions/confirm?email=${encodeURIComponent(email)}`;
+  const confirmUrl = `${SITE_URL}/.netlify/functions/confirm?token=${confirmToken}`;
 
   if (process.env.DRY_RUN === 'true') {
-    console.log('[DRY_RUN] 確認メール送信スキップ:', email, confirmUrl);
+    console.log('[DRY_RUN] 確認メール送信スキップ');
+    console.log('  宛先:', email);
+    console.log('  確認URL:', confirmUrl);
     return { statusCode: 200, body: JSON.stringify({ message: 'ok (dry run)' }) };
   }
 
   const { error: mailError } = await resend.emails.send({
     from: FROM_ADDRESS,
     to: email,
-    subject: '週読への登録確認',
+    subject: '【週読】メールアドレスの確認をお願いします',
     html: buildConfirmHtml(confirmUrl),
   });
 
   if (mailError) {
-    console.error('Resend error:', mailError);
+    console.error('Resend error name:', mailError.name);
+    console.error('Resend error message:', mailError.message);
+    console.error('Resend error statusCode:', mailError.statusCode);
     return { statusCode: 500, body: JSON.stringify({ error: 'メール送信に失敗しました。' }) };
   }
 
@@ -62,7 +85,7 @@ exports.handler = async function (event) {
 function buildConfirmHtml(confirmUrl) {
   return `<!DOCTYPE html>
 <html lang="ja">
-<head><meta charset="UTF-8"></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="font-family:'Helvetica Neue',Arial,sans-serif;background:#faf9f6;padding:40px 20px;color:#2c2c2c;">
   <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:8px;padding:40px;">
     <p style="font-size:1.1rem;font-weight:600;margin-bottom:8px;">週読</p>
@@ -81,7 +104,13 @@ function buildConfirmHtml(confirmUrl) {
       </a>
     </div>
     <p style="font-size:0.8rem;color:#aaa;margin-top:32px;">
-      このメールに心当たりがない場合は、無視していただいて構いません。
+      このメールに心当たりがない場合は、無視していただいて構いません。<br>
+      リンクを踏まなければ登録は完了しません。
+    </p>
+    <hr style="border:none;border-top:1px solid #f0ece5;margin:32px 0 16px;">
+    <p style="font-size:0.75rem;color:#bbb;line-height:1.7;">
+      送信者：週読 運営事務局｜contact@syudoku.com<br>
+      syudoku.com
     </p>
   </div>
 </body>

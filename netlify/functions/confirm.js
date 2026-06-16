@@ -5,25 +5,28 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_KEY
 );
 
-const SITE_URL = process.env.URL || 'https://syudoku.com';
+const SITE_URL = process.env.SITE_URL || 'https://syudoku.com';
 
 exports.handler = async function (event) {
-  const email = event.queryStringParameters && event.queryStringParameters.email;
+  const token = event.queryStringParameters && event.queryStringParameters.token;
 
-  if (!email) {
+  if (!token) {
     return redirect(`${SITE_URL}/?confirm=error`);
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from('subscribers')
-    .update({ confirmed: true })
-    .eq('email', email);
+    .update({ confirmed: true, confirm_token: null })
+    .eq('confirm_token', token)
+    .select('email')
+    .single();
 
-  if (error) {
+  if (error || !data) {
     console.error('Supabase confirm error:', error);
     return redirect(`${SITE_URL}/?confirm=error`);
   }
 
+  console.log('確認完了:', data.email);
   return redirect(`${SITE_URL}/?confirm=success`);
 };
 
