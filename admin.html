@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理ダッシュボード｜週読</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #F6F5F1;
+      --card:     #FFFFFF;
+      --text:     #2C2824;
+      --muted:    #8A847C;
+      --accent:   #8B7355;
+      --gold:     #C9A962;
+      --border:   #E0DCD5;
+      --danger:   #C0392B;
+    }
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Login ─────────────────────────────── */
+    #login-section {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+    .login-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 48px 40px;
+      width: 100%;
+      max-width: 360px;
+      text-align: center;
+    }
+    .login-card h1 {
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .login-card p {
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+    .login-card input[type="password"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      font-size: 0.9rem;
+      background: var(--bg);
+      color: var(--text);
+      margin-bottom: 12px;
+      outline: none;
+    }
+    .login-card input[type="password"]:focus {
+      border-color: var(--accent);
+    }
+    .btn-primary {
+      width: 100%;
+      padding: 11px;
+      background: var(--text);
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      letter-spacing: 0.04em;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    #login-error {
+      margin-top: 12px;
+      font-size: 0.8rem;
+      color: var(--danger);
+      min-height: 1.2em;
+    }
+
+    /* ── Dashboard ──────────────────────────── */
+    #dashboard { display: none; }
+    .dash-header {
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+      padding: 16px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dash-header h1 { font-size: 1rem; font-weight: 500; }
+    .dash-header span { font-size: 0.75rem; color: var(--muted); }
+    .logout-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      cursor: pointer;
+    }
+    .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    .dash-body {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* ── Stat cards ─────────────────────────── */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px 20px;
+    }
+    .stat-card .label {
+      font-size: 0.72rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      margin-bottom: 8px;
+    }
+    .stat-card .value {
+      font-size: 2rem;
+      font-weight: 300;
+      color: var(--text);
+      line-height: 1;
+    }
+    .stat-card .sub {
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    /* ── Chart panels ───────────────────────── */
+    .chart-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    .chart-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 700px) {
+      .chart-grid, .chart-grid-2 { grid-template-columns: 1fr; }
+    }
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+    }
+    .panel h2 {
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      margin-bottom: 20px;
+      text-transform: uppercase;
+    }
+    .chart-wrap { position: relative; height: 220px; }
+
+    /* ── Campaign table ─────────────────────── */
+    .table-wrap { overflow-x: auto; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+    }
+    th {
+      text-align: left;
+      padding: 8px 12px;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      border-bottom: 1px solid var(--border);
+      white-space: nowrap;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text);
+      vertical-align: middle;
+    }
+    tr:last-child td { border-bottom: none; }
+    .rate-bar {
+      display: inline-block;
+      height: 6px;
+      border-radius: 3px;
+      background: var(--gold);
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+    .rate-bar.click { background: var(--accent); }
+    .empty-msg {
+      text-align: center;
+      padding: 40px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+    #loading {
+      text-align: center;
+      padding: 80px;
+      color: var(--muted);
+      font-size: 0.85rem;
+    }
+  </style>
+</head>
+<body>
+
+<!-- ログイン画面 -->
+<section id="login-section">
+  <div class="login-card">
+    <h1>週読 管理画面</h1>
+    <p>管理者パスワードを入力してください</p>
+    <form id="login-form">
+      <input type="password" id="password-input" placeholder="パスワード" autocomplete="current-password" required>
+      <button type="submit" class="btn-primary">ログイン</button>
+      <p id="login-error"></p>
+    </form>
+  </div>
+</section>
+
+<!-- ダッシュボード -->
+<div id="dashboard">
+  <header class="dash-header">
+    <h1>週読 ダッシュボード</h1>
+    <div>
+      <span id="last-updated"></span>
+      <button class="logout-btn" id="logout-btn">ログアウト</button>
+    </div>
+  </header>
+
+  <main class="dash-body">
+    <div id="loading">データを読み込み中...</div>
+    <div id="dash-content" style="display:none">
+
+      <!-- Stat cards -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="label">総購読者数</div>
+          <div class="value" id="stat-total">—</div>
+          <div class="sub">confirmed = true</div>
+        </div>
+        <div class="stat-card">
+          <div class="label">最新配信 開封率</div>
+          <div class="value" id="stat-open">—</div>
+          <div class="sub" id="stat-open-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">最新配信 クリック率</div>
+          <div class="value" id="stat-click">—</div>
+          <div class="sub" id="stat-click-sub"></div>
+        </div>
+        <div class="stat-card">
+          <div class="label">累計配信回数</div>
+          <div class="value" id="stat-campaigns">—</div>
+          <div class="sub">過去12件まで表示</div>
+        </div>
+      </div>
+
+      <!-- Charts row 1: Growth + Source -->
+      <div class="chart-grid">
+        <div class="panel">
+          <h2>購読者数の推移（週別）</h2>
+          <div class="chart-wrap">
+            <canvas id="chart-growth"></canvas>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>登録経路</h2>
+          <div class="chart-wrap">
+            <canvas id="chart-source"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts row 2: Campaign rates + Genre trends -->
+      <div class="chart-grid-2">
+        <div class="panel">
+          <h2>配信別 開封率・クリック率</h2>
+          <div class="chart-wrap">
+            <canvas id="chart-campaigns"></canvas>
+          </div>
+        </div>
+        <div class="panel">
+          <h2>ジャンル別 平均開封率</h2>
+          <div class="chart-wrap">
+            <canvas id="chart-genre"></canvas>
+          </div>
+        </div>
+      </div>
+
+      <!-- Campaign table -->
+      <div class="panel">
+        <h2>配信履歴</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>配信日</th>
+                <th>タイトル</th>
+                <th>ジャンル</th>
+                <th>配信数</th>
+                <th>開封率</th>
+                <th>クリック率</th>
+              </tr>
+            </thead>
+            <tbody id="campaign-table-body"></tbody>
+          </table>
+        </div>
+      </div>
+
+    </div><!-- /dash-content -->
+  </main>
+</div><!-- /dashboard -->
+
+<script src="admin.js"></script>
+</body>
+</html>

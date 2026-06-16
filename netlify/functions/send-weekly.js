@@ -42,7 +42,7 @@ exports.handler = async function () {
   const subject = `今週の一冊：${book.title || '今週の一冊'}｜週読`;
 
   if (process.env.DRY_RUN === 'true') {
-    const sampleHtml = buildWeeklyHtml(book, subscribers[0].unsubscribe_token);
+    const sampleHtml = buildWeeklyHtml(book, subscribers[0].unsubscribe_token, 'dry-run-campaign-id');
     console.log(`[DRY_RUN] 週次メール送信スキップ`);
     console.log(`  件名: ${subject}`);
     console.log(`  送信対象: ${subscribers.length}件`);
@@ -52,17 +52,41 @@ exports.handler = async function () {
     return { statusCode: 200, body: JSON.stringify({ dryRun: true, count: subscribers.length }) };
   }
 
+  // キャンペーン記録を作成
+  const { data: campaign, error: campaignErr } = await supabase
+    .from('email_campaigns')
+    .insert({
+      book_title:       book.title || '今週の一冊',
+      book_category:    book.category || null,
+      week_number:      getISOWeek(new Date()),
+      recipients_count: subscribers.length,
+    })
+    .select('id')
+    .single();
+
+  if (campaignErr) {
+    console.error('Campaign insert error:', campaignErr);
+    return { statusCode: 500, body: 'Campaign record failed' };
+  }
+
+  const campaignId = campaign.id;
+  console.log(`キャンペーン作成: ${campaignId} | 送信対象: ${subscribers.length}件`);
+
   // バッチ送信（Resend batch.send は最大100件/回）
   let sent = 0;
   for (let i = 0; i < subscribers.length; i += BATCH_SIZE) {
     const batch = subscribers.slice(i, i + BATCH_SIZE).map((s) => ({
       from: FROM_ADDRESS,
-      to: s.email,
+      to:   s.email,
       subject,
-      html: buildWeeklyHtml(book, s.unsubscribe_token),
+      html: buildWeeklyHtml(book, s.unsubscribe_token, campaignId),
+      tags: [
+        { name: 'campaign_id',   value: campaignId },
+        { name: 'subscriber_id', value: s.unsubscribe_token },
+      ],
     }));
 
-    const { data, error: mailError } = await resend.batch.send(batch);
+    const { error: mailError } = await resend.batch.send(batch);
     if (mailError) {
       console.error(`Resend batch error (${i}〜${i + batch.length - 1}件目):`, mailError);
     } else {
@@ -85,7 +109,15 @@ async function fetchLatestBook() {
   return json.contents[0];
 }
 
-function buildWeeklyHtml(book, unsubscribeToken) {
+function getISOWeek(date) {
+  const d = new Date(date);
+  d.setHours(0, 0, 0, 0);
+  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
+  const yearStart = new Date(d.getFullYear(), 0, 4);
+  return 1 + Math.round(((d - yearStart) / 86400000 - 3 + ((yearStart.getDay() + 6) % 7)) / 7);
+}
+
+function buildWeeklyHtml(book, unsubscribeToken, _campaignId) {
   const title = book.title || '今週の一冊';
   const author = book.author || '';
   const category = book.category || '';
