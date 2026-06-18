@@ -62,6 +62,9 @@ async function main() {
   fs.writeFileSync(path.join(ROOT, 'robots.txt'), robotsTxt(), 'utf8');
   console.log('  → robots.txt');
 
+  // microcms-config.js に API キーを注入（キーは Netlify 環境変数から取得）
+  injectMicroCMSApiKey();
+
   console.log('[generate-pages] 完了');
 }
 
@@ -497,4 +500,30 @@ function slugify(str) {
     .replace(/[^\w-]/g, '')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '') || 'book';
+}
+
+// ── microCMS API キー注入 ──────────────────────────────────────────────────────
+// git 上は空文字のまま保持し、ビルド時に環境変数から書き換える。
+// これにより API キーが git 履歴に残らない。
+function injectMicroCMSApiKey() {
+  const apiKey = String(process.env.MICROCMS_API_KEY || '').trim();
+  if (!apiKey) {
+    console.warn('[generate-pages] MICROCMS_API_KEY が未設定のため microcms-config.js へのキー注入をスキップしました。');
+    return;
+  }
+
+  const configPath = path.join(ROOT, 'microcms-config.js');
+  const original   = fs.readFileSync(configPath, 'utf8');
+  const injected   = original.replace(
+    /^(const staticMicrocmsApiKey\s*=\s*)['"][^'"]*['"]\s*;/m,
+    `$1'${apiKey}';`
+  );
+
+  if (original === injected) {
+    console.warn('[generate-pages] microcms-config.js の注入パターンが見つかりませんでした。スキップします。');
+    return;
+  }
+
+  fs.writeFileSync(configPath, injected, 'utf8');
+  console.log('  → microcms-config.js (API キーを注入)');
 }
