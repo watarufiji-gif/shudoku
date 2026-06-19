@@ -963,6 +963,13 @@ function initBookMetadataEditor() {
 // =============================================
 // microCMS Content Loader
 // =============================================
+function revealBookShowcase() {
+    const el = document.querySelector('.book-showcase');
+    if (!el) return;
+    el.style.transition = 'opacity 0.4s ease';
+    el.style.opacity = '1';
+}
+
 async function initMicroCMSContent() {
     const config = getMicroCMSConfig();
     if (!config) {
@@ -970,6 +977,7 @@ async function initMicroCMSContent() {
         setCMSStatus('home', 'CMS未接続のため、固定表示を使用しています。');
         setCMSStatus('detail', 'CMS未接続のため、固定表示を使用しています。');
         renderArchiveLists([]);
+        revealBookShowcase();
         return null;
     }
 
@@ -982,6 +990,7 @@ async function initMicroCMSContent() {
             setCMSStatus('home', 'CMSからデータを取得できませんでした。固定表示を使用しています。');
             setCMSStatus('detail', 'CMSからデータを取得できませんでした。固定表示を使用しています。');
             renderArchiveLists([]);
+            revealBookShowcase();
             return null;
         }
 
@@ -989,6 +998,7 @@ async function initMicroCMSContent() {
         applyMicroCMSBookToHome(latestBook);
         applyMicroCMSBookToDetail(latestBook);
         renderArchiveLists(books);
+        revealBookShowcase();
 
         const missingFields = validateRequiredBookFields(latestBook);
         if (missingFields.length > 0) {
@@ -1007,6 +1017,7 @@ async function initMicroCMSContent() {
         setCMSStatus('home', 'CMS取得エラーのため固定表示を使用しています。', true);
         setCMSStatus('detail', 'CMS取得エラーのため固定表示を使用しています。', true);
         renderArchiveLists([]);
+        revealBookShowcase();
         console.error('microCMS fetch failed:', error);
         return null;
     }
