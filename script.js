@@ -1659,7 +1659,7 @@ function setLinkIfSafe(target, url) {
 function setAmazonAffiliateLink(target, url, scope) {
     const normalized = normalizeAmazonAffiliateUrl(url);
     if (!target || !normalized) {
-        setCMSStatus(scope, 'AmazonURLが無効です（https://www.amazon.co.jp と tag が必要）', true);
+        setCMSStatus(scope, 'AmazonURLが無効です（https://www.amazon.co.jp のURLを設定してください）', true);
         return;
     }
     target.href = normalized;
@@ -1678,8 +1678,9 @@ function normalizeAmazonAffiliateUrl(url) {
     const host = parsed.hostname.toLowerCase();
     if (host !== 'www.amazon.co.jp' && host !== 'amazon.co.jp') return '';
 
+    // テンプレートそのままのプレースホルダーは除外。tagの有無は問わない。
     const tag = String(parsed.searchParams.get('tag') || '').trim();
-    if (!tag || tag === 'YOUR_AMAZON_ID') return '';
+    if (tag === 'YOUR_AMAZON_ID') return '';
     return parsed.toString();
 }
 
