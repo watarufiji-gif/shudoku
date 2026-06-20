@@ -1658,11 +1658,24 @@ function setLinkIfSafe(target, url) {
 
 function setAmazonAffiliateLink(target, url, scope) {
     const normalized = normalizeAmazonAffiliateUrl(url);
-    if (!target || !normalized) {
-        setCMSStatus(scope, 'AmazonURLが無効です（https://www.amazon.co.jp のURLを設定してください）', true);
+    const ctaWrapper = target ? target.closest('.book-cta') : null;
+
+    if (!target) return;
+
+    if (!normalized) {
+        // URLが無効 or 未設定のときはボタンごと非表示にして「押せない飾り」を防ぐ
+        if (ctaWrapper) ctaWrapper.hidden = true;
+        if (url) {
+            console.warn('[週読] AmazonURL が無効です。microCMS の値を確認してください:', url);
+            setCMSStatus(scope, `AmazonURL「${url}」は無効です（amazon.co.jp / amazon.com / amzn.to のURLを設定してください）`, true);
+        } else {
+            setCMSStatus(scope, 'AmazonURL が未設定です', true);
+        }
         return;
     }
+
     target.href = normalized;
+    if (ctaWrapper) ctaWrapper.hidden = false;
 }
 
 function normalizeAmazonAffiliateUrl(url) {
@@ -1676,7 +1689,14 @@ function normalizeAmazonAffiliateUrl(url) {
 
     if (parsed.protocol !== 'https:') return '';
     const host = parsed.hostname.toLowerCase();
-    if (host !== 'www.amazon.co.jp' && host !== 'amazon.co.jp') return '';
+
+    // amazon.co.jp / amazon.com / 各国Amazon / amzn.to（短縮URL）を許可
+    const isAmazonHost =
+        /^(www\.)?amazon\.(co\.jp|com|co\.uk|de|fr|it|es|ca|com\.au|com\.br|com\.mx|in|nl|pl|se|sg|ae|com\.tr)$/.test(host)
+        || host === 'amzn.to'
+        || host === 'amzn.asia';
+
+    if (!isAmazonHost) return '';
 
     // テンプレートそのままのプレースホルダーは除外。tagの有無は問わない。
     const tag = String(parsed.searchParams.get('tag') || '').trim();
