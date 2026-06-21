@@ -101,20 +101,19 @@ body {
 
 .nav-logo-mark {
     display: inline-block;
-    width: 48px;
-    height: 48px;
-    background-image: url('assets/logo-mark.png');
+    width: 56px;
+    height: 56px;
+    background-image: url('assets/logo.svg');
     background-repeat: no-repeat;
     background-position: center;
     background-size: contain;
-    mix-blend-mode: multiply;
     flex-shrink: 0;
 }
 
 .nav-logo-word {
     display: inline-block;
     font-family: var(--font-serif);
-    font-size: 1.35rem;
+    font-size: 1.5rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     color: var(--color-text);
@@ -126,11 +125,11 @@ body {
         gap: 6px;
     }
     .nav-logo-mark {
-        width: 26px;
-        height: 26px;
+        width: 32px;
+        height: 32px;
     }
     .nav-logo-word {
-        font-size: 1.05rem;
+        font-size: 1.15rem;
     }
 }
 
