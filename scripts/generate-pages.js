@@ -112,11 +112,15 @@ function bookPageHtml(book, slug) {
   const coverUrl    = book.coverImage?.url || '';
   const amazonUrl   = book.AmazonURL   || '';
 
+  // coverImage がなければ AmazonURL の ASIN から Amazon 表紙 URL を生成
+  const asin = !coverUrl ? extractAsinFromUrl(amazonUrl) : '';
+  const resolvedCoverUrl = coverUrl || (asin ? `https://m.media-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg` : '');
+
   const canonicalUrl  = `${SITE_URL}/${slug}.html`;
   const metaDesc      = conclusion
     ? conclusion.slice(0, 120)
     : (description.split('\n')[0] || '').slice(0, 120);
-  const ogImage       = coverUrl || `${SITE_URL}/assets/shudoku-logo.png`;
+  const ogImage       = resolvedCoverUrl || `${SITE_URL}/assets/shudoku-logo.png`;
   const descParagraphs = description.split('\n').filter(p => p.trim())
     .map(p => `<p>${esc(p)}</p>`).join('\n              ');
 
@@ -127,7 +131,7 @@ function bookPageHtml(book, slug) {
         '@type': 'Book',
         'name': title,
         'author': { '@type': 'Person', 'name': author },
-        ...(coverUrl   ? { 'image': coverUrl }   : {}),
+        ...(resolvedCoverUrl ? { 'image': resolvedCoverUrl } : {}),
         ...(amazonUrl  ? { 'url':   amazonUrl }  : {}),
         ...(category   ? { 'genre': category }   : {}),
       },
@@ -201,8 +205,8 @@ ${jsonLd}
       <div class="book-showcase">
         <!-- 表紙 -->
         <div class="book-visual">
-          ${coverUrl
-            ? `<img src="${esc(coverUrl)}" alt="${esc(title)}の表紙" class="book-cover" loading="lazy">`
+          ${resolvedCoverUrl
+            ? `<img src="${esc(resolvedCoverUrl)}" alt="${esc(title)}の表紙" class="book-cover" loading="lazy">`
             : `<div class="book-cover" style="background:var(--color-bg-accent);display:flex;align-items:center;justify-content:center;"><span style="font-size:3rem;opacity:.3;">📖</span></div>`
           }
           <div class="book-shadow"></div>
@@ -491,6 +495,23 @@ function esc(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+// AmazonURL から ASIN を抽出（10桁英数字）
+function extractAsinFromUrl(url) {
+  if (!url) return '';
+  const str = String(url);
+  const patterns = [
+    /\/dp\/([A-Z0-9]{10})(?:[/?]|$)/i,
+    /\/gp\/product\/([A-Z0-9]{10})(?:[/?]|$)/i,
+    /\/gp\/aw\/d\/([A-Z0-9]{10})(?:[/?]|$)/i,
+    /\/exec\/obidos\/ASIN\/([A-Z0-9]{10})(?:[/?]|$)/i,
+  ];
+  for (const pattern of patterns) {
+    const m = str.match(pattern);
+    if (m && m[1]) return m[1].toUpperCase();
+  }
+  return '';
 }
 
 function slugify(str) {

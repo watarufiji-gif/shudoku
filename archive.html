@@ -58,20 +58,54 @@
     <h1 style="font-family:var(--font-serif);font-size:2rem;margin-bottom:12px;">バックナンバー</h1>
     <p style="color:var(--color-text-secondary);margin-bottom:0;">
       これまでに届けてきた本の一覧です。
-      <span id="archive-count" style="margin-left:6px;font-weight:500;">0冊</span>
+      <span id="archive-count" style="margin-left:6px;font-weight:500;">2冊</span>
     </p>
   </header>
 
   <!-- ジャンルフィルター -->
   
+  <div style="padding:0 20px 32px;text-align:center;">
+    <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:720px;margin:0 auto;">
+      <button class="archive-filter-btn active" data-category="all">すべて</button>
+        <button class="archive-filter-btn" data-category="ビジネス・人生設計">ビジネス・人生設計</button>
+        <button class="archive-filter-btn" data-category="人文・哲学">人文・哲学</button>
+    </div>
+  </div>
 
   <!-- 一覧グリッド -->
   <section style="padding:0 20px 80px;">
     <div class="archive-container">
       <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;" id="archive-grid">
-        <p style="grid-column:1/-1;text-align:center;color:var(--color-text-secondary);padding:40px 0;">
-        まだバックナンバーはありません。公開をお待ちください。
-      </p>
+        <a href="/night-and-fog.html" class="archive-card" data-category="人文・哲学"
+          style="display:block;text-decoration:none;color:inherit;background:var(--color-white);border:1px solid var(--color-border);border-radius:8px;overflow:hidden;transition:box-shadow .2s;">
+          <div style="display:flex;gap:16px;padding:16px;">
+            <div style="flex-shrink:0;">
+              <div style="width:64px;height:92px;background:var(--color-bg-accent);border-radius:3px;display:flex;align-items:center;justify-content:center;"><span style="font-size:1.5rem;opacity:.3;">📖</span></div>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <p style="font-size:0.72rem;color:var(--color-text-muted);letter-spacing:.06em;margin:0 0 4px;">人文・哲学</p>
+              <h3 style="font-size:0.95rem;font-weight:500;margin:0 0 4px;color:var(--color-text);line-height:1.4;">夜と霧</h3>
+              <p  style="font-size:0.82rem;color:var(--color-text-secondary);margin:0 0 6px;">ヴィクトール・E・フランクル</p>
+              <p style="font-size:0.78rem;color:var(--color-text-secondary);line-height:1.5;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">「何のために働き、生きるのか」を見失っていた人が、人生からの問いに answer する側に視点を切り替えられる。成果や成功だけが意味ではないと気づき、つらい時期や日常の選択にも自分なりの意味を見出せるようになる。</p>
+            </div>
+            <div style="flex-shrink:0;align-self:flex-start;"><span style="font-size:0.7rem;color:var(--color-text-muted);white-space:nowrap;">第25週</span></div>
+          </div>
+        </a>
+        <a href="/die-with-zero.html" class="archive-card" data-category="ビジネス・人生設計"
+          style="display:block;text-decoration:none;color:inherit;background:var(--color-white);border:1px solid var(--color-border);border-radius:8px;overflow:hidden;transition:box-shadow .2s;">
+          <div style="display:flex;gap:16px;padding:16px;">
+            <div style="flex-shrink:0;">
+              <div style="width:64px;height:92px;background:var(--color-bg-accent);border-radius:3px;display:flex;align-items:center;justify-content:center;"><span style="font-size:1.5rem;opacity:.3;">📖</span></div>
+            </div>
+            <div style="flex:1;min-width:0;">
+              <p style="font-size:0.72rem;color:var(--color-text-muted);letter-spacing:.06em;margin:0 0 4px;">ビジネス・人生設計</p>
+              <h3 style="font-size:0.95rem;font-weight:500;margin:0 0 4px;color:var(--color-text);line-height:1.4;">DIE WITH ZERO（ゼロで死ね）</h3>
+              <p  style="font-size:0.82rem;color:var(--color-text-secondary);margin:0 0 6px;">ビル・パーキンス</p>
+              <p style="font-size:0.78rem;color:var(--color-text-secondary);line-height:1.5;margin:0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;">貯金の不安で動けなくなっていた人が、「今しかできない経験にお金と時間を使っていい」と思える。お金より先に減る「時間」と「経験できる体力」に目を向け、人生の使い方を自分で設計する視点が手に入る。</p>
+            </div>
+            <div style="flex-shrink:0;align-self:flex-start;"><span style="font-size:0.7rem;color:var(--color-text-muted);white-space:nowrap;">第24週</span></div>
+          </div>
+        </a>
       </div>
     </div>
   </section>

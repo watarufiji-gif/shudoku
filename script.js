@@ -1409,8 +1409,8 @@ function validateRequiredBookFields(book) {
         ['quote', normalized.quote],
         ['description', normalized.description],
         ['coverImage', normalized.coverUrl],
-        ['AmazonURL', normalizeAmazonAffiliateUrl(normalized.amazonUrl)],
-        ['weekLabel', normalized.weekLabel]
+        ['AmazonURL', normalizeAmazonAffiliateUrl(normalized.amazonUrl)]
+        // weekLabel は公開日から自動計算するため必須チェックから除外
     ];
     return required.filter((entry) => !entry[1]).map((entry) => entry[0]);
 }
@@ -1916,15 +1916,18 @@ function setDescriptionParagraphs(container, value) {
 function initSmoothScroll() {
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function(e) {
-            e.preventDefault();
+            // クリック時点の実際のhrefを取得（JSによる書き換え後を考慮）
             const targetId = this.getAttribute('href');
+            // '#' で始まらない場合（例: Amazon URLに書き換えられた後）は通常遷移に委ねる
+            if (!targetId || !targetId.startsWith('#')) return;
+            e.preventDefault();
             if (targetId === '#') return;
 
             const target = document.querySelector(targetId);
             if (target) {
                 const navHeight = document.querySelector('.nav').offsetHeight;
                 const targetPosition = target.getBoundingClientRect().top + window.pageYOffset - navHeight;
-                
+
                 window.scrollTo({
                     top: targetPosition,
                     behavior: 'smooth'
