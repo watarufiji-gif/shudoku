@@ -93,7 +93,7 @@ body {
 .nav-logo {
     display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 14px;
     padding: 0;
     color: var(--color-text);
     text-decoration: none;
@@ -111,7 +111,7 @@ body {
 .nav-logo-word {
     display: inline-block;
     font-family: var(--font-serif);
-    font-size: 1.5rem;
+    font-size: 1.65rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     color: var(--color-text);
@@ -120,14 +120,14 @@ body {
 
 @media (max-width: 640px) {
     .nav-logo {
-        gap: 6px;
+        gap: 10px;
     }
     .nav-logo-mark {
         width: 44px;
         height: 44px;
     }
     .nav-logo-word {
-        font-size: 1.15rem;
+        font-size: 1.25rem;
     }
 }
 
