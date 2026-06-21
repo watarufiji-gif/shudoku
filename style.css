@@ -101,8 +101,8 @@ body {
 
 .nav-logo-mark {
     display: inline-block;
-    width: 42px;
-    height: 42px;
+    width: 48px;
+    height: 48px;
     background-image: url('assets/logo-mark.png');
     background-repeat: no-repeat;
     background-position: center;
@@ -114,7 +114,7 @@ body {
 .nav-logo-word {
     display: inline-block;
     font-family: var(--font-serif);
-    font-size: 1.2rem;
+    font-size: 1.35rem;
     font-weight: 600;
     letter-spacing: 0.06em;
     color: var(--color-text);
@@ -126,11 +126,11 @@ body {
         gap: 6px;
     }
     .nav-logo-mark {
-        width: 18px;
-        height: 18px;
+        width: 26px;
+        height: 26px;
     }
     .nav-logo-word {
-        font-size: 0.95rem;
+        font-size: 1.05rem;
     }
 }
 
@@ -458,8 +458,10 @@ body {
    Newsletter Section
    ============================================= */
 .newsletter {
-    background: linear-gradient(180deg, var(--color-bg-warm) 0%, var(--color-bg-accent) 100%);
+    background: var(--color-bg);
     padding: var(--space-4xl) var(--space-xl);
+    border-top: 1px solid var(--color-border);
+    border-bottom: 1px solid var(--color-border);
 }
 
 .newsletter-container {
