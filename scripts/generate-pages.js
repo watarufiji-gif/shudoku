@@ -187,7 +187,7 @@ ${jsonLd}
   <nav class="nav">
     <div class="nav-container">
       <a href="/" class="nav-logo" aria-label="週読 ホーム">
-        <span class="nav-logo-mark" aria-hidden="true"></span>
+        <img src="/assets/logo-mark.png" alt="" class="nav-logo-mark" aria-hidden="true">
         <span class="nav-logo-word">週読</span>
       </a>
       <div class="nav-links">
@@ -394,7 +394,7 @@ function archiveHtml(books) {
   <nav class="nav">
     <div class="nav-container">
       <a href="/" class="nav-logo" aria-label="週読 ホーム">
-        <span class="nav-logo-mark" aria-hidden="true"></span>
+        <img src="/assets/logo-mark.png" alt="" class="nav-logo-mark" aria-hidden="true">
         <span class="nav-logo-word">週読</span>
       </a>
       <div class="nav-links">
