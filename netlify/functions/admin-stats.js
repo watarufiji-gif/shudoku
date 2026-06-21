@@ -1,10 +1,8 @@
 const { createClient } = require('@supabase/supabase-js');
 const { timingSafeEqual } = require('node:crypto');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
+// createClient はモジュール起動時ではなくハンドラー内で呼ぶ。
+// SUPABASE_URL が未設定でも require 自体は成功するため 502 にならない。
 
 exports.handler = async function (event) {
   if (event.httpMethod === 'OPTIONS') {
@@ -18,6 +16,26 @@ exports.handler = async function (event) {
       body: JSON.stringify({ error: 'Unauthorized' }),
     };
   }
+
+  // Supabase 環境変数が未設定の場合は空データを返す（502 で落とさない）
+  const supabaseUrl = process.env.SUPABASE_URL || '';
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || '';
+  if (!supabaseUrl || !supabaseKey) {
+    return {
+      statusCode: 200,
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        _notice:         'Supabase 未接続（環境変数未設定）',
+        totalSubscribers: 0,
+        growthByWeek:    [],
+        sourceBreakdown: [],
+        campaigns:       [],
+        genreTrends:     [],
+      }),
+    };
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
     // 直近12件のキャンペーンを先に取得し、その campaign_id でイベントを絞る
