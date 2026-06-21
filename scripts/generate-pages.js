@@ -41,6 +41,17 @@ async function main() {
 
   console.log(`[generate-pages] ${books.length}件取得`);
 
+  // 各書籍の表紙URLを事前解決（coverImage → ASIN → Google Books の順）
+  console.log('[generate-pages] 表紙URLを解決中...');
+  for (const book of books) {
+    book._resolvedCoverUrl = await resolveCoverUrl(book);
+    if (book._resolvedCoverUrl) {
+      console.log(`  [cover] ${book.title || book.slug}: ${book._resolvedCoverUrl.slice(0, 60)}...`);
+    } else {
+      console.warn(`  [cover] ${book.title || book.slug}: 表紙URLが解決できませんでした`);
+    }
+  }
+
   // 各書評ページを生成
   for (const book of books) {
     const slug     = book.slug || slugify(book.title || 'book');
@@ -109,12 +120,8 @@ function bookPageHtml(book, slug) {
   const description = book.description || '';
   const weekLabel   = book.weekLabel   || '';
   const weekDate    = book.weekDate    || '';
-  const coverUrl    = book.coverImage?.url || '';
+  const resolvedCoverUrl = book._resolvedCoverUrl || '';
   const amazonUrl   = book.AmazonURL   || '';
-
-  // coverImage がなければ AmazonURL の ASIN から Amazon 表紙 URL を生成
-  const asin = !coverUrl ? extractAsinFromUrl(amazonUrl) : '';
-  const resolvedCoverUrl = coverUrl || (asin ? `https://m.media-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg` : '');
 
   const canonicalUrl  = `${SITE_URL}/${slug}.html`;
   const metaDesc      = conclusion
@@ -313,7 +320,7 @@ function archiveHtml(books) {
     const author    = book.author   || '';
     const category  = book.category || '';
     const weekLabel = book.weekLabel || weekLabelFromDate(book.publishedAt || book.createdAt);
-    const coverUrl  = book.coverImage?.url || '';
+    const coverUrl  = book._resolvedCoverUrl || '';
     const conclusion = book.conclusion || '';
 
     return `<a href="/${esc(slug)}.html" class="archive-card" data-category="${esc(category)}"
@@ -495,6 +502,33 @@ function esc(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+// 表紙URLを3段階で解決: coverImage → Amazon ASIN → Google Books API
+async function resolveCoverUrl(book) {
+  // 1. microCMS の coverImage フィールド
+  const direct = book.coverImage?.url || '';
+  if (direct) return direct;
+
+  // 2. AmazonURL から ASIN を抽出して Amazon 画像 URL を構築
+  const asin = extractAsinFromUrl(book.AmazonURL || '');
+  if (asin) return `https://m.media-amazon.com/images/P/${asin}.01.LZZZZZZZ.jpg`;
+
+  // 3. Google Books API（タイトル＋著者で検索）
+  const title  = book.title  || '';
+  const author = book.author || '';
+  if (!title) return '';
+  try {
+    const q   = encodeURIComponent(`${title} ${author}`.trim());
+    const res = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${q}&maxResults=1`);
+    if (!res.ok) return '';
+    const data = await res.json();
+    const info = data?.items?.[0]?.volumeInfo;
+    const img  = info?.imageLinks?.thumbnail || info?.imageLinks?.smallThumbnail || '';
+    return img.replace(/^http:\/\//i, 'https://');
+  } catch (_) {
+    return '';
+  }
 }
 
 // AmazonURL から ASIN を抽出（10桁英数字）
