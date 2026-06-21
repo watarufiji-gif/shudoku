@@ -308,7 +308,7 @@ function archiveHtml(books) {
     const title     = book.title    || '';
     const author    = book.author   || '';
     const category  = book.category || '';
-    const weekLabel = book.weekLabel || '';
+    const weekLabel = book.weekLabel || weekLabelFromDate(book.publishedAt || book.createdAt);
     const coverUrl  = book.coverImage?.url || '';
     const conclusion = book.conclusion || '';
 
@@ -500,6 +500,24 @@ function slugify(str) {
     .replace(/[^\w-]/g, '')
     .replace(/-+/g, '-')
     .replace(/^-|-$/g, '') || 'book';
+}
+
+// publishedAt (ISO文字列) → 「第N週」ラベル（JST基準、script.jsと同一アルゴリズム）
+function weekLabelFromDate(isoDate) {
+  if (!isoDate) return '';
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) return '';
+  const dayMs = 24 * 60 * 60 * 1000;
+  const jstMs = date.getTime() + 9 * 60 * 60 * 1000;
+  const jst   = new Date(jstMs);
+  const jstDate = new Date(Date.UTC(jst.getUTCFullYear(), jst.getUTCMonth(), jst.getUTCDate()));
+  const year  = jstDate.getUTCFullYear();
+  const firstSaturday = new Date(Date.UTC(year, 0, 1));
+  const offsetToSaturday = (6 - firstSaturday.getUTCDay() + 7) % 7;
+  firstSaturday.setUTCDate(firstSaturday.getUTCDate() + offsetToSaturday);
+  const diffMs = jstDate.getTime() - firstSaturday.getTime();
+  const week   = diffMs < 0 ? 1 : Math.floor(diffMs / (7 * dayMs)) + 1;
+  return `第${week}週`;
 }
 
 // ── microCMS API キー注入 ──────────────────────────────────────────────────────

@@ -96,14 +96,17 @@ function applyCurrentWeekBadge() {
 }
 
 function getCurrentWeekNumberJst() {
+    return getWeekNumberForDate(getCurrentWeeklyBaseDateJst());
+}
+
+function getWeekNumberForDate(date) {
     const dayMs = 24 * 60 * 60 * 1000;
-    const baseDate = toJstDateOnly(getCurrentWeeklyBaseDateJst());
-    const currentYear = baseDate.getUTCFullYear();
-    const firstSaturday = new Date(Date.UTC(currentYear, 0, 1));
+    const jstDate = toJstDateOnly(date);
+    const year = jstDate.getUTCFullYear();
+    const firstSaturday = new Date(Date.UTC(year, 0, 1));
     const offsetToSaturday = (6 - firstSaturday.getUTCDay() + 7) % 7;
     firstSaturday.setUTCDate(firstSaturday.getUTCDate() + offsetToSaturday);
-
-    const diffMs = baseDate.getTime() - firstSaturday.getTime();
+    const diffMs = jstDate.getTime() - firstSaturday.getTime();
     if (diffMs < 0) return 1;
     return Math.floor(diffMs / (7 * dayMs)) + 1;
 }
@@ -1342,15 +1345,30 @@ function renderArchiveItems(container, books, options = {}) {
         const normalized = normalizeBookPayload(book);
         const title = firstNonEmpty(normalized.title, 'タイトル未設定');
         const author = firstNonEmpty(normalized.author, '著者未設定');
-        const weekLabel = firstNonEmpty(
-            normalized.weekLabel,
-            book.weekNumber ? `第${book.weekNumber}週` : `第${index + 2}週`
-        );
+
+        // 週番号: CMS値 → publishedAt からカレンダー計算 → 順番インデックス の優先順
+        const weekLabel = (() => {
+            const fromCms = firstNonEmpty(
+                normalized.weekLabel,
+                book.weekNumber ? `第${book.weekNumber}週` : ''
+            );
+            if (fromCms) return fromCms;
+            const pubDate = parseCmsDate(book.publishedAt, book.createdAt, book.revisedAt);
+            if (pubDate) return `第${getWeekNumberForDate(pubDate)}週`;
+            return '';
+        })();
+
         const coverUrl = normalized.coverUrl;
-        const detailUrl = firstNonEmpty(book.pageUrl, book.detailUrl, book.url, '#');
+
+        // 詳細ページURL: slug.html → pageUrl → detailUrl → url → '#' の優先順
+        const slug = firstNonEmpty(book.slug, '');
+        const detailUrl = slug
+            ? `${slug}.html`
+            : firstNonEmpty(book.pageUrl, book.detailUrl, book.url, '#');
 
         const link = document.createElement('a');
-        link.href = /^https?:\/\//i.test(detailUrl) || detailUrl.startsWith('/') || detailUrl === '#'
+        // 相対パス（slug.html）も絶対URLも許可。javascript:等の危険なスキームは除外。
+        link.href = /^(https?:\/\/|\/|[a-z0-9_-]+\.html$)/i.test(detailUrl) || detailUrl === '#'
             ? detailUrl
             : '#';
         link.className = 'archive-item';
