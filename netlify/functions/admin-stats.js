@@ -45,7 +45,8 @@ exports.handler = async function (event) {
       .order('sent_at', { ascending: false })
       .limit(12);
 
-    if (campaignErr) throw campaignErr;
+    // campaign テーブルが存在しない場合も空データで続行
+    if (campaignErr) console.warn('[admin-stats] campaigns fetch error:', campaignErr.message);
 
     const campaignIds = (campaigns || []).map(c => c.id);
 
@@ -66,13 +67,14 @@ exports.handler = async function (event) {
         : Promise.resolve({ data: [] }),
     ]);
 
-    if (subscribersRes.error) throw subscribersRes.error;
-    if (sourcesRes.error)     throw sourcesRes.error;
-    if (eventsRes.error)      throw eventsRes.error;
+    // 各クエリが失敗しても、その部分だけ空データで続行（列が存在しない場合など）
+    if (subscribersRes.error) console.warn('[admin-stats] subscribers error:', subscribersRes.error.message);
+    if (sourcesRes.error)     console.warn('[admin-stats] sources error:', sourcesRes.error.message);
+    if (eventsRes.error)      console.warn('[admin-stats] events error:', eventsRes.error.message);
 
-    const subscribers    = subscribersRes.data || [];
-    const sources        = sourcesRes.data || [];
-    const events         = eventsRes.data || [];
+    const subscribers    = subscribersRes.error ? [] : (subscribersRes.data || []);
+    const sources        = sourcesRes.error     ? [] : (sourcesRes.data || []);
+    const events         = eventsRes.error      ? [] : (eventsRes.data || []);
     const campaignStats  = computeCampaignStats(campaigns || [], events);
 
     return {
