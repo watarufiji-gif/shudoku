@@ -1209,3 +1209,312 @@ body {
         gap: var(--space-md);
     }
 }
+
+/* ═══════════════════════════════════════════════════
+   Book Reader — 本が開く演出 ＋ 縦書き読書体験
+   ═══════════════════════════════════════════════════ */
+
+/* ── Overlay ── */
+.book-reader-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    background: rgba(28, 22, 16, 0.94);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.35s ease;
+}
+
+.book-reader-overlay.is-open {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* ── Close button ── */
+.book-reader-close {
+    position: absolute;
+    top: 20px;
+    right: 24px;
+    width: 44px;
+    height: 44px;
+    background: transparent;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 50%;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 1.2rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, border-color 0.2s;
+    z-index: 10;
+}
+
+.book-reader-close:hover {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── 3D scene ── */
+.book-scene {
+    perspective: 1600px;
+    perspective-origin: 50% 45%;
+}
+
+.book-wrapper {
+    position: relative;
+    display: flex;
+    width: min(800px, 90vw);
+    height: min(500px, 66vh);
+}
+
+/* ── Content panel (left) ── */
+.book-content-panel {
+    flex: 0 0 57%;
+    height: 100%;
+    background: var(--color-bg);
+    box-sizing: border-box;
+    padding: 36px 32px 56px;
+    position: relative;
+    border-radius: 4px 0 0 4px;
+    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
+    overflow: hidden;
+    z-index: 1;
+}
+
+/* Spine gold line */
+.book-spine {
+    flex: 0 0 5px;
+    background: linear-gradient(180deg, var(--color-gold, #C9A962) 0%, var(--color-accent, #8B7355) 100%);
+    box-shadow: 2px 0 8px rgba(0,0,0,0.25), -2px 0 8px rgba(0,0,0,0.15);
+    z-index: 2;
+}
+
+/* ── Cover panel (right) ── */
+.book-cover-panel {
+    flex: 0 0 43%;
+    height: 100%;
+    transform-style: preserve-3d;
+    position: relative;
+}
+
+.book-cover-flap {
+    width: 100%;
+    height: 100%;
+    transform-origin: left center;
+    transform: rotateY(0deg);
+    transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-style: preserve-3d;
+    position: relative;
+}
+
+.book-cover-flap.is-open {
+    transform: rotateY(-165deg);
+}
+
+.book-flap-front,
+.book-flap-back {
+    position: absolute;
+    inset: 0;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    overflow: hidden;
+    border-radius: 0 4px 4px 0;
+}
+
+.book-flap-front img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.book-flap-back {
+    background: var(--color-bg-warm);
+    transform: rotateY(180deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-text-secondary);
+    font-family: var(--font-serif);
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+}
+
+/* ── Vertical reading pages ── */
+.book-pages-container {
+    height: 100%;
+    position: relative;
+}
+
+.reading-page {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    height: 100%;
+    font-family: var(--font-serif);
+    font-size: 0.97rem;
+    line-height: 2.1;
+    letter-spacing: 0.07em;
+    color: var(--color-text);
+    overflow: hidden;
+    white-space: pre-wrap;
+    word-break: normal;
+    display: none;
+}
+
+.reading-page.is-active {
+    display: block;
+}
+
+/* ── CTA page (last) ── */
+.reading-cta-page {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    text-align: center;
+    gap: 28px;
+}
+
+.reading-cta-page.is-active {
+    display: flex;
+}
+
+.reading-cta-tagline {
+    font-family: var(--font-serif);
+    font-size: 1.1rem;
+    color: var(--color-text);
+    line-height: 2;
+    letter-spacing: 0.05em;
+    margin: 0;
+}
+
+.reading-cta-tagline em {
+    display: block;
+    font-style: normal;
+    font-size: 0.82rem;
+    color: var(--color-text-secondary);
+    margin-top: 8px;
+    letter-spacing: 0.04em;
+}
+
+/* ── Page navigation ── */
+.book-page-nav {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 18px 11px;
+    border-top: 1px solid var(--color-border);
+    background: var(--color-bg);
+}
+
+.book-nav-btn {
+    background: none;
+    border: 1px solid var(--color-border);
+    border-radius: 4px;
+    padding: 5px 14px;
+    font-family: var(--font-serif);
+    font-size: 0.78rem;
+    color: var(--color-text-secondary);
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s;
+}
+
+.book-nav-btn:hover:not(:disabled) {
+    border-color: var(--color-gold, #C9A962);
+    color: var(--color-gold, #C9A962);
+}
+
+.book-nav-btn:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+.book-page-indicator {
+    font-size: 0.75rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-serif);
+    letter-spacing: 0.05em;
+}
+
+/* ── Cover click trigger ── */
+.book-cover.is-reader-trigger {
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.book-cover.is-reader-trigger:hover {
+    transform: scale(1.02);
+}
+
+.book-open-hint {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.72rem;
+    color: var(--color-text-muted);
+    font-family: var(--font-serif);
+    letter-spacing: 0.05em;
+    text-align: center;
+    opacity: 0.85;
+}
+
+/* ── Mobile ── */
+@media (max-width: 640px) {
+    .book-wrapper {
+        flex-direction: column-reverse;
+        height: min(82vh, 580px);
+    }
+
+    .book-content-panel {
+        flex: 1 1 auto;
+        min-height: 70%;
+        border-radius: 0 0 4px 4px;
+        padding: 20px 18px 52px;
+    }
+
+    .book-spine {
+        flex: 0 0 4px;
+        width: 100%;
+        height: 4px;
+    }
+
+    .book-cover-panel {
+        flex: 0 0 28%;
+    }
+
+    .book-flap-front,
+    .book-flap-back {
+        border-radius: 4px 4px 0 0;
+    }
+
+    .book-cover-flap {
+        transform-origin: bottom center;
+    }
+
+    .book-cover-flap.is-open {
+        transform: rotateX(160deg);
+    }
+
+    .reading-page {
+        font-size: 0.88rem;
+        line-height: 1.9;
+    }
+
+    .book-reader-close {
+        top: 12px;
+        right: 12px;
+        width: 38px;
+        height: 38px;
+    }
+}

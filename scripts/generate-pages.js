@@ -158,6 +158,13 @@ function bookPageHtml(book, slug) {
     ],
   }, null, 2);
 
+  const readerData = JSON.stringify({
+    text: description,
+    title,
+    author,
+    amazonUrl,
+  }).replace(/<\//g, '<\\/');
+
   return `<!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -213,9 +220,10 @@ ${jsonLd}
         <!-- 表紙 -->
         <div class="book-visual">
           ${resolvedCoverUrl
-            ? `<img src="${esc(resolvedCoverUrl)}" alt="${esc(title)}の表紙" class="book-cover" loading="lazy">`
+            ? `<img src="${esc(resolvedCoverUrl)}" alt="${esc(title)}の表紙" class="book-cover${description ? ' is-reader-trigger' : ''}" loading="lazy">`
             : `<div class="book-cover" style="background:var(--color-bg-accent);display:flex;align-items:center;justify-content:center;"><span style="font-size:3rem;opacity:.3;">📖</span></div>`
           }
+          ${description ? `<span class="book-open-hint" aria-hidden="true">タップして読む →</span>` : ''}
           <div class="book-shadow"></div>
         </div>
 
@@ -296,6 +304,36 @@ ${jsonLd}
     </div>
   </footer>
 
+  ${description ? `<!-- book reader overlay -->
+  <div class="book-reader-overlay" id="book-reader-overlay" role="dialog" aria-modal="true" aria-label="書評を読む">
+    <button class="book-reader-close" id="book-reader-close" aria-label="閉じる">✕</button>
+    <div class="book-scene">
+      <div class="book-wrapper">
+        <div class="book-content-panel">
+          <div class="book-pages-container" id="book-pages-container"></div>
+          <nav class="book-page-nav">
+            <button class="book-nav-btn" id="book-nav-prev">← 前へ</button>
+            <span class="book-page-indicator" id="book-page-indicator">1 / 1</span>
+            <button class="book-nav-btn" id="book-nav-next">次へ →</button>
+          </nav>
+        </div>
+        <div class="book-spine" aria-hidden="true"></div>
+        <div class="book-cover-panel">
+          <div class="book-cover-flap" id="book-cover-flap">
+            <div class="book-flap-front">
+              ${resolvedCoverUrl
+                ? `<img src="${esc(resolvedCoverUrl)}" alt="${esc(title)}の表紙">`
+                : `<div style="background:var(--color-bg-accent);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:.4;">📖</div>`
+              }
+            </div>
+            <div class="book-flap-back" aria-hidden="true">裏表紙</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="application/json" id="book-reader-data">${readerData}</script>
+  <script src="/book-reader.js"></script>` : ''}
   <script src="/analytics-config.js"></script>
   <script src="/newsletter.js"></script>
 </body>

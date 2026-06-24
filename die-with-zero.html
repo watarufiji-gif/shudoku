@@ -91,7 +91,8 @@
       <div class="book-showcase">
         <!-- 表紙 -->
         <div class="book-visual">
-          <img src="https://m.media-amazon.com/images/P/4478109680.01.LZZZZZZZ.jpg" alt="DIE WITH ZERO（ゼロで死ね）の表紙" class="book-cover" loading="lazy">
+          <img src="https://m.media-amazon.com/images/P/4478109680.01.LZZZZZZZ.jpg" alt="DIE WITH ZERO（ゼロで死ね）の表紙" class="book-cover is-reader-trigger" loading="lazy">
+          <span class="book-open-hint" aria-hidden="true">タップして読む →</span>
           <div class="book-shadow"></div>
         </div>
 
@@ -178,6 +179,33 @@
     </div>
   </footer>
 
+  <!-- book reader overlay -->
+  <div class="book-reader-overlay" id="book-reader-overlay" role="dialog" aria-modal="true" aria-label="書評を読む">
+    <button class="book-reader-close" id="book-reader-close" aria-label="閉じる">✕</button>
+    <div class="book-scene">
+      <div class="book-wrapper">
+        <div class="book-content-panel">
+          <div class="book-pages-container" id="book-pages-container"></div>
+          <nav class="book-page-nav">
+            <button class="book-nav-btn" id="book-nav-prev">← 前へ</button>
+            <span class="book-page-indicator" id="book-page-indicator">1 / 1</span>
+            <button class="book-nav-btn" id="book-nav-next">次へ →</button>
+          </nav>
+        </div>
+        <div class="book-spine" aria-hidden="true"></div>
+        <div class="book-cover-panel">
+          <div class="book-cover-flap" id="book-cover-flap">
+            <div class="book-flap-front">
+              <img src="https://m.media-amazon.com/images/P/4478109680.01.LZZZZZZZ.jpg" alt="DIE WITH ZERO（ゼロで死ね）の表紙">
+            </div>
+            <div class="book-flap-back" aria-hidden="true">裏表紙</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script type="application/json" id="book-reader-data">{"text":"通帳の残高が増えると、少しだけ安心する。その安心のために、私たちは何を後回しにしてきただろう。\n\nビル・パーキンスの『DIE WITH ZERO』は、お金の本の顔をして、実は「時間」の本だ。著者の主張は、タイトルそのまま——死ぬときに資産をゼロにせよ。ぎょっとする。普通は逆を教わってきた。少しでも多く貯め、備え、残す。それが正しさだと。\n\nだが著者はこう問い返す。使われなかったお金は、ただの数字のまま消えていく。あなたが我慢して積み上げた残高は、結局あなたの人生の何にもならなかったかもしれない、と。\n\n刺さるのは、お金には貯められても経験には「賞味期限」があるという指摘だ。20代でしか味わえない旅がある。子どもが小さいうちにしか作れない記憶がある。体力のあるうちにしか登れない山がある。お金は後からでも取り戻せるが、その時期の自分はもう戻ってこない。\n\nもちろん、明日からすべて使い切れという話ではない。著者が言うのは順番の問題だ。いつ、何に、どれだけ使うかを、漠然とした不安に任せず、自分で設計する。\n\n読み終えて残るのは、罪悪感ではなく、許可証のような感覚だ。「お金を使ってもいい」のではない。「今しかできないことに、ちゃんとお金と時間を向けていい」——そう背中を押される。貯めることに慣れすぎた私たちが、ずっと聞きたかった言葉かもしれない。\n\n週末、残高ではなく、今しかできない一つの経験について考えてみる。この本は、その小さなきっかけをくれる。","title":"DIE WITH ZERO（ゼロで死ね）","author":"ビル・パーキンス","amazonUrl":"https://www.amazon.co.jp/DIE-ZERO-%E4%BA%BA%E7%94%9F%E3%81%8C%E8%B1%8A%E3%81%8B%E3%81%AB%E3%81%AA%E3%82%8A%E3%81%99%E3%81%8E%E3%82%8B%E7%A9%B6%E6%A5%B5%E3%81%AE%E3%83%AB%E3%83%BC%E3%83%AB-%E3%83%93%E3%83%AB%E3%83%BB%E3%83%91%E3%83%BC%E3%82%AD%E3%83%B3%E3%82%B9/dp/4478109680/ref=sr_1_1?__mk_ja_JP=%E3%82%AB%E3%82%BF%E3%82%AB%E3%83%8A&crid=34J66FN3QD9VZ&dib=eyJ2IjoiMSJ9.FajpGWS_SIk46IrqrEh73mDAeSWfJ4TOtDi_dH7SVKjyBLWfCXHgeYu0hNIM_wsSYIVPH4K8SqUJBrm6noIKtizNQXB6lsA8x-kWcguNLmAdKidwuGeZRhJ4w4xJbYZrol9pT_BW2s0LcaW3UueC7RK8JZYo_3NauiOju9F0ISusacHQnUfqUMGfygX2w08fuUyztnK9JGSV2eXTZF3rdvBCAWEc_oXY7SaGxMyBlFegtubY5Ku90UHsnAwIDWxybXqCJ4zQ6xHU7PVNYAuPZFmv82eGacgZrYad0Eqw7ng.aTGLe6DN1hAwAmJZfJSzc0bap8E2HSveEKjhnWOR9a8&dib_tag=se&keywords=DIE+WITH+ZERO&qid=1781812874&sprefix=die+with+zero%2Caps%2C211&sr=8-1"}</script>
+  <script src="/book-reader.js"></script>
   <script src="/analytics-config.js"></script>
   <script src="/newsletter.js"></script>
 </body>
