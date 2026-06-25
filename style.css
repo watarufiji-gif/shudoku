@@ -1211,7 +1211,7 @@ body {
 }
 
 /* ═══════════════════════════════════════════════════
-   Book Reader — 本が開く演出 ＋ 縦書き読書体験
+   Book Reader — 見開き読書体験
    ═══════════════════════════════════════════════════ */
 
 /* ── Overlay ── */
@@ -1219,15 +1219,15 @@ body {
     position: fixed;
     inset: 0;
     z-index: 2000;
-    background: rgba(28, 22, 16, 0.94);
+    background: rgba(14, 10, 6, 0.96);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 18px;
+    gap: 20px;
     opacity: 0;
     pointer-events: none;
-    transition: opacity 0.35s ease;
+    transition: opacity 0.3s ease;
 }
 
 .book-reader-overlay.is-open {
@@ -1237,218 +1237,204 @@ body {
 
 /* ── Close button ── */
 .book-reader-close {
-    position: absolute;
-    top: 20px;
-    right: 24px;
-    width: 44px;
-    height: 44px;
+    position: fixed;
+    top: 22px;
+    right: 26px;
+    width: 42px;
+    height: 42px;
     background: transparent;
-    border: 1px solid rgba(255, 255, 255, 0.35);
+    border: 1px solid rgba(255, 255, 255, 0.28);
     border-radius: 50%;
-    color: rgba(255, 255, 255, 0.8);
-    font-size: 1.2rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 1.1rem;
     line-height: 1;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.2s, border-color 0.2s;
+    transition: background 0.2s, border-color 0.2s, color 0.2s;
     z-index: 10;
 }
 
 .book-reader-close:hover {
-    background: rgba(255, 255, 255, 0.15);
-    border-color: rgba(255, 255, 255, 0.6);
+    background: rgba(255, 255, 255, 0.12);
+    border-color: rgba(255, 255, 255, 0.55);
+    color: rgba(255, 255, 255, 0.95);
 }
 
-/* ── 3D scene ── */
-.book-scene {
-    perspective: 1600px;
-    perspective-origin: 50% 45%;
-}
-
-.book-wrapper {
-    position: relative;
+/* ── Book body (見開き本体) ── */
+.book-body {
+    background: #faf8f3;
+    border-radius: 2px 4px 4px 2px;
+    box-shadow:
+        0 2px 4px rgba(0, 0, 0, 0.25),
+        0 12px 36px rgba(0, 0, 0, 0.55),
+        0 36px 72px rgba(0, 0, 0, 0.35);
     display: flex;
-    width: min(800px, 90vw);
-    height: min(500px, 66vh);
+    flex-direction: column;
+    width: min(820px, 94vw);
+    position: relative;
+    overflow: hidden;
 }
 
-/* ── Content panel (left) ── */
-.book-content-panel {
-    flex: 0 0 57%;
-    height: 100%;
-    background: var(--color-bg);
+/* Opening animation */
+.book-reader-overlay.is-open .book-body {
+    animation: bookOpen 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes bookOpen {
+    from { opacity: 0; transform: scale(0.93) translateY(10px); }
+    to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* ── Spread (見開きページエリア) ── */
+.book-spread {
+    display: flex;
+    height: min(440px, 62vh);
+    transition: opacity 0.22s ease;
+}
+
+.book-spread.is-turning {
+    opacity: 0;
+}
+
+/* ── 個別ページ ── */
+.book-page {
+    flex: 1;
+    padding: 44px 38px 36px;
     box-sizing: border-box;
-    padding: 36px 32px 56px;
-    position: relative;
-    border-radius: 4px 0 0 4px;
-    box-shadow: -12px 0 40px rgba(0, 0, 0, 0.45);
     overflow: hidden;
-    z-index: 1;
-}
-
-/* Spine gold line */
-.book-spine {
-    flex: 0 0 5px;
-    background: linear-gradient(180deg, var(--color-gold, #C9A962) 0%, var(--color-accent, #8B7355) 100%);
-    box-shadow: 2px 0 8px rgba(0,0,0,0.25), -2px 0 8px rgba(0,0,0,0.15);
-    z-index: 2;
-}
-
-/* ── Cover panel (right) ── */
-.book-cover-panel {
-    flex: 0 0 43%;
-    height: 100%;
-    transform-style: preserve-3d;
     position: relative;
+    background: #faf8f3;
 }
 
-.book-cover-flap {
-    width: 100%;
-    height: 100%;
-    transform-origin: left center;
-    transform: rotateY(0deg);
-    transition: transform 0.85s cubic-bezier(0.4, 0, 0.2, 1);
-    transform-style: preserve-3d;
-    position: relative;
+.book-page-right {
+    /* 右ページ内側に薄い影（綴じ目から離れる方向） */
+    box-shadow: inset -3px 0 10px rgba(0, 0, 0, 0.05);
 }
 
-.book-cover-flap.is-open {
-    transform: rotateY(-165deg);
+.book-page-left {
+    box-shadow: inset 3px 0 10px rgba(0, 0, 0, 0.05);
 }
 
-.book-flap-front,
-.book-flap-back {
-    position: absolute;
-    inset: 0;
-    backface-visibility: hidden;
-    -webkit-backface-visibility: hidden;
-    overflow: hidden;
-    border-radius: 0 4px 4px 0;
-}
-
-.book-flap-front img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-}
-
-.book-flap-back {
-    background: var(--color-bg-warm);
-    transform: rotateY(180deg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: var(--color-text-secondary);
-    font-family: var(--font-serif);
-    font-size: 0.85rem;
-    letter-spacing: 0.06em;
-}
-
-/* ── Vertical reading pages ── */
-.book-pages-container {
-    height: 100%;
-    position: relative;
-}
-
-.reading-page {
+/* ── 縦書きテキスト ── */
+.book-page-text {
     writing-mode: vertical-rl;
     text-orientation: mixed;
     height: 100%;
+    width: 100%;
     font-family: var(--font-serif);
-    font-size: 0.97rem;
-    line-height: 2.1;
-    letter-spacing: 0.07em;
-    color: var(--color-text);
+    font-size: 0.98rem;
+    line-height: 2.05;
+    letter-spacing: 0.08em;
+    color: #2a1a0c;
     overflow: hidden;
     white-space: pre-wrap;
     word-break: normal;
-    display: none;
 }
 
-.reading-page.is-active {
-    display: block;
-}
-
-/* ── CTA page (last) ── */
-.reading-cta-page {
-    display: none;
+/* ── CTA ページテキストエリア ── */
+.book-page-cta {
+    display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     height: 100%;
+    gap: 24px;
     text-align: center;
-    gap: 28px;
 }
 
-.reading-cta-page.is-active {
-    display: flex;
-}
-
-.reading-cta-tagline {
+.book-cta-tagline {
     font-family: var(--font-serif);
-    font-size: 1.1rem;
-    color: var(--color-text);
+    font-size: 1.08rem;
+    color: #2a1a0c;
     line-height: 2;
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
     margin: 0;
 }
 
-.reading-cta-tagline em {
+.book-cta-tagline em {
     display: block;
     font-style: normal;
-    font-size: 0.82rem;
-    color: var(--color-text-secondary);
-    margin-top: 8px;
-    letter-spacing: 0.04em;
+    font-size: 0.8rem;
+    color: #6b5040;
+    margin-top: 10px;
+    letter-spacing: 0.05em;
 }
 
-/* ── Page navigation ── */
-.book-page-nav {
+/* ── 綴じ目 ── */
+.book-gutter {
+    flex: 0 0 22px;
+    position: relative;
+    background: linear-gradient(
+        to right,
+        rgba(0, 0, 0, 0.13) 0%,
+        rgba(0, 0, 0, 0.04) 40%,
+        rgba(0, 0, 0, 0.04) 60%,
+        rgba(0, 0, 0, 0.13) 100%
+    );
+    flex-shrink: 0;
+}
+
+.book-gutter::after {
+    content: '';
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    top: 6%;
+    bottom: 6%;
+    left: 50%;
+    width: 1px;
+    transform: translateX(-50%);
+    background: linear-gradient(
+        to bottom,
+        transparent 0%,
+        rgba(90, 55, 20, 0.18) 15%,
+        rgba(90, 55, 20, 0.18) 85%,
+        transparent 100%
+    );
+}
+
+/* ── ナビゲーションバー ── */
+.book-nav-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 9px 18px 11px;
-    border-top: 1px solid var(--color-border);
-    background: var(--color-bg);
+    padding: 10px 22px 12px;
+    border-top: 1px solid rgba(0, 0, 0, 0.09);
+    background: #f5f2ea;
 }
 
 .book-nav-btn {
     background: none;
-    border: 1px solid var(--color-border);
+    border: 1px solid rgba(0, 0, 0, 0.18);
     border-radius: 4px;
-    padding: 5px 14px;
+    padding: 5px 16px;
     font-family: var(--font-serif);
     font-size: 0.78rem;
-    color: var(--color-text-secondary);
+    color: #5a3c20;
     cursor: pointer;
-    transition: border-color 0.2s, color 0.2s;
+    transition: border-color 0.2s, background 0.2s, color 0.2s;
+    letter-spacing: 0.04em;
 }
 
 .book-nav-btn:hover:not(:disabled) {
-    border-color: var(--color-gold, #C9A962);
-    color: var(--color-gold, #C9A962);
+    border-color: #a07840;
+    background: rgba(160, 120, 64, 0.07);
+    color: #7a5220;
 }
 
 .book-nav-btn:disabled {
-    opacity: 0.3;
+    opacity: 0.28;
     cursor: default;
 }
 
-.book-page-indicator {
-    font-size: 0.75rem;
-    color: var(--color-text-muted);
+.book-spread-indicator {
+    font-size: 0.73rem;
+    color: #8c6e50;
     font-family: var(--font-serif);
-    letter-spacing: 0.05em;
+    letter-spacing: 0.06em;
 }
 
-/* ── Cover click trigger ── */
+/* ── 表紙クリックトリガー ── */
 .book-cover.is-reader-trigger {
     cursor: pointer;
     transition: transform 0.2s;
@@ -1469,51 +1455,39 @@ body {
     opacity: 0.85;
 }
 
-/* ── Mobile ── */
+/* ── モバイル（縦1ページ表示） ── */
 @media (max-width: 640px) {
-    .book-wrapper {
-        flex-direction: column-reverse;
-        height: min(82vh, 580px);
+    .book-body {
+        width: 96vw;
+        border-radius: 2px;
     }
 
-    .book-content-panel {
-        flex: 1 1 auto;
-        min-height: 70%;
-        border-radius: 0 0 4px 4px;
-        padding: 20px 18px 52px;
+    .book-spread {
+        height: min(68vh, 500px);
     }
 
-    .book-spine {
-        flex: 0 0 4px;
-        width: 100%;
-        height: 4px;
+    /* モバイルでは右ページのみ表示、左ページを隠す */
+    .book-gutter,
+    .book-page-left {
+        display: none;
     }
 
-    .book-cover-panel {
-        flex: 0 0 28%;
+    .book-page-right {
+        box-shadow: none;
     }
 
-    .book-flap-front,
-    .book-flap-back {
-        border-radius: 4px 4px 0 0;
+    .book-page {
+        padding: 30px 24px 24px;
     }
 
-    .book-cover-flap {
-        transform-origin: bottom center;
-    }
-
-    .book-cover-flap.is-open {
-        transform: rotateX(160deg);
-    }
-
-    .reading-page {
-        font-size: 0.88rem;
-        line-height: 1.9;
+    .book-page-text {
+        font-size: 0.93rem;
+        line-height: 1.95;
     }
 
     .book-reader-close {
-        top: 12px;
-        right: 12px;
+        top: 14px;
+        right: 14px;
         width: 38px;
         height: 38px;
     }

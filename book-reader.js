@@ -1,13 +1,17 @@
 (function () {
   'use strict';
 
-  const PAGE_CHARS = 170;
+  // 1ページあたりの文字数（右ページ or 左ページ、各々独立）
+  var CHARS_PER_PAGE = 130;
 
-  var pages = [];
-  var currentPage = 0;
+  var singlePages  = [];  // テキスト1ページ単位の配列（末尾にCTAオブジェクト）
+  var currentSpread = 0;
   var isOpen = false;
+  var isMobile = false;
 
-  var overlay, closeBtn, coverFlap, pagesContainer, prevBtn, nextBtn, indicator, ctaPage;
+  var overlay, closeBtn, spreadEl,
+      rightSlot, leftSlot, leftPageEl,
+      prevBtn, nextBtn, indicator;
 
   function init() {
     var dataEl = document.getElementById('book-reader-data');
@@ -16,7 +20,11 @@
     var data;
     try { data = JSON.parse(dataEl.textContent); } catch (e) { return; }
 
-    pages = splitIntoPages((data.text || '').trim(), PAGE_CHARS);
+    singlePages = splitIntoPages((data.text || '').trim(), CHARS_PER_PAGE);
+    singlePages.push({ cta: true, title: data.title || '', author: data.author || '', amazonUrl: data.amazonUrl || '' });
+
+    updateMobile();
+    window.addEventListener('resize', updateMobile);
 
     var trigger = document.querySelector('.book-cover.is-reader-trigger');
     if (trigger) {
@@ -28,26 +36,33 @@
       });
     }
 
-    overlay       = document.getElementById('book-reader-overlay');
-    closeBtn      = document.getElementById('book-reader-close');
-    coverFlap     = document.getElementById('book-cover-flap');
-    pagesContainer = document.getElementById('book-pages-container');
-    prevBtn       = document.getElementById('book-nav-prev');
-    nextBtn       = document.getElementById('book-nav-next');
-    indicator     = document.getElementById('book-page-indicator');
+    overlay    = document.getElementById('book-reader-overlay');
+    closeBtn   = document.getElementById('book-reader-close');
+    spreadEl   = document.getElementById('book-spread');
+    rightSlot  = document.getElementById('book-page-right-text');
+    leftSlot   = document.getElementById('book-page-left-text');
+    leftPageEl = document.querySelector('.book-page-left');
+    prevBtn    = document.getElementById('book-nav-prev');
+    nextBtn    = document.getElementById('book-nav-next');
+    indicator  = document.getElementById('book-spread-indicator');
 
-    if (!overlay) return;
+    if (!overlay || !spreadEl) return;
 
-    renderPages(pages, data.amazonUrl || '', data.title || '', data.author || '');
+    renderSpread(0);
 
     closeBtn && closeBtn.addEventListener('click', closeReader);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) closeReader(); });
-    prevBtn && prevBtn.addEventListener('click', function () { goToPage(currentPage - 1); });
-    nextBtn && nextBtn.addEventListener('click', function () { goToPage(currentPage + 1); });
+    prevBtn && prevBtn.addEventListener('click', function () { goToSpread(currentSpread - 1); });
+    nextBtn && nextBtn.addEventListener('click', function () { goToSpread(currentSpread + 1); });
     document.addEventListener('keydown', handleKeydown);
-    setupSwipe(pagesContainer);
+    setupSwipe(spreadEl);
   }
 
+  function updateMobile() {
+    isMobile = window.innerWidth <= 640;
+  }
+
+  // テキストを1ページ単位に分割
   function splitIntoPages(text, max) {
     if (!text) return [];
     var result = [];
@@ -80,93 +95,101 @@
     return result;
   }
 
-  function renderPages(textPages, amazonUrl, title, author) {
-    pagesContainer.innerHTML = '';
+  function totalSpreads() {
+    // モバイルは1ページ=1見開き、デスクトップは2ページ=1見開き
+    return isMobile ? singlePages.length : Math.ceil(singlePages.length / 2);
+  }
 
-    textPages.forEach(function (text, i) {
-      var div = document.createElement('div');
-      div.className = 'reading-page' + (i === 0 ? ' is-active' : '');
-      div.textContent = text;
-      pagesContainer.appendChild(div);
-    });
-
-    var cta = document.createElement('div');
-    cta.className = 'reading-cta-page';
-    cta.id = 'book-reader-cta';
-    var ctaHtml = '<p class="reading-cta-tagline">続きは、この一冊で。<em>' +
-      escHtml(title) + '　' + escHtml(author) + '</em></p>';
-    if (amazonUrl) {
-      ctaHtml += '<a href="' + escHtml(amazonUrl) + '" target="_blank" rel="noopener noreferrer"' +
-        ' class="btn btn-amazon" style="text-decoration:none;">' +
-        '<span class="btn-icon">📦</span>' +
-        '<span class="btn-text">Amazonで見る</span></a>';
+  function renderSpread(spreadIdx) {
+    if (isMobile) {
+      // モバイル：右スロットのみ
+      fillSlot(rightSlot, singlePages[spreadIdx]);
+    } else {
+      var ri = spreadIdx * 2;
+      var li = spreadIdx * 2 + 1;
+      fillSlot(rightSlot, singlePages[ri]);
+      fillSlot(leftSlot,  singlePages[li] !== undefined ? singlePages[li] : null);
     }
-    cta.innerHTML = ctaHtml;
-    pagesContainer.appendChild(cta);
-    ctaPage = cta;
-
     updateNav();
   }
 
-  function totalPages() { return pages.length + 1; }
+  // スロット要素にコンテンツをセット（クラスを直接付与して height:100% が効くようにする）
+  function fillSlot(el, pageData) {
+    if (!el) return;
+    el.innerHTML = '';
+    el.className = '';
 
-  function goToPage(n) {
-    var total = totalPages();
-    if (n < 0 || n >= total) return;
-    setPageVisible(currentPage, false);
-    currentPage = n;
-    setPageVisible(currentPage, true);
-    updateNav();
+    if (!pageData) {
+      // 空ページ（テキストが奇数ページで終わったときの左ページなど）
+      return;
+    }
+
+    if (pageData.cta) {
+      el.className = 'book-page-cta';
+      var tagline = document.createElement('p');
+      tagline.className = 'book-cta-tagline';
+      tagline.innerHTML = '続きは、この一冊で。<em>' +
+        escHtml(pageData.title) + '　' + escHtml(pageData.author) + '</em>';
+      el.appendChild(tagline);
+      if (pageData.amazonUrl) {
+        var link = document.createElement('a');
+        link.href = pageData.amazonUrl;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        link.className = 'btn btn-amazon';
+        link.style.textDecoration = 'none';
+        link.innerHTML = '<span class="btn-icon">📦</span><span class="btn-text">Amazonで見る</span>';
+        el.appendChild(link);
+      }
+    } else {
+      el.className = 'book-page-text';
+      el.textContent = pageData;
+    }
   }
 
-  function setPageVisible(n, show) {
-    var all = pagesContainer.querySelectorAll('.reading-page, .reading-cta-page');
-    if (all[n]) all[n].classList.toggle('is-active', show);
+  function goToSpread(n) {
+    var total = totalSpreads();
+    if (n < 0 || n >= total || n === currentSpread) return;
+    var target = n;
+
+    spreadEl.classList.add('is-turning');
+    setTimeout(function () {
+      currentSpread = target;
+      renderSpread(currentSpread);
+      spreadEl.classList.remove('is-turning');
+    }, 220);
   }
 
   function updateNav() {
-    var total = totalPages();
-    if (prevBtn) prevBtn.disabled = currentPage === 0;
-    if (nextBtn) nextBtn.disabled = currentPage === total - 1;
-    if (indicator) indicator.textContent = (currentPage + 1) + ' / ' + total;
+    var total = totalSpreads();
+    if (prevBtn)   prevBtn.disabled   = currentSpread === 0;
+    if (nextBtn)   nextBtn.disabled   = currentSpread === total - 1;
+    if (indicator) indicator.textContent = (currentSpread + 1) + ' / ' + total;
   }
 
   function openReader() {
     if (isOpen) return;
     isOpen = true;
-    currentPage = 0;
-
-    var all = pagesContainer.querySelectorAll('.reading-page, .reading-cta-page');
-    for (var i = 0; i < all.length; i++) all[i].classList.toggle('is-active', i === 0);
-    updateNav();
+    currentSpread = 0;
+    renderSpread(0);
 
     overlay.classList.add('is-open');
     document.body.style.overflow = 'hidden';
-
-    requestAnimationFrame(function () {
-      requestAnimationFrame(function () {
-        if (coverFlap) coverFlap.classList.add('is-open');
-      });
-    });
-
     if (closeBtn) closeBtn.focus();
   }
 
   function closeReader() {
     if (!isOpen) return;
-    if (coverFlap) coverFlap.classList.remove('is-open');
-    setTimeout(function () {
-      overlay.classList.remove('is-open');
-      document.body.style.overflow = '';
-      isOpen = false;
-    }, 460);
+    overlay.classList.remove('is-open');
+    document.body.style.overflow = '';
+    isOpen = false;
   }
 
   function handleKeydown(e) {
     if (!isOpen) return;
-    if (e.key === 'Escape')                                 { e.preventDefault(); closeReader(); return; }
-    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')    { e.preventDefault(); goToPage(currentPage - 1); }
-    if (e.key === 'ArrowRight' || e.key === 'ArrowDown')  { e.preventDefault(); goToPage(currentPage + 1); }
+    if (e.key === 'Escape')                               { e.preventDefault(); closeReader(); return; }
+    if (e.key === 'ArrowRight' || e.key === 'ArrowDown') { e.preventDefault(); goToSpread(currentSpread + 1); }
+    if (e.key === 'ArrowLeft'  || e.key === 'ArrowUp')   { e.preventDefault(); goToSpread(currentSpread - 1); }
   }
 
   function setupSwipe(el) {
@@ -181,8 +204,8 @@
       var dy = e.changedTouches[0].clientY - startY;
       if (Math.abs(dy) > Math.abs(dx) * 1.2) return;
       if (Math.abs(dx) < 30) return;
-      if (dx < 0) goToPage(currentPage + 1);
-      else goToPage(currentPage - 1);
+      if (dx < 0) goToSpread(currentSpread + 1);
+      else         goToSpread(currentSpread - 1);
     }, { passive: true });
   }
 

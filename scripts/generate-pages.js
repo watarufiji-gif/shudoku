@@ -307,28 +307,20 @@ ${jsonLd}
   ${description ? `<!-- book reader overlay -->
   <div class="book-reader-overlay" id="book-reader-overlay" role="dialog" aria-modal="true" aria-label="書評を読む">
     <button class="book-reader-close" id="book-reader-close" aria-label="閉じる">✕</button>
-    <div class="book-scene">
-      <div class="book-wrapper">
-        <div class="book-content-panel">
-          <div class="book-pages-container" id="book-pages-container"></div>
-          <nav class="book-page-nav">
-            <button class="book-nav-btn" id="book-nav-prev">← 前へ</button>
-            <span class="book-page-indicator" id="book-page-indicator">1 / 1</span>
-            <button class="book-nav-btn" id="book-nav-next">次へ →</button>
-          </nav>
+    <div class="book-body">
+      <div class="book-spread" id="book-spread">
+        <div class="book-page book-page-right">
+          <div id="book-page-right-text"></div>
         </div>
-        <div class="book-spine" aria-hidden="true"></div>
-        <div class="book-cover-panel">
-          <div class="book-cover-flap" id="book-cover-flap">
-            <div class="book-flap-front">
-              ${resolvedCoverUrl
-                ? `<img src="${esc(resolvedCoverUrl)}" alt="${esc(title)}の表紙">`
-                : `<div style="background:var(--color-bg-accent);width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-size:2.5rem;opacity:.4;">📖</div>`
-              }
-            </div>
-            <div class="book-flap-back" aria-hidden="true">裏表紙</div>
-          </div>
+        <div class="book-gutter" aria-hidden="true"></div>
+        <div class="book-page book-page-left">
+          <div id="book-page-left-text"></div>
         </div>
+      </div>
+      <div class="book-nav-bar">
+        <button class="book-nav-btn" id="book-nav-prev" aria-label="前の見開きへ">← 前へ</button>
+        <span class="book-spread-indicator" id="book-spread-indicator"></span>
+        <button class="book-nav-btn" id="book-nav-next" aria-label="次の見開きへ">次へ →</button>
       </div>
     </div>
   </div>
