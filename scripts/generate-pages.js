@@ -257,7 +257,6 @@ ${jsonLd}
               <a href="${esc(amazonUrl)}" target="_blank" rel="noopener noreferrer"
                  class="btn btn-amazon"
                  data-track-type="affiliate" data-platform="amazon" data-book-title="${esc(title)}">
-                <span class="btn-icon">📦</span>
                 <span class="btn-text">Amazonで見る</span>
               </a>
             </div>

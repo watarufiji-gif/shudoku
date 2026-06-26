@@ -153,7 +153,7 @@
         link.rel = 'noopener noreferrer';
         link.className = 'btn btn-amazon';
         link.style.textDecoration = 'none';
-        link.innerHTML = '<span class="btn-icon">📦</span><span class="btn-text">Amazonで見る</span>';
+        link.innerHTML = '<span class="btn-text">Amazonで見る</span>';
         el.appendChild(link);
       }
     } else {
