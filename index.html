@@ -55,8 +55,11 @@
                 <!-- 本の画像 -->
                 <div class="book-visual">
                     <div class="book-glow"></div>
-                    <img id="home-book-cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
-                        alt="" class="book-cover">
+                    <div class="book-cover-wrapper">
+                        <img id="home-book-cover" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///ywAAAAAAQABAAACAUwAOw=="
+                            alt="" class="book-cover">
+                        <span class="book-open-hint" id="home-book-open-hint" aria-hidden="true" hidden>タップして読む↓</span>
+                    </div>
                     <div class="book-shadow"></div>
                 </div>
 
@@ -190,6 +193,30 @@
     <script src="microcms-config.js"></script>
     <script src="script.js"></script>
     <script src="newsletter.js"></script>
+    <!-- book reader overlay (トップページ用) -->
+    <div class="book-reader-overlay" id="book-reader-overlay" role="dialog" aria-modal="true" aria-label="書評を読む">
+      <button class="book-reader-close" id="book-reader-close" aria-label="閉じる">✕</button>
+      <div class="book-body">
+        <div class="book-front-cover" id="book-cover" aria-hidden="true">
+          <p class="book-front-title" id="home-front-cover-title"></p>
+        </div>
+        <div class="book-spread" id="book-spread">
+          <div class="book-page book-page-right">
+            <div id="book-page-right-text"></div>
+          </div>
+          <div class="book-gutter" aria-hidden="true"></div>
+          <div class="book-page book-page-left">
+            <div id="book-page-left-text"></div>
+          </div>
+        </div>
+        <div class="book-nav-bar">
+          <button class="book-nav-btn" id="book-nav-next" aria-label="次の見開きへ">← 次へ</button>
+          <span class="book-spread-indicator" id="book-spread-indicator"></span>
+          <button class="book-nav-btn" id="book-nav-prev" aria-label="前の見開きへ">前へ →</button>
+        </div>
+      </div>
+    </div>
+    <script src="book-reader.js"></script>
 </body>
 
 </html>

@@ -1478,9 +1478,15 @@ body {
 }
 
 /* ── 表紙クリックトリガー ── */
+.book-cover-wrapper {
+    position: relative;
+    display: block;
+}
+
 .book-cover.is-reader-trigger {
     cursor: pointer;
     transition: transform 0.2s;
+    display: block;
 }
 
 .book-cover.is-reader-trigger:hover {
@@ -1488,14 +1494,20 @@ body {
 }
 
 .book-open-hint {
-    display: block;
-    margin-top: 8px;
-    font-size: 0.72rem;
-    color: var(--color-text-muted);
+    position: absolute;
+    bottom: 12px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.4);
+    color: rgba(255, 255, 255, 0.92);
     font-family: var(--font-serif);
-    letter-spacing: 0.05em;
-    text-align: center;
-    opacity: 0.85;
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    padding: 4px 11px;
+    border-radius: 10px;
+    white-space: nowrap;
+    pointer-events: none;
+    z-index: 1;
 }
 
 /* ── モバイル（縦1ページ表示） ── */

@@ -1,10 +1,9 @@
 (function () {
   'use strict';
 
-  // 1ページあたりの文字数（右ページ or 左ページ、各々独立）
   var CHARS_PER_PAGE = 130;
 
-  var singlePages  = [];  // テキスト1ページ単位の配列（末尾にCTAオブジェクト）
+  var singlePages  = [];
   var currentSpread = 0;
   var isOpen = false;
   var isMobile = false;
@@ -14,30 +13,47 @@
       prevBtn, nextBtn, indicator,
       bookBodyEl;
 
+  // ── 起動 ────────────────────────────────────────────────────────────────────
+
   function init() {
-    var dataEl = document.getElementById('book-reader-data');
-    if (!dataEl) return;
-
-    var data;
-    try { data = JSON.parse(dataEl.textContent); } catch (e) { return; }
-
-    singlePages = splitIntoPages((data.text || '').trim(), CHARS_PER_PAGE);
-    singlePages.push({ cta: true, title: data.title || '', author: data.author || '', amazonUrl: data.amazonUrl || '' });
-
     updateMobile();
     window.addEventListener('resize', updateMobile);
 
-    var trigger = document.querySelector('.book-cover.is-reader-trigger');
-    if (trigger) {
-      trigger.addEventListener('click', openReader);
-      trigger.setAttribute('role', 'button');
-      trigger.setAttribute('tabindex', '0');
-      trigger.addEventListener('keydown', function (e) {
-        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openReader(); }
-      });
+    // 詳細ページ用：<script type="application/json" id="book-reader-data"> から読み込む
+    var dataEl = document.getElementById('book-reader-data');
+    if (dataEl) {
+      var data;
+      try { data = JSON.parse(dataEl.textContent); } catch (e) { return; }
+      singlePages = splitIntoPages((data.text || '').trim(), CHARS_PER_PAGE);
+      singlePages.push({ cta: true, title: data.title || '', author: data.author || '', amazonUrl: data.amazonUrl || '' });
+      wireTrigger();  // 詳細ページのクリックトリガーを登録
     }
 
+    // オーバーレイ DOM を準備（詳細ページ・トップページ共通）
+    if (!initOverlay()) return;
+
+    // 詳細ページは初期スプレッドも描画する
+    if (singlePages.length > 0) {
+      renderSpread(0);
+    }
+  }
+
+  // 詳細ページ用：静的 HTML の .book-cover.is-reader-trigger にクリックを登録
+  function wireTrigger() {
+    var trigger = document.querySelector('.book-cover.is-reader-trigger');
+    if (!trigger) return;
+    trigger.addEventListener('click', openReader);
+    trigger.setAttribute('role', 'button');
+    trigger.setAttribute('tabindex', '0');
+    trigger.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openReader(); }
+    });
+  }
+
+  // オーバーレイの DOM 参照を取得し、ボタン等のイベントを登録
+  function initOverlay() {
     overlay    = document.getElementById('book-reader-overlay');
+    if (!overlay) return false;
     closeBtn   = document.getElementById('book-reader-close');
     spreadEl   = document.getElementById('book-spread');
     bookBodyEl = document.querySelector('.book-body');
@@ -47,10 +63,7 @@
     prevBtn    = document.getElementById('book-nav-prev');
     nextBtn    = document.getElementById('book-nav-next');
     indicator  = document.getElementById('book-spread-indicator');
-
-    if (!overlay || !spreadEl) return;
-
-    renderSpread(0);
+    if (!spreadEl) return false;
 
     closeBtn && closeBtn.addEventListener('click', closeReader);
     overlay.addEventListener('click', function (e) { if (e.target === overlay) closeReader(); });
@@ -58,13 +71,11 @@
     nextBtn && nextBtn.addEventListener('click', function () { goToSpread(currentSpread + 1); });
     document.addEventListener('keydown', handleKeydown);
     setupSwipe(spreadEl);
+    return true;
   }
 
-  function updateMobile() {
-    isMobile = window.innerWidth <= 640;
-  }
+  // ── テキスト分割 ─────────────────────────────────────────────────────────────
 
-  // テキストを1ページ単位に分割
   function splitIntoPages(text, max) {
     if (!text) return [];
     var result = [];
@@ -97,14 +108,18 @@
     return result;
   }
 
+  // ── 見開きレンダリング ───────────────────────────────────────────────────────
+
+  function updateMobile() {
+    isMobile = window.innerWidth <= 640;
+  }
+
   function totalSpreads() {
-    // モバイルは1ページ=1見開き、デスクトップは2ページ=1見開き
     return isMobile ? singlePages.length : Math.ceil(singlePages.length / 2);
   }
 
   function renderSpread(spreadIdx) {
     if (isMobile) {
-      // モバイル：右スロットのみ
       fillSlot(rightSlot, singlePages[spreadIdx]);
     } else {
       var ri = spreadIdx * 2;
@@ -117,16 +132,12 @@
     updateNav();
   }
 
-  // スロット要素にコンテンツをセット（クラスを直接付与して height:100% が効くようにする）
   function fillSlot(el, pageData) {
     if (!el) return;
     el.innerHTML = '';
     el.className = '';
 
-    if (!pageData) {
-      // 空ページ（テキストが奇数ページで終わったときの左ページなど）
-      return;
-    }
+    if (!pageData) return;
 
     if (pageData.cta) {
       el.className = 'book-page-cta';
@@ -155,7 +166,6 @@
     var total = totalSpreads();
     if (n < 0 || n >= total || n === currentSpread) return;
     var target = n;
-
     spreadEl.classList.add('is-turning');
     setTimeout(function () {
       currentSpread = target;
@@ -171,19 +181,18 @@
     if (indicator) indicator.textContent = (currentSpread + 1) + ' / ' + total;
   }
 
+  // ── 開閉 ────────────────────────────────────────────────────────────────────
+
   function openReader() {
     if (isOpen) return;
     isOpen = true;
     currentSpread = 0;
     renderSpread(0);
 
-    // 表紙を閉じた状態にリセットしてからオーバーレイを表示
     if (bookBodyEl) bookBodyEl.classList.remove('is-cover-open');
-
     overlay.classList.add('is-open');
     document.body.style.overflow = 'hidden';
 
-    // book-body のフェードイン（~120ms）が落ち着いてから表紙を開く
     setTimeout(function () {
       if (bookBodyEl) bookBodyEl.classList.add('is-cover-open');
     }, 150);
@@ -193,7 +202,6 @@
 
   function closeReader() {
     if (!isOpen) return;
-    // 表紙を閉じた状態に戻してからオーバーレイを消す
     if (bookBodyEl) bookBodyEl.classList.remove('is-cover-open');
     overlay.classList.remove('is-open');
     document.body.style.overflow = '';
@@ -231,6 +239,27 @@
       .replace(/>/g, '&gt;')
       .replace(/"/g, '&quot;');
   }
+
+  // ── 外部 API（トップページの script.js から呼ぶ） ───────────────────────────
+  // ガード：本文が空またはオーバーレイ未準備の場合は何もしない
+
+  window.bookReader = {
+    open: function (data) {
+      if (!data || !(data.text || '').trim()) return;
+      if (!overlay || !spreadEl) return;
+
+      singlePages = splitIntoPages(data.text.trim(), CHARS_PER_PAGE);
+      singlePages.push({ cta: true, title: data.title || '', author: data.author || '', amazonUrl: data.amazonUrl || '' });
+
+      // トップページの表紙タイトルを動的に更新（要素がなければ無視）
+      var frontTitle = document.getElementById('home-front-cover-title');
+      if (frontTitle) frontTitle.textContent = data.title || '';
+
+      openReader();
+    }
+  };
+
+  // ── 起動 ────────────────────────────────────────────────────────────────────
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

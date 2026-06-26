@@ -1218,6 +1218,26 @@ function applyMicroCMSBookToHome(book) {
     }
     setAmazonAffiliateLink(amazonEl, normalized.amazonUrl, 'home');
     setAffiliateLinkMeta(amazonEl, 'amazon', title);
+
+    // book-reader: 本文が取れた場合のみトリガーを有効化（ガード付き）
+    if (description) {
+        var readerImgEl = document.getElementById('home-book-cover');
+        if (readerImgEl && !readerImgEl.classList.contains('is-reader-trigger')) {
+            readerImgEl.classList.add('is-reader-trigger');
+            readerImgEl.addEventListener('click', function () {
+                if (window.bookReader && typeof window.bookReader.open === 'function') {
+                    window.bookReader.open({
+                        text: description,
+                        title: title,
+                        author: author,
+                        amazonUrl: normalized.amazonUrl || book.AmazonURL || ''
+                    });
+                }
+            });
+            var hintEl = document.getElementById('home-book-open-hint');
+            if (hintEl) hintEl.removeAttribute('hidden');
+        }
+    }
 }
 
 function applyMicroCMSBookToDetail(book) {
