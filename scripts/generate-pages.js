@@ -318,9 +318,9 @@ ${jsonLd}
         </div>
       </div>
       <div class="book-nav-bar">
-        <button class="book-nav-btn" id="book-nav-prev" aria-label="前の見開きへ">← 前へ</button>
+        <button class="book-nav-btn" id="book-nav-next" aria-label="次の見開きへ">← 次へ</button>
         <span class="book-spread-indicator" id="book-spread-indicator"></span>
-        <button class="book-nav-btn" id="book-nav-next" aria-label="次の見開きへ">次へ →</button>
+        <button class="book-nav-btn" id="book-nav-prev" aria-label="前の見開きへ">前へ →</button>
       </div>
     </div>
   </div>
