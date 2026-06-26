@@ -107,8 +107,10 @@
     } else {
       var ri = spreadIdx * 2;
       var li = spreadIdx * 2 + 1;
-      fillSlot(rightSlot, singlePages[ri]);
-      fillSlot(leftSlot,  singlePages[li] !== undefined ? singlePages[li] : null);
+      // DOMの並びは [book-page-right=画面左] | gutter | [book-page-left=画面右]
+      // 和書は右→左へ読むため、先のチャンク(ri)を画面右(leftSlot)、後(li)を画面左(rightSlot)に入れる
+      fillSlot(leftSlot,  singlePages[ri]);
+      fillSlot(rightSlot, singlePages[li] !== undefined ? singlePages[li] : null);
     }
     updateNav();
   }
