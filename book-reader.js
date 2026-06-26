@@ -11,7 +11,8 @@
 
   var overlay, closeBtn, spreadEl,
       rightSlot, leftSlot, leftPageEl,
-      prevBtn, nextBtn, indicator;
+      prevBtn, nextBtn, indicator,
+      bookBodyEl;
 
   function init() {
     var dataEl = document.getElementById('book-reader-data');
@@ -39,6 +40,7 @@
     overlay    = document.getElementById('book-reader-overlay');
     closeBtn   = document.getElementById('book-reader-close');
     spreadEl   = document.getElementById('book-spread');
+    bookBodyEl = document.querySelector('.book-body');
     rightSlot  = document.getElementById('book-page-right-text');
     leftSlot   = document.getElementById('book-page-left-text');
     leftPageEl = document.querySelector('.book-page-left');
@@ -175,13 +177,24 @@
     currentSpread = 0;
     renderSpread(0);
 
+    // 表紙を閉じた状態にリセットしてからオーバーレイを表示
+    if (bookBodyEl) bookBodyEl.classList.remove('is-cover-open');
+
     overlay.classList.add('is-open');
     document.body.style.overflow = 'hidden';
+
+    // book-body のフェードイン（~120ms）が落ち着いてから表紙を開く
+    setTimeout(function () {
+      if (bookBodyEl) bookBodyEl.classList.add('is-cover-open');
+    }, 150);
+
     if (closeBtn) closeBtn.focus();
   }
 
   function closeReader() {
     if (!isOpen) return;
+    // 表紙を閉じた状態に戻してからオーバーレイを消す
+    if (bookBodyEl) bookBodyEl.classList.remove('is-cover-open');
     overlay.classList.remove('is-open');
     document.body.style.overflow = '';
     isOpen = false;
