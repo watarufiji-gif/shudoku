@@ -6,6 +6,19 @@
   const submitBtn = document.getElementById('newsletter-submit');
   const statusEl = document.getElementById('newsletter-status');
 
+  if (emailInput) {
+    emailInput.addEventListener('invalid', function () {
+      if (emailInput.validity.valueMissing) {
+        emailInput.setCustomValidity('素敵なメールアドレスを打ち込んじゃってください！');
+      } else {
+        emailInput.setCustomValidity('');
+      }
+    });
+    emailInput.addEventListener('input', function () {
+      emailInput.setCustomValidity('');
+    });
+  }
+
   function setStatus(message, isError) {
     statusEl.textContent = message;
     statusEl.className = 'newsletter-status ' + (isError ? 'newsletter-status--error' : 'newsletter-status--success');
@@ -14,8 +27,12 @@
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
+    if (!emailInput.checkValidity()) {
+      emailInput.reportValidity();
+      return;
+    }
+
     const email = emailInput.value.trim();
-    if (!email) return;
 
     submitBtn.disabled = true;
     submitBtn.textContent = '送信中…';
