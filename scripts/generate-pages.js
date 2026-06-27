@@ -224,7 +224,7 @@ ${jsonLd}
               ? `<img src="${esc(resolvedCoverUrl)}" alt="${esc(title)}の表紙" class="book-cover${description ? ' is-reader-trigger' : ''}" loading="lazy">`
               : `<div class="book-cover" style="background:var(--color-bg-accent);display:flex;align-items:center;justify-content:center;"><span style="font-size:3rem;opacity:.3;">📖</span></div>`
             }
-            ${description ? `<span class="book-open-hint" aria-hidden="true">タップして読む↓</span>` : ''}
+            ${description ? `<span class="book-open-hint" aria-hidden="true">タップして読む↑</span>` : ''}
           </div>
           <div class="book-shadow"></div>
         </div>
