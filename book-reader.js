@@ -198,6 +198,23 @@
     }, 150);
 
     if (closeBtn) closeBtn.focus();
+
+    try { showSwipeHint(); } catch (e) { /* ヒント失敗でもリーダーは動作継続 */ }
+  }
+
+  function showSwipeHint() {
+    if (!('ontouchstart' in window || navigator.maxTouchPoints > 0)) return;
+    if (!overlay) return;
+    var hint = document.createElement('div');
+    hint.className = 'book-swipe-hint';
+    hint.textContent = 'スワイプでもめくれます';
+    overlay.appendChild(hint);
+    setTimeout(function () {
+      hint.classList.add('is-fading');
+      setTimeout(function () {
+        if (hint.parentNode) hint.parentNode.removeChild(hint);
+      }, 600);
+    }, 2000);
   }
 
   function closeReader() {
@@ -227,8 +244,8 @@
       var dy = e.changedTouches[0].clientY - startY;
       if (Math.abs(dy) > Math.abs(dx) * 1.2) return;
       if (Math.abs(dx) < 30) return;
-      if (dx < 0) goToSpread(currentSpread + 1);
-      else         goToSpread(currentSpread - 1);
+      if (dx > 0) goToSpread(currentSpread + 1);
+      else        goToSpread(currentSpread - 1);
     }, { passive: true });
   }
 
