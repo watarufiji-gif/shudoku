@@ -229,7 +229,7 @@ ${jsonLd}
           <div class="book-shadow"></div>
         </div>
 
-        <!-- テキスト情報 -->
+        <!-- テキスト情報（見出し部分：カテゴリ・タイトル・著者・引用） -->
         <div class="book-info">
           ${category ? `<p class="book-category">${esc(category)}</p>` : ''}
           <h1 class="book-title">${esc(title)}</h1>
@@ -246,22 +246,25 @@ ${jsonLd}
           <blockquote class="book-quote">
             <p>${esc(quote)}</p>
           </blockquote>` : ''}
-
-          <div class="book-description">
-            ${descParagraphs}
-          </div>
-
-          ${amazonUrl ? `
-          <div class="book-cta">
-            <div class="cta-group">
-              <a href="${esc(amazonUrl)}" target="_blank" rel="noopener noreferrer"
-                 class="btn btn-amazon"
-                 data-track-type="affiliate" data-platform="amazon" data-book-title="${esc(title)}">
-                <span class="btn-text">Amazonで見る</span>
-              </a>
-            </div>
-          </div>` : ''}
         </div>
+      </div>
+
+      <!-- 本文・CTAをグリッド外に出してページ中央配置 -->
+      <div class="book-prose">
+        <div class="book-description">
+          ${descParagraphs}
+        </div>
+
+        ${amazonUrl ? `
+        <div class="book-cta">
+          <div class="cta-group">
+            <a href="${esc(amazonUrl)}" target="_blank" rel="noopener noreferrer"
+               class="btn btn-amazon"
+               data-track-type="affiliate" data-platform="amazon" data-book-title="${esc(title)}">
+              <span class="btn-text">Amazonで見る</span>
+            </a>
+          </div>
+        </div>` : ''}
       </div>
 
       <!-- 戻るリンク -->

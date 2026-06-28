@@ -63,7 +63,7 @@
                     <div class="book-shadow"></div>
                 </div>
 
-                <!-- 本の情報 -->
+                <!-- 本の情報（見出し部分：カテゴリ・タイトル・著者・引用） -->
                 <div class="book-info">
                     <p id="home-book-category" class="book-category"></p>
                     <h1 id="home-book-title" class="book-title"></h1>
@@ -73,21 +73,24 @@
                     <blockquote class="book-quote">
                         <p id="home-book-quote"></p>
                     </blockquote>
+                </div>
+            </div>
 
-                    <!-- 紹介文 -->
-                    <div id="home-book-description" class="book-description"></div>
+            <!-- 本文・CTAをグリッド外に出してページ中央配置 -->
+            <div class="book-prose">
+                <!-- 紹介文 -->
+                <div id="home-book-description" class="book-description"></div>
 
-                    <!-- CTA: 購入ボタン（URLが確定するまで非表示） -->
-                    <div class="book-cta" hidden>
-                        <div class="cta-group">
-                            <a href="#" target="_blank"
-                                rel="noopener noreferrer" class="btn btn-amazon" id="buy-amazon" data-track-type="affiliate"
-                                data-platform="amazon" data-book-title="">
-                                <span class="btn-text">Amazon</span>
-                            </a>
-                        </div>
-                        <p class="affiliate-note">※ アフィリエイトリンクを使用しています</p>
+                <!-- CTA: 購入ボタン（URLが確定するまで非表示） -->
+                <div class="book-cta" hidden>
+                    <div class="cta-group">
+                        <a href="#" target="_blank"
+                            rel="noopener noreferrer" class="btn btn-amazon" id="buy-amazon" data-track-type="affiliate"
+                            data-platform="amazon" data-book-title="">
+                            <span class="btn-text">Amazon</span>
+                        </a>
                     </div>
+                    <p class="affiliate-note">※ アフィリエイトリンクを使用しています</p>
                 </div>
             </div>
 

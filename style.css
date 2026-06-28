@@ -290,6 +290,25 @@ body {
     padding: 0;
 }
 
+/* 本文・CTAをグリッド外に出してページ中央に配置するコンテナ */
+.book-prose {
+    max-width: 680px;
+    margin-inline: auto;
+    margin-top: var(--space-2xl);
+}
+
+.book-prose .book-cta {
+    text-align: center;
+}
+
+.book-prose .cta-group {
+    justify-content: center;
+}
+
+.book-prose .btn {
+    flex: 0 0 auto;
+}
+
 .book-category {
     font-size: 0.75rem;
     color: var(--color-accent);
