@@ -198,9 +198,14 @@ ${jsonLd}
         <span class="nav-logo-word">週読</span>
       </a>
       <div class="nav-links">
-        <a href="/about.html">このサイトについて</a>
-        <a href="/archive.html">過去の本</a>
+        <div id="nav-menu" class="nav-menu">
+          <a href="/about.html">週読について</a>
+          <a href="/archive.html">過去の本</a>
+        </div>
         <a href="/#subscribe" class="nav-cta">購読する</a>
+        <button id="nav-menu-toggle" class="nav-hamburger" aria-label="メニューを開く" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
   </nav>
@@ -335,6 +340,7 @@ ${jsonLd}
   <script src="/book-reader.js"></script>` : ''}
   <script src="/analytics-config.js"></script>
   <script src="/newsletter.js"></script>
+  <script src="/nav.js"></script>
 </body>
 </html>`;
 }
@@ -435,9 +441,14 @@ function archiveHtml(books) {
         <span class="nav-logo-word">週読</span>
       </a>
       <div class="nav-links">
-        <a href="/about.html">このサイトについて</a>
-        <a href="/archive.html" aria-current="page">過去の本</a>
+        <div id="nav-menu" class="nav-menu">
+          <a href="/about.html">週読について</a>
+          <a href="/archive.html" aria-current="page">過去の本</a>
+        </div>
         <a href="/#subscribe" class="nav-cta">購読する</a>
+        <button id="nav-menu-toggle" class="nav-hamburger" aria-label="メニューを開く" aria-expanded="false">
+          <span></span><span></span><span></span>
+        </button>
       </div>
     </div>
   </nav>
@@ -485,6 +496,7 @@ function archiveHtml(books) {
 
   <script src="/analytics-config.js"></script>
   <script src="/archive-filter.js"></script>
+  <script src="/nav.js"></script>
 </body>
 </html>`;
 }
