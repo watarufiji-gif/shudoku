@@ -203,7 +203,6 @@ body {
 }
 
 .nav-hamburger {
-    display: none;
     flex-direction: column;
     justify-content: center;
     gap: 5px;
@@ -224,9 +223,13 @@ body {
 }
 
 .nav-menu {
-    display: flex;
     align-items: center;
     gap: var(--space-xl);
+}
+
+@media (min-width: 641px) {
+    .nav-hamburger { display: none; }
+    .nav-menu      { display: flex; }
 }
 
 /* =============================================
