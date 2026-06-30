@@ -114,6 +114,7 @@ async function fetchAllBooks() {
 function bookPageHtml(book, slug) {
   const title       = book.title       || '';
   const author      = book.author      || '';
+  const publisher   = book.publisher   || '';
   const category    = book.category    || '';
   const conclusion  = book.conclusion  || '';
   const quote       = book.quote       || '';
@@ -238,7 +239,8 @@ ${jsonLd}
         <div class="book-info">
           ${category ? `<p class="book-category">${esc(category)}</p>` : ''}
           <h1 class="book-title">${esc(title)}</h1>
-          <p class="book-author">${esc(author)}</p>
+          <p class="book-author${publisher ? ' has-publisher' : ''}">${esc(author)}</p>
+          ${publisher ? `<p class="book-publisher">${esc(publisher)}</p>` : ''}
 
           ${conclusion ? `
           <!-- この一冊で何が変わるか -->

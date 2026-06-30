@@ -1184,6 +1184,7 @@ function applyMicroCMSBookToHome(book) {
     const weekDateEl = document.getElementById('home-week-date');
     const categoryEl = document.getElementById('home-book-category');
     const authorEl = document.getElementById('home-book-author');
+    const publisherEl = document.getElementById('home-book-publisher');
     const quoteEl = document.getElementById('home-book-quote');
     const descriptionEl = document.getElementById('home-book-description');
     const coverEl = document.getElementById('home-book-cover');
@@ -1198,9 +1199,20 @@ function applyMicroCMSBookToHome(book) {
     const weekLabel = normalized.weekLabel;
     const weekDate = resolveWeekDateLabel(book);
     const coverUrl = normalized.coverUrl;
+    const publisher = normalized.publisher;
 
     setTextIfValue(titleEl, title);
     setTextIfValue(authorEl, author);
+    if (publisherEl) {
+        if (publisher) {
+            publisherEl.textContent = publisher;
+            publisherEl.removeAttribute('hidden');
+            if (authorEl) authorEl.classList.add('has-publisher');
+        } else {
+            publisherEl.setAttribute('hidden', '');
+            if (authorEl) authorEl.classList.remove('has-publisher');
+        }
+    }
     setTextIfValue(categoryEl, category);
     setTextIfValue(quoteEl, quote);
     setTextIfValue(weekNumberEl, weekLabel);
@@ -1447,7 +1459,8 @@ function normalizeBookPayload(book) {
         description: normalizeBookDescription(firstNonEmpty(book.description, book.summary, book.body, extracted.description)),
         weekLabel: normalizeWeekLabel(firstNonEmpty(book.weekLabel, book.week, book.weekNumber, extracted.weekLabel)),
         amazonUrl: firstNonEmpty(book.AmazonURL, book.amazonUrl, book.amazonURL, book.amazon_link, extracted.amazonUrl),
-        coverUrl: resolveImageUrl(book)
+        coverUrl: resolveImageUrl(book),
+        publisher: normalizeDisplayText(firstNonEmpty(book.publisher, book.publisherName, ''))
     };
 }
 

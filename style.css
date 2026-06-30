@@ -392,6 +392,15 @@ body {
     color: var(--color-text-secondary);
     margin-bottom: var(--space-2xl);
 }
+.book-author.has-publisher {
+    margin-bottom: 4px;
+}
+.book-publisher {
+    font-size: 0.78rem;
+    color: var(--color-text-muted);
+    letter-spacing: 0.04em;
+    margin-bottom: var(--space-2xl);
+}
 
 .book-quote {
     position: relative;
