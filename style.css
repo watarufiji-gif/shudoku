@@ -1582,6 +1582,10 @@ body {
 
 /* ── モバイル（縦1ページ表示） ── */
 @media (max-width: 640px) {
+    .book-reader-overlay {
+        padding-top: 60px;
+    }
+
     .book-body {
         width: 96vw;
         border-radius: 2px;
