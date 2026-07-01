@@ -1042,7 +1042,11 @@ function initMicroCMSContentAutoRefresh() {
 
         const weekDateEl = document.getElementById('home-week-date');
         if (!weekDateEl) return;
-        const weekDate = resolveWeekDateLabel(latestMicroCMSBook);
+        const bk = latestMicroCMSBook;
+        const anch = getWeekStartSaturdayJst(
+            parseCmsDate(bk.publishedAt, bk.createdAt, bk.revisedAt) || getCurrentWeeklyBaseDateJst()
+        );
+        const weekDate = `${formatJpDate(anch)}〜${formatJpDate(new Date(anch.getTime() + 6 * 24 * 60 * 60 * 1000))}`;
         setTextIfValue(weekDateEl, weekDate);
     }, WEEK_DATE_REFRESH_INTERVAL_MS);
 }
@@ -1196,8 +1200,11 @@ function applyMicroCMSBookToHome(book) {
     const category = normalized.category;
     const quote = normalized.quote;
     const description = normalized.description;
-    const weekLabel = normalized.weekLabel;
-    const weekDate = resolveWeekDateLabel(book);
+    const anchor = getWeekStartSaturdayJst(
+        parseCmsDate(book.publishedAt, book.createdAt, book.revisedAt) || getCurrentWeeklyBaseDateJst()
+    );
+    const weekLabel = `第${getWeekNumberForDate(anchor)}週`;
+    const weekDate = `${formatJpDate(anchor)}〜${formatJpDate(new Date(anchor.getTime() + 6 * 24 * 60 * 60 * 1000))}`;
     const coverUrl = normalized.coverUrl;
     const publisher = normalized.publisher;
 

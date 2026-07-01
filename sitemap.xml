@@ -25,6 +25,12 @@
     <priority>0.3</priority>
   </url>
   <url>
+    <loc>https://syudoku.com/nariwai.html</loc>
+    <lastmod>2026-06-30</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://syudoku.com/night-and-fog.html</loc>
     <lastmod>2026-06-30</lastmod>
     <changefreq>monthly</changefreq>
