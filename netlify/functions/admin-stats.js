@@ -1,5 +1,8 @@
+'use strict';
+
 const { createClient } = require('@supabase/supabase-js');
 const { timingSafeEqual } = require('node:crypto');
+const { getWeekStartSaturdayJst, getWeekNumberForDate } = require('./week-utils');
 
 // createClient はモジュール起動時ではなくハンドラー内で呼ぶ。
 // SUPABASE_URL が未設定でも require 自体は成功するため 502 にならない。
@@ -25,12 +28,13 @@ exports.handler = async function (event) {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        _notice:         'Supabase 未接続（環境変数未設定）',
-        totalSubscribers: 0,
-        growthByWeek:    [],
-        sourceBreakdown: [],
-        campaigns:       [],
-        genreTrends:     [],
+        _notice:          'Supabase 未接続（環境変数未設定）',
+        totalSubscribers:  0,
+        totalCampaigns:    0,
+        growthByWeek:     [],
+        sourceBreakdown:  [],
+        campaigns:        [],
+        genreTrends:      [],
       }),
     };
   }
@@ -45,47 +49,47 @@ exports.handler = async function (event) {
       .order('sent_at', { ascending: false })
       .limit(12);
 
-    // campaign テーブルが存在しない場合も空データで続行
     if (campaignErr) console.warn('[admin-stats] campaigns fetch error:', campaignErr.message);
 
     const campaignIds = (campaigns || []).map(c => c.id);
 
-    const [subscribersRes, sourcesRes, eventsRes] = await Promise.all([
+    const [subscribersRes, campaignCountRes, eventsRes] = await Promise.all([
+      // created_at と source を1本のクエリで取得
       supabase
         .from('subscribers')
-        .select('created_at')
+        .select('created_at, source')
         .eq('confirmed', true),
+      // 累計配信回数: 件数だけ取得（行データは不要）
       supabase
-        .from('subscribers')
-        .select('source')
-        .eq('confirmed', true),
+        .from('email_campaigns')
+        .select('*', { count: 'exact', head: true }),
       campaignIds.length > 0
         ? supabase
             .from('email_events')
             .select('campaign_id, type')
             .in('campaign_id', campaignIds)
-        : Promise.resolve({ data: [] }),
+        : Promise.resolve({ data: [], count: 0 }),
     ]);
 
-    // 各クエリが失敗しても、その部分だけ空データで続行（列が存在しない場合など）
-    if (subscribersRes.error) console.warn('[admin-stats] subscribers error:', subscribersRes.error.message);
-    if (sourcesRes.error)     console.warn('[admin-stats] sources error:', sourcesRes.error.message);
-    if (eventsRes.error)      console.warn('[admin-stats] events error:', eventsRes.error.message);
+    if (subscribersRes.error)    console.warn('[admin-stats] subscribers error:', subscribersRes.error.message);
+    if (campaignCountRes.error)  console.warn('[admin-stats] campaign count error:', campaignCountRes.error.message);
+    if (eventsRes.error)         console.warn('[admin-stats] events error:', eventsRes.error.message);
 
-    const subscribers    = subscribersRes.error ? [] : (subscribersRes.data || []);
-    const sources        = sourcesRes.error     ? [] : (sourcesRes.data || []);
-    const events         = eventsRes.error      ? [] : (eventsRes.data || []);
-    const campaignStats  = computeCampaignStats(campaigns || [], events);
+    const subscribers   = subscribersRes.error ? [] : (subscribersRes.data || []);
+    const totalCampaigns = campaignCountRes.error ? (campaigns || []).length : (campaignCountRes.count ?? (campaigns || []).length);
+    const events        = eventsRes.error ? [] : (eventsRes.data || []);
+    const campaignStats = computeCampaignStats(campaigns || [], events);
 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        totalSubscribers: subscribers.length,
-        growthByWeek:     computeGrowthByWeek(subscribers),
-        sourceBreakdown:  computeSourceBreakdown(sources),
-        campaigns:        campaignStats,
-        genreTrends:      computeGenreTrends(campaignStats),
+        totalSubscribers:  subscribers.length,
+        totalCampaigns,
+        growthByWeek:      computeGrowthByWeek(subscribers),
+        sourceBreakdown:   computeSourceBreakdown(subscribers),
+        campaigns:         campaignStats,
+        genreTrends:       computeGenreTrends(campaignStats),
       }),
     };
   } catch (err) {
@@ -118,11 +122,8 @@ function computeGrowthByWeek(subscribers) {
   const weeks = {};
   subscribers.forEach(s => {
     if (!s.created_at) return;
-    const d = new Date(s.created_at);
-    // その週の月曜日を週キーにする
-    const monday = new Date(d);
-    monday.setDate(d.getDate() - ((d.getDay() + 6) % 7));
-    const key = monday.toISOString().slice(0, 10);
+    const anchor = getWeekStartSaturdayJst(new Date(s.created_at));
+    const key = anchor.toISOString().slice(0, 10); // 土曜日の日付文字列をキーに
     weeks[key] = (weeks[key] || 0) + 1;
   });
   return Object.entries(weeks)
@@ -131,9 +132,9 @@ function computeGrowthByWeek(subscribers) {
     .slice(-12);
 }
 
-function computeSourceBreakdown(sources) {
+function computeSourceBreakdown(subscribers) {
   const counts = {};
-  sources.forEach(s => {
+  subscribers.forEach(s => {
     const src = s.source || 'web';
     counts[src] = (counts[src] || 0) + 1;
   });
@@ -143,7 +144,6 @@ function computeSourceBreakdown(sources) {
 }
 
 function computeCampaignStats(campaigns, events) {
-  // イベントをキャンペーン別・タイプ別に集計
   const eventMap = {};
   events.forEach(e => {
     if (!eventMap[e.campaign_id]) eventMap[e.campaign_id] = {};
@@ -157,16 +157,16 @@ function computeCampaignStats(campaigns, events) {
     const clicks     = e.clicked   || 0;
     const recipients = c.recipients_count || 1;
     return {
-      id:             c.id,
-      sentAt:         c.sent_at,
-      bookTitle:      c.book_title,
-      bookCategory:   c.book_category || '未分類',
-      weekNumber:     c.week_number,
+      id:              c.id,
+      sentAt:          c.sent_at,
+      bookTitle:       c.book_title,
+      bookCategory:    c.book_category || '未分類',
+      weekNumber:      c.week_number,
       recipientsCount: c.recipients_count,
-      openCount:      opens,
-      clickCount:     clicks,
-      openRate:       Math.round((opens  / recipients) * 1000) / 10,
-      clickRate:      Math.round((clicks / recipients) * 1000) / 10,
+      openCount:       opens,
+      clickCount:      clicks,
+      openRate:        Math.round((opens  / recipients) * 1000) / 10,
+      clickRate:       Math.round((clicks / recipients) * 1000) / 10,
     };
   });
 }

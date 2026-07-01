@@ -1,11 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { createHmac, timingSafeEqual } = require('node:crypto');
 
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
-
 const EVENT_TYPE_MAP = {
   'email.delivered': 'delivered',
   'email.opened': 'opened',
@@ -18,6 +13,14 @@ exports.handler = async function (event) {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
+
+  const supabaseUrl = process.env.SUPABASE_URL || '';
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || '';
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn('[resend-webhook] Supabase 環境変数未設定');
+    return { statusCode: 500, body: 'DB not configured' };
+  }
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   if (!verifySignature(event)) {
     console.warn('Webhook signature verification failed');

@@ -95,7 +95,7 @@
 
   function renderStatCards(data) {
     document.getElementById('stat-total').textContent = data.totalSubscribers ?? '—';
-    document.getElementById('stat-campaigns').textContent = (data.campaigns || []).length;
+    document.getElementById('stat-campaigns').textContent = data.totalCampaigns ?? (data.campaigns || []).length;
 
     var latest = (data.campaigns || [])[0];
     if (latest) {

@@ -1,11 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
-
-const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-);
-const resend = new Resend(process.env.RESEND_API_KEY);
+const { getWeekStartSaturdayJst, getWeekNumberForDate } = require('./week-utils');
 
 const MICROCMS_SERVICE_DOMAIN = process.env.MICROCMS_SERVICE_DOMAIN || 'shudoku';
 const MICROCMS_API_KEY = process.env.MICROCMS_API_KEY;
@@ -14,6 +9,15 @@ const FROM_ADDRESS = process.env.MAIL_FROM || '週読 <contact@syudoku.com>';
 const BATCH_SIZE = 100; // Resend batch 上限
 
 exports.handler = async function () {
+  const supabaseUrl = process.env.SUPABASE_URL || '';
+  const supabaseKey = process.env.SUPABASE_SERVICE_KEY || '';
+  if (!supabaseUrl || !supabaseKey) {
+    console.error('[send-weekly] Supabase 環境変数未設定');
+    return { statusCode: 500, body: 'DB not configured' };
+  }
+  const supabase = createClient(supabaseUrl, supabaseKey);
+  const resend = new Resend(process.env.RESEND_API_KEY);
+
   // 今週の本を microCMS から取得
   let book;
   try {
@@ -58,7 +62,7 @@ exports.handler = async function () {
     .insert({
       book_title:       book.title || '今週の一冊',
       book_category:    book.category || null,
-      week_number:      getISOWeek(new Date()),
+      week_number:      getWeekNumberForDate(getWeekStartSaturdayJst(new Date())),
       recipients_count: subscribers.length,
     })
     .select('id')
@@ -109,13 +113,6 @@ async function fetchLatestBook() {
   return json.contents[0];
 }
 
-function getISOWeek(date) {
-  const d = new Date(date);
-  d.setHours(0, 0, 0, 0);
-  d.setDate(d.getDate() + 3 - ((d.getDay() + 6) % 7));
-  const yearStart = new Date(d.getFullYear(), 0, 4);
-  return 1 + Math.round(((d - yearStart) / 86400000 - 3 + ((yearStart.getDay() + 6) % 7)) / 7);
-}
 
 function buildWeeklyHtml(book, unsubscribeToken, _campaignId) {
   const title = book.title || '今週の一冊';
