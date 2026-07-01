@@ -158,8 +158,22 @@
       }
     } else {
       el.className = 'book-page-text';
-      el.textContent = pageData;
+      el.innerHTML = formatVerticalText(pageData);
     }
+  }
+
+  function escHtmlText(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  function formatVerticalText(text) {
+    var s = escHtmlText(text);
+    s = s.replace(/"([^"]+)"/g, '〝$1〟');
+    s = s.replace(/\d+/g, '<span class="tcy">$&</span>');
+    return s;
   }
 
   function goToSpread(n) {

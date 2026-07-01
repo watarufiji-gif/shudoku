@@ -1459,6 +1459,12 @@ body {
     word-break: normal;
 }
 
+/* 縦中横（数字を縦書き中で正立させる） */
+.book-page-text .tcy {
+    text-combine-upright: all;
+    -webkit-text-combine: horizontal;
+}
+
 /* ── CTA ページテキストエリア ── */
 .book-page-cta {
     display: flex;
