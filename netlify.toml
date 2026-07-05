@@ -6,6 +6,9 @@
   node_bundler = "esbuild"
   node_bundler_options = { target = "node22" }
 
+[functions."send-weekly"]
+  schedule = "0 0 * * 6"
+
 [build.environment]
   NODE_VERSION = "22"
 
