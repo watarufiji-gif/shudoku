@@ -1,5 +1,6 @@
 const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
+const { randomUUID } = require('node:crypto');
 const { getWeekStartSaturdayJst, getWeekNumberForDate } = require('./week-utils');
 
 const MICROCMS_SERVICE_DOMAIN = process.env.MICROCMS_SERVICE_DOMAIN || 'shudoku';
@@ -60,10 +61,11 @@ exports.handler = async function () {
   const { data: campaign, error: campaignErr } = await supabase
     .from('email_campaigns')
     .insert({
+      id:               randomUUID(),
       book_title:       book.title || '今週の一冊',
       book_category:    book.category || null,
-      week_number:      getWeekNumberForDate(getWeekStartSaturdayJst(new Date())),
-      recipients_count: subscribers.length,
+      subject,
+      total_recipients: subscribers.length,
     })
     .select('id')
     .single();
