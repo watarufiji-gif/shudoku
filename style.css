@@ -351,7 +351,7 @@ body {
 
 /* 本文・CTAをグリッド外に出してページ中央に配置するコンテナ */
 .book-prose {
-    max-width: 680px;
+    max-width: 620px;
     margin-inline: auto;
     margin-top: var(--space-2xl);
 }
@@ -419,6 +419,8 @@ body {
 }
 
 .book-description {
+    max-width: 560px;
+    margin-inline: auto;
     margin-bottom: var(--space-2xl);
 }
 
