@@ -14,7 +14,7 @@ exports.handler = async function (event) {
 
   const { data, error } = await supabase
     .from('subscribers')
-    .delete()
+    .update({ unsubscribed_at: new Date().toISOString() })
     .eq('unsubscribe_token', token)
     .select('email')
     .single();

@@ -32,7 +32,8 @@ exports.handler = async function () {
   const { data: subscribers, error: dbError } = await supabase
     .from('subscribers')
     .select('email, unsubscribe_token')
-    .eq('confirmed', true);
+    .eq('confirmed', true)
+    .is('unsubscribed_at', null);
 
   if (dbError) {
     console.error('Supabase error:', dbError);
