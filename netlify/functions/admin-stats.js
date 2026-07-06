@@ -53,12 +53,13 @@ exports.handler = async function (event) {
 
     const campaignIds = (campaigns || []).map(c => c.id);
 
-    const [subscribersRes, campaignCountRes, eventsRes] = await Promise.all([
-      // created_at と source を1本のクエリで取得
+    const [subscribersRes, campaignCountRes, eventsRes, unsubscribedRes] = await Promise.all([
+      // created_at と source を1本のクエリで取得（解除済みを除外）
       supabase
         .from('subscribers')
         .select('created_at, source')
-        .eq('confirmed', true),
+        .eq('confirmed', true)
+        .is('unsubscribed_at', null),
       // 累計配信回数: 件数だけ取得（行データは不要）
       supabase
         .from('email_campaigns')
@@ -69,23 +70,38 @@ exports.handler = async function (event) {
             .select('campaign_id, type')
             .in('campaign_id', campaignIds)
         : Promise.resolve({ data: [], count: 0 }),
+      // 解除済み件数
+      supabase
+        .from('subscribers')
+        .select('id', { count: 'exact', head: true })
+        .not('unsubscribed_at', 'is', null),
     ]);
 
     if (subscribersRes.error)    console.warn('[admin-stats] subscribers error:', subscribersRes.error.message);
     if (campaignCountRes.error)  console.warn('[admin-stats] campaign count error:', campaignCountRes.error.message);
     if (eventsRes.error)         console.warn('[admin-stats] events error:', eventsRes.error.message);
+    if (unsubscribedRes.error)   console.warn('[admin-stats] unsubscribed error:', unsubscribedRes.error.message);
 
-    const subscribers   = subscribersRes.error ? [] : (subscribersRes.data || []);
-    const totalCampaigns = campaignCountRes.error ? (campaigns || []).length : (campaignCountRes.count ?? (campaigns || []).length);
-    const events        = eventsRes.error ? [] : (eventsRes.data || []);
-    const campaignStats = computeCampaignStats(campaigns || [], events);
+    const subscribers      = subscribersRes.error ? [] : (subscribersRes.data || []);
+    const totalCampaigns   = campaignCountRes.error ? (campaigns || []).length : (campaignCountRes.count ?? (campaigns || []).length);
+    const events           = eventsRes.error ? [] : (eventsRes.data || []);
+    const unsubscribedCount = unsubscribedRes.error ? 0 : (unsubscribedRes.count ?? 0);
+    const campaignStats    = computeCampaignStats(campaigns || [], events);
+
+    const totalSubscribers  = subscribers.length;
+    const unsubscribeBase   = totalSubscribers + unsubscribedCount;
+    const unsubscribeRate   = unsubscribeBase > 0
+      ? Math.round((unsubscribedCount / unsubscribeBase) * 1000) / 10
+      : 0;
 
     return {
       statusCode: 200,
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        totalSubscribers:  subscribers.length,
+        totalSubscribers,
         totalCampaigns,
+        unsubscribedCount,
+        unsubscribeRate,
         growthByWeek:      computeGrowthByWeek(subscribers),
         sourceBreakdown:   computeSourceBreakdown(subscribers),
         campaigns:         campaignStats,
