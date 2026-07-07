@@ -73,8 +73,11 @@ async function main() {
   fs.writeFileSync(path.join(ROOT, 'robots.txt'), robotsTxt(), 'utf8');
   console.log('  → robots.txt');
 
-  // microcms-config.js に API キーを注入（キーは Netlify 環境変数から取得）
-  injectMicroCMSApiKey();
+  // index.html に書籍JSONを注入（ブラウザからのmicroCMS直接アクセスを廃止）
+  injectBooksDataToIndex(books);
+
+  // APIキーが生成物に混入していないかチェック（ビルド失敗でデプロイを止める）
+  checkApiKeyLeak();
 
   console.log('[generate-pages] 完了');
 }
@@ -632,28 +635,58 @@ function weekLabelFromDate(isoDate) {
   return `第${week}週`;
 }
 
-// ── microCMS API キー注入 ──────────────────────────────────────────────────────
-// git 上は空文字のまま保持し、ビルド時に環境変数から書き換える。
-// これにより API キーが git 履歴に残らない。
-function injectMicroCMSApiKey() {
+// ── index.html への書籍JSON注入 ───────────────────────────────────────────────
+// ビルド時に全書籍データを埋め込み、ブラウザからのmicroCMS直接アクセスをなくす。
+// <!--BOOKS_DATA--> プレースホルダーへの初回置換と、既存タグの再ビルド時更新の両方に対応。
+function injectBooksDataToIndex(books) {
+  const indexPath = path.join(ROOT, 'index.html');
+  const original  = fs.readFileSync(indexPath, 'utf8');
+
+  const payload = books.map(book => ({
+    title:       book.title       || '',
+    author:      book.author      || '',
+    publisher:   book.publisher   || '',
+    category:    book.category    || '',
+    quote:       book.quote       || '',
+    description: book.description || '',
+    AmazonURL:   book.AmazonURL   || '',
+    slug:        book.slug || slugify(book.title || 'book'),
+    conclusion:  book.conclusion  || '',
+    coverUrl:    book._resolvedCoverUrl || '',
+    publishedAt: book.publishedAt || '',
+    createdAt:   book.createdAt   || '',
+    revisedAt:   book.revisedAt   || '',
+  }));
+
+  const scriptTag = `<script id="books-data" type="application/json">\n${JSON.stringify(payload)}\n</script>`;
+
+  let injected;
+  if (original.includes('<!--BOOKS_DATA-->')) {
+    injected = original.replace('<!--BOOKS_DATA-->', scriptTag);
+  } else if (/<script id="books-data"/.test(original)) {
+    // 再ビルド時: 既存タグを最新データで上書き
+    injected = original.replace(/<script id="books-data" type="application\/json">[\s\S]*?<\/script>/, scriptTag);
+  } else {
+    console.warn('[generate-pages] index.html に <!--BOOKS_DATA--> も <script id="books-data"> も見つかりません。スキップします。');
+    return;
+  }
+
+  fs.writeFileSync(indexPath, injected, 'utf8');
+  console.log(`  → index.html (書籍JSON ${payload.length}件を注入)`);
+}
+
+// ── APIキー混入チェック ────────────────────────────────────────────────────────
+// 生成した index.html に MICROCMS_API_KEY が含まれていたらビルドを即座に失敗させる。
+function checkApiKeyLeak() {
   const apiKey = String(process.env.MICROCMS_API_KEY || '').trim();
-  if (!apiKey) {
-    console.warn('[generate-pages] MICROCMS_API_KEY が未設定のため microcms-config.js へのキー注入をスキップしました。');
-    return;
+  if (!apiKey || apiKey.length < 8) return;
+
+  const indexPath = path.join(ROOT, 'index.html');
+  const content   = fs.readFileSync(indexPath, 'utf8');
+
+  if (content.includes(apiKey)) {
+    console.error('[generate-pages] ⛔ APIキーが index.html に混入しています！ビルドを中止します。');
+    process.exit(1);
   }
-
-  const configPath = path.join(ROOT, 'microcms-config.js');
-  const original   = fs.readFileSync(configPath, 'utf8');
-  const injected   = original.replace(
-    /^(const staticMicrocmsApiKey\s*=\s*)['"][^'"]*['"]\s*;/m,
-    `$1'${apiKey}';`
-  );
-
-  if (original === injected) {
-    console.warn('[generate-pages] microcms-config.js の注入パターンが見つかりませんでした。スキップします。');
-    return;
-  }
-
-  fs.writeFileSync(configPath, injected, 'utf8');
-  console.log('  → microcms-config.js (API キーを注入)');
+  console.log('  ✓ index.html にAPIキーの混入なし');
 }

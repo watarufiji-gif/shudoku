@@ -8,7 +8,6 @@ document.addEventListener('DOMContentLoaded', () => {
     initRemainingWeeksBadge();
     initCurrentWeekBadge();
     initSupabaseSetupPanel();
-    initMicroCMSSetupPanel();
     initAnalytics();
     initAffiliateTracking();
     initMicroCMSContentAutoRefresh();
@@ -974,6 +973,32 @@ function revealBookShowcase() {
 }
 
 async function initMicroCMSContent() {
+    // ビルド時注入データ (#books-data) があればそれを使い、microCMSは叩かない
+    const booksDataEl = document.getElementById('books-data');
+    if (booksDataEl) {
+        try {
+            const books = JSON.parse(booksDataEl.textContent || '[]');
+            const latestBook = books[0] || null;
+
+            if (!latestBook) {
+                latestMicroCMSBook = null;
+                renderArchiveLists([]);
+                revealBookShowcase();
+                return null;
+            }
+
+            latestMicroCMSBook = latestBook;
+            applyMicroCMSBookToHome(latestBook);
+            applyMicroCMSBookToDetail(latestBook);
+            renderArchiveLists(books);
+            revealBookShowcase();
+            return latestBook;
+        } catch (e) {
+            console.warn('[books-data] JSON parse error:', e);
+        }
+    }
+
+    // フォールバック: microCMS fetch（#books-data がない環境・旧ページ用）
     const config = getMicroCMSConfig();
     if (!config) {
         latestMicroCMSBook = null;
@@ -1063,50 +1088,6 @@ function getMicroCMSConfig() {
     if (!/^[a-z0-9-_]+$/i.test(endpoint)) return null;
 
     return { serviceDomain, apiKey, endpoint, query };
-}
-
-function initMicroCMSSetupPanel() {
-    const panel = document.getElementById('microcms-setup-panel');
-    const form = document.getElementById('microcms-setup-form');
-    if (!panel || !form) return;
-    if (!ensureOperatorToolsVisible()) return;
-
-    const domainInput = document.getElementById('microcms-service-domain');
-    const keyInput = document.getElementById('microcms-api-key');
-    const messageEl = document.getElementById('microcms-setup-message');
-    if (!domainInput || !keyInput) return;
-
-    const hasConfig = Boolean(getMicroCMSConfig());
-    panel.hidden = hasConfig;
-    if (hasConfig) return;
-
-    if (window.MICROCMS_SERVICE_DOMAIN) domainInput.value = window.MICROCMS_SERVICE_DOMAIN;
-    if (window.MICROCMS_API_KEY) keyInput.value = window.MICROCMS_API_KEY;
-
-    form.addEventListener('submit', (e) => {
-        e.preventDefault();
-
-        const domain = String(domainInput.value || '').trim();
-        const key = String(keyInput.value || '').trim();
-
-        if (!/^[a-z0-9-]+$/i.test(domain)) {
-            if (messageEl) messageEl.textContent = 'Service Domainは英数字とハイフンのみで入力してください。';
-            return;
-        }
-        if (key.length < 20) {
-            if (messageEl) messageEl.textContent = 'API Keyが短すぎます。Read onlyキーを確認してください。';
-            return;
-        }
-
-        if (window.sessionStorage) {
-            window.sessionStorage.setItem('microcms_service_domain', domain);
-            window.sessionStorage.setItem('microcms_api_key', key);
-        }
-        if (messageEl) messageEl.textContent = '保存しました。ページを再読み込みします。';
-        setTimeout(() => {
-            window.location.reload();
-        }, 500);
-    });
 }
 
 async function fetchBooksFromMicroCMS(config) {
@@ -1645,6 +1626,9 @@ function firstNonEmpty(...values) {
 
 function resolveImageUrl(book) {
     if (!book || typeof book !== 'object') return '';
+
+    // ビルド時注入データの解決済み coverUrl を優先
+    if (typeof book.coverUrl === 'string' && book.coverUrl.trim()) return book.coverUrl.trim();
 
     // microCMS image field can be object({url}) or plain string depending on schema/migration.
     const candidates = [
