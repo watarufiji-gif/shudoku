@@ -7,7 +7,7 @@
   node_bundler_options = { target = "node22" }
 
 [functions."send-weekly"]
-  schedule = "0 0 * * 6"
+  schedule = "0 1 * * 6"
 
 [build.environment]
   NODE_VERSION = "22"
