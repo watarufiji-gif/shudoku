@@ -1293,6 +1293,10 @@ body {
         flex-direction: column;
         gap: var(--space-md);
     }
+
+    .book-prose {
+        padding-inline: 32px;
+    }
 }
 
 /* ═══════════════════════════════════════════════════
