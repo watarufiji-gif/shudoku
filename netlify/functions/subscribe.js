@@ -92,7 +92,7 @@ function buildConfirmHtml(confirmUrl) {
     <p style="font-size:1.1rem;font-weight:600;margin-bottom:8px;">週読</p>
     <h1 style="font-size:1.3rem;font-weight:500;margin-bottom:24px;color:#1a1a1a;">ご登録ありがとうございます</h1>
     <p style="line-height:1.8;color:#555;">
-      毎週土曜日の朝9時に、一冊の本をお届けします。<br>
+      毎週土曜日の朝10時に、一冊の本をお届けします。<br>
       広告なし。セールも勧誘もありません。
     </p>
     <p style="line-height:1.8;color:#555;margin-top:16px;">

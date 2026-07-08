@@ -20,7 +20,11 @@
   }
 
   function setStatus(message, isError) {
-    statusEl.textContent = message;
+    if (isError) {
+      statusEl.textContent = message;
+    } else {
+      statusEl.innerHTML = message;
+    }
     statusEl.className = 'newsletter-status ' + (isError ? 'newsletter-status--error' : 'newsletter-status--success');
   }
 
@@ -52,7 +56,7 @@
       })
       .then(function (result) {
         if (result.ok) {
-          setStatus('ありがとうございます！確認メールをお送りしました。', false);
+          setStatus('一通目、さっき旅立ちました。<br>もし迷惑メールに紛れていたら、拾ってあげてください。', false);
           form.reset();
         } else {
           var msg = result.data && result.data.error ? result.data.error : '登録に失敗しました。もう一度お試しください。';
