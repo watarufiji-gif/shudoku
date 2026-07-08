@@ -1297,6 +1297,10 @@ body {
     .book-prose {
         padding-inline: 32px;
     }
+
+    #home-archive-grid > .archive-item:nth-child(n+4) {
+        display: none;
+    }
 }
 
 /* ═══════════════════════════════════════════════════
