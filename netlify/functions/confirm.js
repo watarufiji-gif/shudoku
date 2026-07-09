@@ -12,7 +12,7 @@ exports.handler = async function (event) {
   const token = event.queryStringParameters && event.queryStringParameters.token;
 
   if (!token) {
-    return redirect(`${SITE_URL}/?confirm=error`);
+    return redirect(`${SITE_URL}/welcome.html?status=error`);
   }
 
   const { data, error } = await supabase
@@ -24,7 +24,7 @@ exports.handler = async function (event) {
 
   if (error || !data) {
     console.error('Supabase confirm error:', error);
-    return redirect(`${SITE_URL}/?confirm=error`);
+    return redirect(`${SITE_URL}/welcome.html?status=error`);
   }
 
   console.log('確認完了:', data.email);
@@ -56,7 +56,7 @@ exports.handler = async function (event) {
     console.warn('[confirm] 管理者通知の送信に失敗しました:', notifyErr.message);
   }
 
-  return redirect(`${SITE_URL}/?confirm=success`);
+  return redirect(`${SITE_URL}/welcome.html?status=success`);
 };
 
 function redirect(url) {

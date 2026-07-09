@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex">
+    <title>登録完了 | 週読</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@300;400;500;600&family=Shippori+Mincho:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+    <style>
+        .welcome-container {
+            max-width: 640px;
+            margin: 0 auto;
+            padding: 140px 24px 100px;
+            text-align: center;
+        }
+
+        .welcome-icon {
+            font-size: 2rem;
+            margin-bottom: 32px;
+            line-height: 1;
+        }
+
+        .welcome-title {
+            font-family: 'Shippori Mincho', serif;
+            font-size: clamp(1.4rem, 4vw, 1.9rem);
+            font-weight: 500;
+            line-height: 1.6;
+            color: var(--color-text);
+            margin-bottom: 24px;
+        }
+
+        .welcome-body {
+            font-size: 0.95rem;
+            line-height: 2;
+            color: var(--color-muted, #888);
+        }
+
+        .welcome-link {
+            display: inline-block;
+            margin-top: 40px;
+            font-size: 0.85rem;
+            color: var(--color-text);
+            text-decoration: underline;
+            text-decoration-color: var(--color-accent, #8B7355);
+            text-underline-offset: 4px;
+        }
+
+        .welcome-link:hover {
+            color: var(--color-accent, #8B7355);
+        }
+
+        [hidden] { display: none !important; }
+    </style>
+</head>
+
+<body>
+    <nav class="nav">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo" aria-label="週読 ホーム">
+                <img src="/assets/logo-mark.png" alt="" class="nav-logo-mark" aria-hidden="true">
+                <span class="nav-logo-word">週読</span>
+            </a>
+            <div class="nav-links">
+                <div id="nav-menu" class="nav-menu">
+                    <a href="about.html">週読について</a>
+                    <a href="archive.html">過去の本</a>
+                    <a href="my-library.html" hidden aria-hidden="true">読書記録</a>
+                    <a href="login.html" class="nav-login" hidden aria-hidden="true">ログイン</a>
+                </div>
+                <a href="index.html#subscribe" class="nav-cta" hidden aria-hidden="true">購読する</a>
+                <button id="nav-menu-toggle" class="nav-hamburger" aria-label="メニューを開く" aria-expanded="false">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <div class="welcome-container">
+
+            <!-- 成功 -->
+            <div id="state-success">
+                <div class="welcome-icon">&#128218;</div>
+                <h1 class="welcome-title">登録が完了しました。<br>あなたも、週読の仲間です。</h1>
+                <p class="welcome-body">
+                    このページは閉じて構いません。<br>
+                    土曜の朝、静かに一冊お届けします。
+                </p>
+            </div>
+
+            <!-- エラー -->
+            <div id="state-error" hidden>
+                <div class="welcome-icon">&#128274;</div>
+                <h1 class="welcome-title">リンクの有効期限が<br>切れているようです。</h1>
+                <p class="welcome-body">
+                    このリンクは一度しか使えません。<br>
+                    もう一度メールアドレスを登録すると、新しい確認メールをお送りします。
+                </p>
+                <a href="index.html#subscribe" class="welcome-link">登録フォームに戻る</a>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-brand">
+                <span class="footer-logo">週読</span>
+                <p class="footer-tagline">週に一冊、自分と向き合う時間を</p>
+            </div>
+            <div class="footer-links">
+                <a href="privacy.html">プライバシーポリシー</a>
+                <a href="about.html">お問い合わせ</a>
+            </div>
+            <p class="footer-copyright">© 2026 週読 All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script>
+        (function () {
+            var status = new URLSearchParams(location.search).get('status');
+            if (status === 'error') {
+                document.getElementById('state-success').hidden = true;
+                document.getElementById('state-error').hidden = false;
+            }
+        })();
+    </script>
+    <script src="analytics-config.js"></script>
+    <script src="nav.js"></script>
+</body>
+
+</html>
