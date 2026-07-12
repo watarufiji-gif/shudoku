@@ -113,6 +113,18 @@
       cursor: pointer;
     }
     .logout-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .ga-link-btn {
+      display: inline-block;
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 6px 14px;
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-decoration: none;
+      margin-right: 8px;
+    }
+    .ga-link-btn:hover { border-color: var(--accent); color: var(--accent); }
 
     .dash-body {
       max-width: 1100px;
@@ -251,6 +263,7 @@
     <h1>週読 ダッシュボード</h1>
     <div>
       <span id="last-updated"></span>
+      <a href="https://analytics.google.com/analytics/web/#/a400726003p545040642/reports/intelligenthome" target="_blank" rel="noopener noreferrer" class="ga-link-btn">アクセス解析を見る →</a>
       <button class="logout-btn" id="logout-btn">ログアウト</button>
     </div>
   </header>
