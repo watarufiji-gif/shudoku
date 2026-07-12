@@ -347,6 +347,7 @@ ${jsonLd}
   <script type="application/json" id="book-reader-data">${readerData}</script>
   <script src="/book-reader.js"></script>` : ''}
   <script src="/analytics-config.js"></script>
+  <script src="/ga4.js"></script>
   <script src="/newsletter.js"></script>
   <script src="/nav.js"></script>
 </body>
@@ -506,6 +507,7 @@ function archiveHtml(books) {
   </footer>
 
   <script src="/analytics-config.js"></script>
+  <script src="/ga4.js"></script>
   <script src="/archive-filter.js"></script>
   <script src="/nav.js"></script>
 </body>
