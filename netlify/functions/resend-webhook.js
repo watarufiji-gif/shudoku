@@ -41,30 +41,48 @@ exports.handler = async function (event) {
 
   const data = payload.data || {};
 
-  // campaign_id / subscriber_id を tags から取得
+  // campaign_id は tags から取得
   // Resend は tags を [{name, value}] 配列または {key: value} オブジェクトで送る
   const tags = data.tags || {};
   let campaignId = null;
-  let subscriberId = null;
 
   if (Array.isArray(tags)) {
-    campaignId  = tags.find(t => t.name === 'campaign_id')?.value  || null;
-    subscriberId = tags.find(t => t.name === 'subscriber_id')?.value || null;
+    campaignId = tags.find(t => t.name === 'campaign_id')?.value || null;
   } else {
-    campaignId  = tags.campaign_id  || null;
-    subscriberId = tags.subscriber_id || null;
+    campaignId = tags.campaign_id || null;
   }
 
-  const url = data.click?.link || null;
+  // resend_email_id は NOT NULL 制約があるため必須。取得できない不正な payload は
+  // リトライしても解決しないので 200 を返して Resend の再送ループを止める。
+  const resendEmailId = data.email_id || null;
+  if (!resendEmailId) {
+    console.warn('[resend-webhook] email_id が payload に無いためスキップ:', JSON.stringify(payload));
+    return { statusCode: 200, body: 'ok (skipped: missing email_id)' };
+  }
+
+  // data.to は文字列 or 配列で届く可能性があるため両対応
+  const toField = data.to;
+  const recipientEmail = Array.isArray(toField) ? (toField[0] || null) : (toField || null);
+
+  // link_url は email.clicked のときだけ存在する。他イベントでは null のまま
+  const linkUrl = data.click?.link || null;
+
+  const occurredAt = payload.created_at || data.created_at || null;
 
   const { error } = await supabase.from('email_events').insert({
-    campaign_id:   campaignId,
-    subscriber_id: subscriberId,
-    type:          dbType,
-    url,
+    campaign_id:      campaignId,
+    resend_email_id:  resendEmailId,
+    event_type:       dbType,
+    recipient_email:  recipientEmail,
+    link_url:         linkUrl,
+    occurred_at:      occurredAt,
+    raw_payload:      payload,
   });
 
   if (error) {
+    // ここまで来ている時点で必須項目(resend_email_id / event_type)は揃っているため、
+    // 失敗は payload 不正ではなく DB 側の一時的な問題である可能性が高い。
+    // 500 を返し Resend にリトライさせる。
     console.error('DB insert error:', error);
     return { statusCode: 500, body: 'DB error' };
   }
