@@ -108,8 +108,8 @@ generate-pages.js が microCMS から全書籍を取得し以下を生成：
 | テーブル | 用途 |
 |---------|------|
 | `subscribers` | メール購読者（email, confirmed, source, created_at） |
-| `email_campaigns` | 配信ログ（book_title, sent_at, recipients_count など） |
-| `email_events` | 開封・クリックイベント（campaign_id, type） |
+| `email_campaigns` | 配信ログ（book_title, sent_at, total_recipients など） |
+| `email_events` | 開封・クリックイベント（campaign_id, event_type, recipient_email） |
 
 ### 現在未使用（将来の本選定エージェント用）
 

@@ -67,7 +67,7 @@ exports.handler = async function (event) {
       campaignIds.length > 0
         ? supabase
             .from('email_events')
-            .select('campaign_id, type')
+            .select('campaign_id, event_type, recipient_email')
             .in('campaign_id', campaignIds)
         : Promise.resolve({ data: [], count: 0 }),
       // 解除済み件数
@@ -164,25 +164,25 @@ function computeCampaignStats(campaigns, events) {
   events.forEach(e => {
     if (!eventMap[e.campaign_id]) eventMap[e.campaign_id] = {};
     const m = eventMap[e.campaign_id];
-    m[e.type] = (m[e.type] || 0) + 1;
+    if (!m[e.event_type]) m[e.event_type] = new Set();
+    m[e.event_type].add(e.recipient_email || `__unknown_${Math.random()}`);
   });
 
   return campaigns.map(c => {
     const e          = eventMap[c.id] || {};
-    const opens      = e.opened    || 0;
-    const clicks     = e.clicked   || 0;
-    const recipients = c.recipients_count || 1;
+    const opens      = e.opened  ? e.opened.size  : 0;
+    const clicks     = e.clicked ? e.clicked.size : 0;
+    const recipients = c.total_recipients || 0;
     return {
       id:              c.id,
       sentAt:          c.sent_at,
       bookTitle:       c.book_title,
       bookCategory:    c.book_category || '未分類',
-      weekNumber:      c.week_number,
-      recipientsCount: c.recipients_count,
+      recipientsCount: c.total_recipients,
       openCount:       opens,
       clickCount:      clicks,
-      openRate:        Math.round((opens  / recipients) * 1000) / 10,
-      clickRate:       Math.round((clicks / recipients) * 1000) / 10,
+      openRate:        recipients > 0 ? Math.round((opens  / recipients) * 1000) / 10 : 0,
+      clickRate:       recipients > 0 ? Math.round((clicks / recipients) * 1000) / 10 : 0,
     };
   });
 }
