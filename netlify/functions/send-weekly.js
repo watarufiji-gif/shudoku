@@ -146,7 +146,7 @@ function buildWeeklyHtml(book, unsubscribeToken, _campaignId) {
   const descriptionHtml = description
     .split('\n')
     .filter(line => line.trim() !== '')
-    .map(line => `<p style="margin:0 0 1.6em 0;">${escapeHtml(line)}</p>`)
+    .map(line => `<p style="margin:0 0 1.0em 0;">${escapeHtml(line)}</p>`)
     .join('\n');
 
   // 条件付きブロック
@@ -214,8 +214,8 @@ function buildWeeklyHtml(book, unsubscribeToken, _campaignId) {
 <td valign="middle"><span style="font-family:'Hiragino Mincho ProN','Yu Mincho','MS Mincho',serif;font-size:26px;letter-spacing:0.35em;color:#2b2926;">週読</span></td>
 </tr></table></a></td></tr>
 
-<tr><td class="inner-pad" style="padding:0 48px 40px 48px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;line-height:2.2;letter-spacing:0.05em;color:#2b2926;">
-<p style="margin:0 0 1.2em 0;">おはようございます。週読の隊長です。</p>${greetingBlock}
+<tr><td class="inner-pad" style="padding:0 48px 40px 48px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;line-height:1.8;letter-spacing:0.05em;color:#2b2926;">
+<p style="margin:0 0 0.8em 0;">おはようございます。週読の隊長です。</p>${greetingBlock}
 </td></tr>
 
 <tr><td align="center" style="padding:0 0 10px 0;"><span style="display:inline-block;background-color:#a99465;color:#ffffff;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:13px;letter-spacing:0.25em;padding:6px 22px;border-radius:999px;">第${weekNumber}週</span></td></tr>
@@ -233,7 +233,7 @@ ${publisherBlock}
 
 ${quoteBlock}
 
-<tr><td class="inner-pad" style="padding:0 48px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;line-height:2.2;letter-spacing:0.05em;color:#2b2926;">${descriptionHtml}</td></tr>
+<tr><td class="inner-pad" style="padding:0 48px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;line-height:1.8;letter-spacing:0.05em;color:#2b2926;">${descriptionHtml}</td></tr>
 
 ${amazonBlock}
 
