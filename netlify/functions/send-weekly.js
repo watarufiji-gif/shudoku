@@ -177,7 +177,7 @@ function buildWeeklyHtml(book, unsubscribeToken, _campaignId) {
   const amazonBlock = amazonUrl
     ? `<tr><td align="center" style="padding:24px 48px 16px 48px;">
 <table role="presentation" cellpadding="0" cellspacing="0"><tr>
-<td align="center" style="background-color:#2b2926;border-radius:4px;"><a href="${escapeHtml(amazonUrl)}" style="display:inline-block;padding:16px 72px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;letter-spacing:0.25em;color:#ffffff;text-decoration:none;">Amazonで見る</a></td>
+<td align="center" style="background-color:#2b2926;border-radius:4px;"><a href="${escapeHtml(amazonUrl)}" style="display:inline-block;padding:16px 72px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;letter-spacing:0.05em;color:#ffffff;text-decoration:none;white-space:nowrap;">Amazonで見る</a></td>
 </tr></table></td></tr>`
     : '';
 
