@@ -351,7 +351,7 @@ body {
 
 /* 本文・CTAをグリッド外に出してページ中央に配置するコンテナ */
 .book-prose {
-    max-width: 620px;
+    max-width: 504px;
     margin-inline: auto;
     margin-top: var(--space-2xl);
 }
@@ -419,8 +419,6 @@ body {
 }
 
 .book-description {
-    max-width: 560px;
-    margin-inline: auto;
     margin-bottom: var(--space-2xl);
 }
 
@@ -1295,7 +1293,7 @@ body {
     }
 
     .book-prose {
-        padding-inline: 32px;
+        padding-inline: 8px;
     }
 
     #home-archive-grid > .archive-item:nth-child(n+4) {

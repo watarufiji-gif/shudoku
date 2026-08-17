@@ -5,7 +5,6 @@
 document.addEventListener('DOMContentLoaded', () => {
     if (enforcePrivateAuthPages()) return;
     initNavLogoAsset();
-    initRemainingWeeksBadge();
     initCurrentWeekBadge();
     initSupabaseSetupPanel();
     initAnalytics();
@@ -51,23 +50,6 @@ function enforcePrivateAuthPages() {
     return true;
 }
 
-function initRemainingWeeksBadge() {
-    const targets = [
-        document.getElementById('home-year-remaining'),
-        document.getElementById('detail-year-remaining')
-    ].filter(Boolean);
-    if (targets.length === 0) return;
-
-    const remainingWeeks = getRemainingWeeksInYear();
-    const label = remainingWeeks > 0
-        ? `今年あと${remainingWeeks}週`
-        : '今年最後の一冊';
-
-    targets.forEach((target) => {
-        target.textContent = label;
-    });
-}
-
 function initCurrentWeekBadge() {
     applyCurrentWeekBadge();
 
@@ -85,11 +67,9 @@ function applyCurrentWeekBadge() {
     const end = new Date(start.getTime() + (6 * 24 * 60 * 60 * 1000));
     const weekDate = `${formatJpDate(start)}〜${formatJpDate(end)}`;
 
-    const homeWeekNumberEl = document.getElementById('home-week-number');
     const homeWeekDateEl = document.getElementById('home-week-date');
     const detailWeekNumberEl = document.getElementById('detail-week-number');
 
-    setTextIfValue(homeWeekNumberEl, weekLabel);
     setTextIfValue(homeWeekDateEl, weekDate);
     setTextIfValue(detailWeekNumberEl, weekLabel);
 }
@@ -108,28 +88,6 @@ function getWeekNumberForDate(date) {
     const diffMs = jstDate.getTime() - firstSaturday.getTime();
     if (diffMs < 0) return 1;
     return Math.floor(diffMs / (7 * dayMs)) + 1;
-}
-
-function getRemainingWeeksInYear() {
-    const now = new Date();
-    const endOfYear = new Date(now.getFullYear(), 11, 31, 23, 59, 59, 999);
-    const cursor = new Date(now);
-    cursor.setHours(0, 0, 0, 0);
-
-    const daysUntilSaturday = (6 - cursor.getDay() + 7) % 7;
-    cursor.setDate(cursor.getDate() + daysUntilSaturday);
-
-    // 土曜の更新時間（9:00）を過ぎていれば、次週分からカウント
-    if (now.getDay() === 6 && now.getHours() >= 9) {
-        cursor.setDate(cursor.getDate() + 7);
-    }
-
-    let count = 0;
-    while (cursor <= endOfYear) {
-        count += 1;
-        cursor.setDate(cursor.getDate() + 7);
-    }
-    return count;
 }
 
 // =============================================
@@ -1165,7 +1123,6 @@ function applyMicroCMSBookToHome(book) {
     const titleEl = document.getElementById('home-book-title');
     if (!titleEl) return;
 
-    const weekNumberEl = document.getElementById('home-week-number');
     const weekDateEl = document.getElementById('home-week-date');
     const categoryEl = document.getElementById('home-book-category');
     const authorEl = document.getElementById('home-book-author');
@@ -1184,7 +1141,6 @@ function applyMicroCMSBookToHome(book) {
     const anchor = getWeekStartSaturdayJst(
         parseCmsDate(book.publishedAt, book.createdAt, book.revisedAt) || getCurrentWeeklyBaseDateJst()
     );
-    const weekLabel = `第${getWeekNumberForDate(anchor)}週`;
     const weekDate = `${formatJpDate(anchor)}〜${formatJpDate(new Date(anchor.getTime() + 6 * 24 * 60 * 60 * 1000))}`;
     const coverUrl = normalized.coverUrl;
     const publisher = normalized.publisher;
@@ -1203,7 +1159,6 @@ function applyMicroCMSBookToHome(book) {
     }
     setTextIfValue(categoryEl, category);
     setTextIfValue(quoteEl, quote);
-    setTextIfValue(weekNumberEl, weekLabel);
     setTextIfValue(weekDateEl, weekDate);
     setDescriptionParagraphs(descriptionEl, description);
     const imageApplied = setImageIfSafe(coverEl, coverUrl, title ? `今週の一冊: ${title}` : '');

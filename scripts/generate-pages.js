@@ -76,6 +76,9 @@ async function main() {
   // index.html に書籍JSONを注入（ブラウザからのmicroCMS直接アクセスを廃止）
   injectBooksDataToIndex(books);
 
+  // index.html の週バッジ（第N週・今年あとN週）をビルド時計算で注入
+  injectWeekBadgesToIndex(books);
+
   // APIキーが生成物に混入していないかチェック（ビルド失敗でデプロイを止める）
   checkApiKeyLeak();
 
@@ -635,6 +638,71 @@ function weekLabelFromDate(isoDate) {
   const diffMs = jstDate.getTime() - firstSaturday.getTime();
   const week   = diffMs < 0 ? 1 : Math.floor(diffMs / (7 * dayMs)) + 1;
   return `第${week}週`;
+}
+
+function getWeekStartSaturdayJst(date) {
+  const dayMs = 24 * 60 * 60 * 1000;
+  const jstMs = date.getTime() + 9 * 60 * 60 * 1000;
+  const jst = new Date(jstMs);
+  const jstDateOnly = new Date(Date.UTC(jst.getUTCFullYear(), jst.getUTCMonth(), jst.getUTCDate()));
+  const dayOfWeek = jstDateOnly.getUTCDay();
+  const daysFromSaturday = (dayOfWeek + 1) % 7;
+  return new Date(jstDateOnly.getTime() - daysFromSaturday * dayMs);
+}
+
+function weekNumberForSaturdayAnchor(anchor) {
+  const dayMs = 24 * 60 * 60 * 1000;
+  const year = anchor.getUTCFullYear();
+  const firstSaturday = new Date(Date.UTC(year, 0, 1));
+  const offsetToSaturday = (6 - firstSaturday.getUTCDay() + 7) % 7;
+  firstSaturday.setUTCDate(firstSaturday.getUTCDate() + offsetToSaturday);
+  const diffMs = anchor.getTime() - firstSaturday.getTime();
+  const week = diffMs < 0 ? 1 : Math.floor(diffMs / (7 * dayMs)) + 1;
+  return { week, year };
+}
+
+function totalWeeksInYear(year) {
+  return weekNumberForSaturdayAnchor(new Date(Date.UTC(year, 11, 31))).week;
+}
+
+// 「第N週」と「今年あとN週」は同じNから導出する（週の変わり目でのバッジ食い違いを防ぐ）
+function computeHomeWeekBadges(books) {
+  const latest = books[0];
+  const baseDate = latest && latest.publishedAt ? new Date(latest.publishedAt) : new Date();
+  const anchor = getWeekStartSaturdayJst(Number.isNaN(baseDate.getTime()) ? new Date() : baseDate);
+  const { week, year } = weekNumberForSaturdayAnchor(anchor);
+  const total = totalWeeksInYear(year);
+  const remaining = total - week;
+  return {
+    weekLabel: `第${week}週`,
+    remainingLabel: remaining > 0 ? `今年あと${remaining}週` : '今年最後の一冊',
+  };
+}
+
+// ── index.html 週バッジの注入 ────────────────────────────────────────────────
+// id指定＋中身の非タグ文字を丸ごと置換するため、プレースホルダーでも既注入の実数でも
+// 同じ正規表現で冪等に上書きできる。
+function injectWeekBadgesToIndex(books) {
+  const indexPath = path.join(ROOT, 'index.html');
+  const original  = fs.readFileSync(indexPath, 'utf8');
+  const { weekLabel, remainingLabel } = computeHomeWeekBadges(books);
+
+  let injected = original.replace(
+    /(<span id="home-week-number" class="week-number">)[^<]*(<\/span>)/,
+    `$1${weekLabel}$2`
+  );
+  injected = injected.replace(
+    /(<span id="home-year-remaining" class="week-remaining week-remaining-below">)[^<]*(<\/span>)/,
+    `$1${remainingLabel}$2`
+  );
+
+  if (injected === original && !original.includes(weekLabel)) {
+    console.warn('[generate-pages] 週バッジ用のspanが見つかりませんでした。スキップします。');
+    return;
+  }
+
+  fs.writeFileSync(indexPath, injected, 'utf8');
+  console.log(`  → index.html (週バッジ: ${weekLabel} / ${remainingLabel})`);
 }
 
 // ── index.html への書籍JSON注入 ───────────────────────────────────────────────
