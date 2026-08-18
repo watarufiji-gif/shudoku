@@ -420,6 +420,7 @@ body {
 
 .book-description {
     margin-bottom: var(--space-2xl);
+    text-align: center;
 }
 
 .book-description p {
