@@ -125,7 +125,7 @@ function bookPageHtml(book, slug) {
   const conclusion  = book.conclusion  || '';
   const quote       = book.quote       || '';
   const description = book.description || '';
-  const weekLabel   = book.weekLabel   || '';
+  const weekLabel   = book.weekLabel   || weekLabelFromDate(book.publishedAt || book.createdAt);
   const weekDate    = book.weekDate    || '';
   const resolvedCoverUrl = book._resolvedCoverUrl || '';
   const amazonUrl   = book.AmazonURL   || '';

@@ -167,7 +167,7 @@ function buildWeeklyHtml(book, unsubscribeToken, _campaignId) {
     : '';
 
   const quoteBlock = quote
-    ? `<tr><td class="inner-pad" style="padding:0 48px 40px 48px;">
+    ? `<tr><td align="center" class="inner-pad" style="padding:0 48px 40px 48px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0ece2;"><tr>
 <td width="4" style="background-color:#a99465;font-size:0;line-height:0;">&nbsp;</td>
 <td style="padding:26px 28px;"><p style="margin:0;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;line-height:2.1;letter-spacing:0.06em;color:#2b2926;font-style:italic;">${escapeHtml(quote)}</p></td>
@@ -233,7 +233,7 @@ ${publisherBlock}
 
 ${quoteBlock}
 
-<tr><td class="inner-pad" style="padding:0 48px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;line-height:1.8;letter-spacing:0.05em;color:#2b2926;">${descriptionHtml}</td></tr>
+<tr><td align="center" class="inner-pad" style="padding:0 48px;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;line-height:1.8;letter-spacing:0.05em;color:#2b2926;">${descriptionHtml}</td></tr>
 
 ${amazonBlock}
 

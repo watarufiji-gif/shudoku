@@ -409,6 +409,7 @@ body {
     border-left: 3px solid var(--color-gold);
     margin-bottom: var(--space-2xl);
     border-radius: 0 8px 8px 0;
+    text-align: center;
 }
 
 .book-quote p {
@@ -416,6 +417,7 @@ body {
     font-style: italic;
     line-height: 1.9;
     color: var(--color-text);
+    text-align: center;
 }
 
 .book-description {
