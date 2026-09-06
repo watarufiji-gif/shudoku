@@ -4,10 +4,14 @@
 
 [functions]
   node_bundler = "esbuild"
-  node_bundler_options = { target = "node22" }
+  node_bundler_options = { target = "node22", external_node_modules = ["@resvg/resvg-js", "sharp"] }
+  included_files = ["assets/fonts/**"]
 
 [functions."send-weekly"]
   schedule = "0 1 * * 6"
+
+[functions."instagram-token-refresh"]
+  schedule = "0 3 1 * *"
 
 [build.environment]
   NODE_VERSION = "22"

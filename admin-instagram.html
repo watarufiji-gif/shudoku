@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instagram投稿生成｜週読</title>
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/assets/favicon-48.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/assets/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg:       #F6F5F1;
+      --card:     #FFFFFF;
+      --text:     #2C2824;
+      --muted:    #8A847C;
+      --accent:   #8B7355;
+      --gold:     #C9A962;
+      --border:   #E0DCD5;
+      --danger:   #C0392B;
+      --success:  #3F7A4D;
+    }
+    body {
+      font-family: 'Noto Sans JP', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    /* ── Login（admin.htmlと同じデザイン） ─────────────── */
+    #login-section {
+      display: flex; align-items: center; justify-content: center;
+      min-height: 100vh; padding: 20px;
+    }
+    .login-card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 8px;
+      padding: 48px 40px; width: 100%; max-width: 360px; text-align: center;
+    }
+    .login-card h1 { font-size: 1.1rem; font-weight: 500; margin-bottom: 8px; }
+    .login-card p { font-size: 0.8rem; color: var(--muted); margin-bottom: 28px; }
+    .login-card input {
+      width: 100%; padding: 12px 14px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.9rem; margin-bottom: 12px; font-family: inherit;
+    }
+    .login-card button, .btn {
+      width: 100%; padding: 12px; border: none; border-radius: 6px;
+      background: var(--text); color: #fff; font-size: 0.9rem; cursor: pointer;
+      font-family: inherit;
+    }
+    .login-card button:hover, .btn:hover { opacity: 0.9; }
+    #login-error { color: var(--danger); font-size: 0.8rem; margin-top: 10px; min-height: 1em; }
+
+    /* ── Dashboard ─────────────────────────────────────── */
+    #dashboard { display: none; max-width: 880px; margin: 0 auto; padding: 40px 24px 80px; }
+    .page-header { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 28px; }
+    .page-header h1 { font-size: 1.3rem; font-weight: 500; }
+    #logout-btn { background: none; border: none; color: var(--muted); font-size: 0.8rem; cursor: pointer; text-decoration: underline; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--border); border-radius: 10px;
+      padding: 28px; margin-bottom: 24px;
+    }
+    .card h2 { font-size: 1rem; font-weight: 500; margin-bottom: 18px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 6px; }
+    .field input[type="text"], .field input[type="url"], .field textarea {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px;
+      font-size: 0.9rem; font-family: inherit; resize: vertical;
+    }
+    .field textarea { min-height: 60px; }
+    .row { display: flex; gap: 12px; align-items: center; }
+    .row .field { flex: 1; margin-bottom: 0; }
+    .checkbox-row { display: flex; align-items: center; gap: 8px; font-size: 0.82rem; color: var(--muted); margin: 12px 0; }
+
+    .btn-primary { background: var(--accent); }
+    .btn-gold { background: var(--gold); color: var(--text); }
+    .btn-danger { background: var(--danger); }
+    .btn-secondary { background: var(--bg); color: var(--text); border: 1px solid var(--border) !important; }
+    .btn { width: auto; padding: 10px 22px; display: inline-flex; align-items: center; gap: 8px; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .status-msg { font-size: 0.85rem; margin-top: 12px; }
+    .status-msg.error { color: var(--danger); }
+    .status-msg.success { color: var(--success); }
+
+    .slide-role-tag {
+      display: inline-block; font-size: 0.7rem; font-weight: 700; color: var(--accent);
+      background: rgba(139,115,85,0.1); padding: 2px 8px; border-radius: 4px; margin-bottom: 8px;
+      letter-spacing: 0.05em;
+    }
+    .slide-editor {
+      border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px;
+      background: var(--bg);
+    }
+
+    .preview-strip { display: flex; gap: 10px; overflow-x: auto; padding: 4px 0 12px; }
+    .preview-strip img {
+      width: 130px; height: 162px; object-fit: cover; border-radius: 6px; border: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th, td { text-align: left; padding: 10px 8px; border-bottom: 1px solid var(--border); }
+    th { color: var(--muted); font-weight: 500; font-size: 0.75rem; }
+    .badge { font-size: 0.7rem; padding: 2px 8px; border-radius: 10px; font-weight: 500; }
+    .badge.draft { background: #EFEAE0; color: var(--muted); }
+    .badge.published { background: rgba(63,122,77,0.12); color: var(--success); }
+    .badge.failed { background: rgba(192,57,43,0.12); color: var(--danger); }
+    .thumb-cell img { width: 40px; height: 50px; object-fit: cover; border-radius: 4px; }
+    .empty-msg { color: var(--muted); text-align: center; padding: 24px 0; font-size: 0.85rem; }
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid rgba(255,255,255,0.4); border-top-color: #fff; border-radius: 50%; animation: spin 0.7s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    [hidden] { display: none !important; }
+  </style>
+</head>
+<body>
+
+  <!-- ── Login ─────────────────────────────────────────── -->
+  <div id="login-section">
+    <form id="login-form" class="login-card">
+      <h1>Instagram投稿生成</h1>
+      <p>週読 管理画面</p>
+      <input type="password" id="password-input" placeholder="管理者パスワード" autocomplete="current-password" required>
+      <button type="submit">ログイン</button>
+      <div id="login-error"></div>
+    </form>
+  </div>
+
+  <!-- ── Dashboard ─────────────────────────────────────── -->
+  <div id="dashboard">
+    <div class="page-header">
+      <h1>Instagram投稿生成</h1>
+      <div>
+        <a href="/admin.html" style="font-size:0.8rem;color:var(--muted);margin-right:16px;">配信ダッシュボードへ</a>
+        <button id="logout-btn">ログアウト</button>
+      </div>
+    </div>
+
+    <!-- Step 1: URL入力 -->
+    <div class="card">
+      <h2>1. 元ネタのURLを入力</h2>
+      <div class="field">
+        <label for="url-input">ブログ記事・商品ページ・YouTube動画のURL</label>
+        <input type="url" id="url-input" placeholder="https://example.com/blog/some-article">
+      </div>
+      <div class="checkbox-row">
+        <input type="checkbox" id="skip-research-checkbox">
+        <label for="skip-research-checkbox">市場調査（Web検索）をスキップして高速・低コストで生成する</label>
+      </div>
+      <button id="generate-btn" class="btn btn-primary">企画を生成する</button>
+      <div id="generate-status" class="status-msg"></div>
+    </div>
+
+    <!-- Step 2: 編集 -->
+    <div class="card" id="edit-card" hidden>
+      <h2>2. 内容を確認・編集</h2>
+      <div id="slides-editor"></div>
+      <div class="field">
+        <label for="caption-input">キャプション</label>
+        <textarea id="caption-input"></textarea>
+      </div>
+      <div class="field">
+        <label for="hashtags-input">ハッシュタグ（カンマ区切り、#は不要）</label>
+        <textarea id="hashtags-input"></textarea>
+      </div>
+      <button id="render-btn" class="btn btn-gold">画像を生成する</button>
+      <div id="render-status" class="status-msg"></div>
+    </div>
+
+    <!-- Step 3: プレビュー＆投稿 -->
+    <div class="card" id="publish-card" hidden>
+      <h2>3. プレビュー＆投稿</h2>
+      <div class="preview-strip" id="preview-strip"></div>
+      <button id="publish-btn" class="btn btn-danger">Instagramに投稿する</button>
+      <div id="publish-status" class="status-msg"></div>
+    </div>
+
+    <!-- 履歴 -->
+    <div class="card">
+      <h2>投稿履歴</h2>
+      <table>
+        <thead>
+          <tr><th>画像</th><th>日時</th><th>タイトル</th><th>状態</th><th></th></tr>
+        </thead>
+        <tbody id="history-body">
+          <tr><td colspan="5" class="empty-msg">読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="/admin-instagram.js"></script>
+</body>
+</html>
