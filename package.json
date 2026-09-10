@@ -12,6 +12,7 @@
     "@anthropic-ai/sdk": "^0.124.0",
     "@resvg/resvg-js": "^2.6.0",
     "@supabase/supabase-js": "^2.0.0",
+    "budoux": "^0.9.1",
     "cheerio": "^1.2.0",
     "fontkit": "^2.0.0",
     "resend": "^3.0.0",

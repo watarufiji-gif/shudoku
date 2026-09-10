@@ -8,6 +8,10 @@
 
 const fs   = require('fs');
 const path = require('path');
+const { loadDefaultJapaneseParser } = require('budoux');
+
+// budoux 日本語パーサ（ビルド時のみ使用。実行時JS・CSPには影響しない）
+const budouxParser = loadDefaultJapaneseParser();
 
 const SERVICE_DOMAIN      = process.env.MICROCMS_SERVICE_DOMAIN || 'shudoku';
 const API_KEY             = process.env.MICROCMS_API_KEY;
@@ -136,7 +140,7 @@ function bookPageHtml(book, slug) {
     : (description.split('\n')[0] || '').slice(0, 120);
   const ogImage       = resolvedCoverUrl || `${SITE_URL}/assets/shudoku-logo.png`;
   const descParagraphs = description.split('\n').filter(p => p.trim())
-    .map(p => `<p>${esc(p)}</p>`).join('\n              ');
+    .map(p => `<p>${escWithWbr(p)}</p>`).join('\n              ');
 
   const jsonLd = JSON.stringify({
     '@context': 'https://schema.org',
@@ -247,7 +251,7 @@ ${jsonLd}
         <!-- テキスト情報（見出し部分：カテゴリ・タイトル・著者・引用） -->
         <div class="book-info">
           ${category ? `<p class="book-category">${esc(category)}</p>` : ''}
-          <h1 class="book-title">${esc(title)}</h1>
+          <h1 class="book-title">${escWithWbr(title)}</h1>
           <p class="book-author${publisher ? ' has-publisher' : ''}">${esc(author)}</p>
           ${publisher ? `<p class="book-publisher">${esc(publisher)}</p>` : ''}
 
@@ -260,7 +264,7 @@ ${jsonLd}
 
           ${quote ? `
           <blockquote class="book-quote">
-            <p>${esc(quote)}</p>
+            <p>${escWithWbr(quote)}</p>
           </blockquote>` : ''}
         </div>
       </div>
@@ -567,6 +571,21 @@ function esc(str) {
     .replace(/</g, '&lt;')
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;');
+}
+
+/**
+ * 日本語テキストを budoux で文節分割し、各文節を esc() でエスケープしてから
+ * <wbr>（ゼロ幅の改行候補）で連結する。
+ *   1. 生テキストを budoux.parse() で文節分割（分割は生テキストにのみ行う）
+ *   2. 文節ごとに esc() でHTMLエスケープ
+ *   3. エスケープ済み文節を <wbr> で連結（<wbr> はエスケープしない）
+ * → 実体参照の内部に <wbr> が入らず、二重エスケープも起きない。
+ *   <wbr> は幅に収まる間は無視され、折り返し時のみ文節境界で改行させる。
+ */
+function escWithWbr(str) {
+  const text = String(str || '');
+  if (!text) return '';
+  return budouxParser.parse(text).map(esc).join('<wbr>');
 }
 
 // 表紙URLを3段階で解決: coverImage → Amazon ASIN → Google Books API

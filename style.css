@@ -384,7 +384,7 @@ body {
     margin-bottom: var(--space-md);
     letter-spacing: 0.03em;
     word-break: keep-all;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
 }
 
 .book-author {
