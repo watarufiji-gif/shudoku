@@ -573,6 +573,10 @@ function esc(str) {
     .replace(/"/g, '&quot;');
 }
 
+// 行頭に来ると不自然な文字（禁則）。この文字で始まる文節の直前には <wbr> を入れない。
+// 小書き仮名（拗音・促音）、長音記号、閉じ括弧類、句読点など。
+const NO_LINE_START = /^[ぁぃぅぇぉゃゅょっゎゕゖァィゥェォャュョッヮヵヶー」』）】〉》〕｝、。，．・：；！？]/;
+
 /**
  * 日本語テキストを budoux で文節分割し、各文節を esc() でエスケープしてから
  * <wbr>（ゼロ幅の改行候補）で連結する。
@@ -581,11 +585,21 @@ function esc(str) {
  *   3. エスケープ済み文節を <wbr> で連結（<wbr> はエスケープしない）
  * → 実体参照の内部に <wbr> が入らず、二重エスケープも起きない。
  *   <wbr> は幅に収まる間は無視され、折り返し時のみ文節境界で改行させる。
+ *
+ * 禁則: 文節が小書き仮名・長音記号・閉じ括弧・句読点など「行頭に来ると不自然な
+ * 文字」で始まる場合は、その直前の <wbr> を省いて前の文節と地続きにする
+ * （budouxの分節が「おかし|ゅうなる」のように割れても、行頭に「ゅ」が来ない）。
  */
 function escWithWbr(str) {
   const text = String(str || '');
   if (!text) return '';
-  return budouxParser.parse(text).map(esc).join('<wbr>');
+  const segments = budouxParser.parse(text);
+  let out = '';
+  for (let i = 0; i < segments.length; i++) {
+    if (i > 0 && !NO_LINE_START.test(segments[i])) out += '<wbr>';
+    out += esc(segments[i]);
+  }
+  return out;
 }
 
 // 表紙URLを3段階で解決: coverImage → Amazon ASIN → Google Books API
