@@ -2,6 +2,7 @@ const { createClient } = require('@supabase/supabase-js');
 const { Resend } = require('resend');
 const { randomUUID } = require('node:crypto');
 const { getWeekStartSaturdayJst, getWeekNumberForDate } = require('./week-utils');
+const { escWithWbr } = require('../../scripts/lib/text-wrap');
 
 const MICROCMS_SERVICE_DOMAIN = process.env.MICROCMS_SERVICE_DOMAIN || 'shudoku';
 const MICROCMS_API_KEY = process.env.MICROCMS_API_KEY;
@@ -142,16 +143,18 @@ function buildWeeklyHtml(book, unsubscribeToken, _campaignId) {
     year: 'numeric', month: 'long', day: 'numeric', timeZone: 'Asia/Tokyo',
   });
 
+  // プレビュー文（受信トレイのスニペット）はHTMLレンダリングとは別のテキスト抽出
+  // 経路に依存し未検証のため、慎重を期して <wbr> は入れない（従来どおり）
   const previewText    = escapeHtml(quote || greeting);
   const descriptionHtml = description
     .split('\n')
     .filter(line => line.trim() !== '')
-    .map(line => `<p style="margin:0 0 1.0em 0;">${escapeHtml(line)}</p>`)
+    .map(line => `<p style="margin:0 0 1.0em 0;">${escWithWbr(line)}</p>`)
     .join('\n');
 
   // 条件付きブロック
   const greetingBlock = greeting
-    ? `\n<p style="margin:0;">${escapeHtml(greeting)}</p>`
+    ? `\n<p style="margin:0;">${escWithWbr(greeting)}</p>`
     : '';
 
   const bookPageUrl = book.slug
@@ -170,7 +173,7 @@ function buildWeeklyHtml(book, unsubscribeToken, _campaignId) {
     ? `<tr><td align="center" class="inner-pad" style="padding:0 48px 40px 48px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0ece2;"><tr>
 <td width="4" style="background-color:#a99465;font-size:0;line-height:0;">&nbsp;</td>
-<td style="padding:26px 28px;"><p style="margin:0;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;line-height:2.1;letter-spacing:0.06em;color:#2b2926;font-style:italic;">${escapeHtml(quote)}</p></td>
+<td style="padding:26px 28px;"><p style="margin:0;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;line-height:2.1;letter-spacing:0.06em;color:#2b2926;font-style:italic;">${escWithWbr(quote)}</p></td>
 </tr></table></td></tr>`
     : '';
 
@@ -226,7 +229,7 @@ ${coverBlock}
 <tr><td class="inner-pad" style="padding:0 48px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 <tr><td align="center" style="padding:0 0 14px 0;"><span style="font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:12px;letter-spacing:0.3em;color:#a99465;">${escapeHtml(category)}</span></td></tr>
-<tr><td align="center" style="padding:0 0 18px 0;"><span class="book-title" style="font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:32px;line-height:1.6;letter-spacing:0.12em;color:#2b2926;">${escapeHtml(title)}</span></td></tr>
+<tr><td align="center" style="padding:0 0 18px 0;"><span class="book-title" style="font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:32px;line-height:1.6;letter-spacing:0.12em;color:#2b2926;">${escWithWbr(title)}</span></td></tr>
 <tr><td align="center" style="padding:0 0 6px 0;"><span style="font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;letter-spacing:0.2em;color:#2b2926;">${escapeHtml(author)}</span></td></tr>
 ${publisherBlock}
 </table></td></tr>
