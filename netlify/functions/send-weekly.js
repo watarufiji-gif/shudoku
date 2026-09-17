@@ -106,6 +106,10 @@ exports.handler = async function () {
   return { statusCode: 200, body: JSON.stringify({ sent, total: subscribers.length }) };
 };
 
+// scripts/test-send-weekly.js から本番と同一テンプレートを使うための内部関数エクスポート。
+// 定期実行(exports.handler)の挙動には影響しない
+exports._internal = { buildWeeklyHtml, fetchLatestBook };
+
 async function fetchLatestBook() {
   const url = `https://${MICROCMS_SERVICE_DOMAIN}.microcms.io/api/v1/books?limit=1&orders=-publishedAt`;
   const res = await fetch(url, {
@@ -149,7 +153,7 @@ function buildWeeklyHtml(book, unsubscribeToken, _campaignId) {
   const descriptionHtml = description
     .split('\n')
     .filter(line => line.trim() !== '')
-    .map(line => `<p style="margin:0 0 1.0em 0;">${escWithWbr(line)}</p>`)
+    .map(line => `<p style="margin:0 0 1.0em 0;word-break:keep-all;overflow-wrap:break-word;">${escWithWbr(line)}</p>`)
     .join('\n');
 
   // 条件付きブロック
@@ -173,7 +177,7 @@ function buildWeeklyHtml(book, unsubscribeToken, _campaignId) {
     ? `<tr><td align="center" class="inner-pad" style="padding:0 48px 40px 48px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background-color:#f0ece2;"><tr>
 <td width="4" style="background-color:#a99465;font-size:0;line-height:0;">&nbsp;</td>
-<td style="padding:26px 28px;"><p style="margin:0;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;line-height:2.1;letter-spacing:0.06em;color:#2b2926;font-style:italic;">${escWithWbr(quote)}</p></td>
+<td style="padding:26px 28px;"><p style="margin:0;font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;line-height:2.1;letter-spacing:0.06em;color:#2b2926;font-style:italic;word-break:keep-all;overflow-wrap:break-word;">${escWithWbr(quote)}</p></td>
 </tr></table></td></tr>`
     : '';
 
@@ -229,7 +233,7 @@ ${coverBlock}
 <tr><td class="inner-pad" style="padding:0 48px;">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
 <tr><td align="center" style="padding:0 0 14px 0;"><span style="font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:12px;letter-spacing:0.3em;color:#a99465;">${escapeHtml(category)}</span></td></tr>
-<tr><td align="center" style="padding:0 0 18px 0;"><span class="book-title" style="font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:32px;line-height:1.6;letter-spacing:0.12em;color:#2b2926;">${escWithWbr(title)}</span></td></tr>
+<tr><td align="center" style="padding:0 0 18px 0;"><span class="book-title" style="font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:32px;line-height:1.6;letter-spacing:0.12em;color:#2b2926;word-break:keep-all;overflow-wrap:break-word;">${escWithWbr(title)}</span></td></tr>
 <tr><td align="center" style="padding:0 0 6px 0;"><span style="font-family:'Hiragino Mincho ProN','Yu Mincho',serif;font-size:15px;letter-spacing:0.2em;color:#2b2926;">${escapeHtml(author)}</span></td></tr>
 ${publisherBlock}
 </table></td></tr>
