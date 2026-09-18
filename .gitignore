@@ -2,5 +2,8 @@ reports/
 .env
 node_modules/
 
+# create-book.js の入力（未公開の実原稿。book.example.json はテンプレートとして残す）
+book.json
+
 # Local Netlify folder
 .netlify

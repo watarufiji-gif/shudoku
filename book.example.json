@@ -1,0 +1,14 @@
+{
+  "_comment": "publishDate は任意。省略すると、空いている次の土曜 09:00 JST に自動で予約公開されます。指定する場合は ISO8601 で土曜 09:00 JST（例: 2026-09-19T09:00:00+09:00）。それ以外の日時はエラーで停止します。_comment 行は送信されません。",
+  "title": "サンプル書名",
+  "author": "著者名（訳者名）",
+  "publisher": "出版社名",
+  "category": "カテゴリ",
+  "quote": "心に響く一節",
+  "description": "紹介文（改行を含む長文）",
+  "AmazonURL": "https://www.amazon.co.jp/dp/XXXXXXXXXX?tag=syudoku-22",
+  "conclusion": "この一冊で何が変わるか",
+  "slug": "url-slug",
+  "greeting": "メール挨拶文（冒頭の定型あいさつは不要・本文のみ）",
+  "publishDate": ""
+}
