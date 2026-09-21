@@ -1,12 +1,28 @@
 (function () {
   var ALLOWED_SOURCES = ['web', 'sns', 'referral', 'company', 'search'];
   var SOURCE_STORAGE_KEY = 'shudoku_source';
+  var UTM_SOURCE_MAP = {
+    instagram: 'sns', ig: 'sns', threads: 'sns', twitter: 'sns', x: 'sns',
+    facebook: 'sns', line: 'sns', youtube: 'sns', tiktok: 'sns', note: 'sns',
+    google: 'search', yahoo: 'search', bing: 'search',
+    newsletter: 'referral', email: 'referral', mail: 'referral'
+  };
 
   function getUrlSource() {
     var params = new URLSearchParams(window.location.search);
-    var value = params.get('source') || params.get('utm_source');
-    if (value && ALLOWED_SOURCES.indexOf(value) !== -1) {
-      return value;
+    var sourceParam = params.get('source');
+    if (sourceParam && ALLOWED_SOURCES.indexOf(sourceParam) !== -1) {
+      return sourceParam;
+    }
+    var utmSource = params.get('utm_source');
+    if (utmSource && ALLOWED_SOURCES.indexOf(utmSource) !== -1) {
+      return utmSource;
+    }
+    if (utmSource) {
+      var mapped = UTM_SOURCE_MAP[utmSource.toLowerCase()];
+      if (mapped && ALLOWED_SOURCES.indexOf(mapped) !== -1) {
+        return mapped;
+      }
     }
     return null;
   }
@@ -27,9 +43,19 @@
     } catch (e) {}
   }
 
+  function stripSourceParamsFromUrl() {
+    try {
+      var url = new URL(window.location.href);
+      url.searchParams.delete('source');
+      url.searchParams.delete('utm_source');
+      history.replaceState(history.state, '', url.pathname + url.search + url.hash);
+    } catch (e) {}
+  }
+
   var urlSource = getUrlSource();
   if (urlSource) {
     storeSource(urlSource);
+    stripSourceParamsFromUrl();
   }
 
   const form = document.getElementById('newsletter-form');
