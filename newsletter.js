@@ -1,4 +1,37 @@
 (function () {
+  var ALLOWED_SOURCES = ['web', 'sns', 'referral', 'company', 'search'];
+  var SOURCE_STORAGE_KEY = 'shudoku_source';
+
+  function getUrlSource() {
+    var params = new URLSearchParams(window.location.search);
+    var value = params.get('source') || params.get('utm_source');
+    if (value && ALLOWED_SOURCES.indexOf(value) !== -1) {
+      return value;
+    }
+    return null;
+  }
+
+  function getStoredSource() {
+    try {
+      var value = sessionStorage.getItem(SOURCE_STORAGE_KEY);
+      if (value && ALLOWED_SOURCES.indexOf(value) !== -1) {
+        return value;
+      }
+    } catch (e) {}
+    return null;
+  }
+
+  function storeSource(value) {
+    try {
+      sessionStorage.setItem(SOURCE_STORAGE_KEY, value);
+    } catch (e) {}
+  }
+
+  var urlSource = getUrlSource();
+  if (urlSource) {
+    storeSource(urlSource);
+  }
+
   const form = document.getElementById('newsletter-form');
   if (!form) return;
 
@@ -28,6 +61,18 @@
     statusEl.className = 'newsletter-status ' + (isError ? 'newsletter-status--error' : 'newsletter-status--success');
   }
 
+  function resolveSource() {
+    var urlSource = getUrlSource();
+    if (urlSource) {
+      return urlSource;
+    }
+    var storedSource = getStoredSource();
+    if (storedSource) {
+      return storedSource;
+    }
+    return form.dataset.source || 'web';
+  }
+
   form.addEventListener('submit', function (e) {
     e.preventDefault();
 
@@ -43,7 +88,7 @@
     statusEl.textContent = '';
     statusEl.className = 'newsletter-status';
 
-    var source = form.dataset.source || 'web';
+    var source = resolveSource();
     fetch('/.netlify/functions/subscribe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
