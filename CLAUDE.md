@@ -185,6 +185,37 @@ MICROCMS_API_KEY=$(node -e "
 ") node scripts/generate-pages.js
 ```
 
+### レイアウト変更前の横はみ出しチェック（必須）
+
+style.css・グリッド/フレックス・折り返し設定（word-break/overflow-wrap等）に関わる
+変更をpushする前に、必ず以下を実行して横はみ出し（scrollWidth > clientWidth）が
+0件であることを確認すること。
+
+```bash
+# 初回のみ
+npm install
+npx playwright install chromium webkit
+
+# 変更のたびに実行
+node scripts/check-overflow.js
+```
+
+全公開ページ × 320/375/390/430/768/899/901/1024/1280/1440px × Chromium/WebKit
+（iPhone・Instagramアプリ内ブラウザはWebKit系）で自動計測する。はみ出しが
+1件でもあれば非ゼロで終了する。オプションは `scripts/check-overflow.js` 冒頭の
+コメント参照。
+
+playwrightは`devDependencies`。Netlifyの本番buildで`playwright`本体
+（playwright + playwright-core、あわせて約18MB、インストールは数秒程度）が
+入ること自体は許容している。ブラウザバイナリ（Chromium/WebKit、数百MB）の
+自動ダウンロードだけは`netlify.toml`の`PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1`で
+確実に止めている（実機で検証済み：この変数を付けた状態でのnpm installでは
+ブラウザキャッシュが一切作成されないことを確認済み）。
+
+**既知の不具合**：`login.html`と`my-library.html`は320px幅のWebKitで
+横はみ出しがある（`.auth-card`/`.reading-card`、修正予定・未着手）。
+`check-overflow.js`を実行してこの2件以外にFAILがないことを確認すること。
+
 ---
 
 ## フェーズ進行状況

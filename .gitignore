@@ -1,6 +1,7 @@
 reports/
 .env
 node_modules/
+.DS_Store
 
 # create-book.js の入力（未公開の実原稿。book.example.json はテンプレートとして残す）
 book.json

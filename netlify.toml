@@ -15,6 +15,12 @@
 
 [build.environment]
   NODE_VERSION = "22"
+  # playwright は devDependencies だが、Netlifyが常にNODE_ENV=productionで
+  # devDependenciesを除外するとは限らない（条件付きの挙動のため）。
+  # 本体（playwright + playwright-core、あわせて約18MB、インストール数秒程度）は
+  # 入る前提で、重いブラウザバイナリ（Chromium/WebKit、数百MB）のダウンロードだけは
+  # この変数で確実に止める。
+  PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD = "1"
 
 [[headers]]
   for = "/.netlify/functions/*"
