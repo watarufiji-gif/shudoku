@@ -859,6 +859,7 @@ body {
     border-radius: 12px;
     padding: var(--space-xl);
     box-shadow: var(--shadow-sm);
+    min-width: 0;
 }
 
 .auth-card h2 {
@@ -878,6 +879,7 @@ body {
 
 .auth-form input,
 .auth-form select {
+    width: 100%;
     border: 1px solid var(--color-border);
     border-radius: 6px;
     padding: 0.7rem 0.8rem;
@@ -1061,6 +1063,7 @@ body {
     border-radius: 12px;
     padding: var(--space-xl);
     box-shadow: var(--shadow-sm);
+    min-width: 0;
 }
 
 .reading-card h2 {
@@ -1076,6 +1079,7 @@ body {
 .reading-form input,
 .reading-form select,
 .reading-form textarea {
+    width: 100%;
     border: 1px solid var(--color-border);
     border-radius: 6px;
     padding: 0.7rem 0.8rem;

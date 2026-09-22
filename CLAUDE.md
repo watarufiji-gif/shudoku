@@ -212,10 +212,6 @@ playwrightは`devDependencies`。Netlifyの本番buildで`playwright`本体
 確実に止めている（実機で検証済み：この変数を付けた状態でのnpm installでは
 ブラウザキャッシュが一切作成されないことを確認済み）。
 
-**既知の不具合**：`login.html`と`my-library.html`は320px幅のWebKitで
-横はみ出しがある（`.auth-card`/`.reading-card`、修正予定・未着手）。
-`check-overflow.js`を実行してこの2件以外にFAILがないことを確認すること。
-
 ---
 
 ## フェーズ進行状況
