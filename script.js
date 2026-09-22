@@ -1145,7 +1145,7 @@ function applyMicroCMSBookToHome(book) {
     const coverUrl = normalized.coverUrl;
     const publisher = normalized.publisher;
 
-    setTextIfValue(titleEl, title);
+    setTitleHtmlIfValue(titleEl, title, book.titleHtml);
     setTextIfValue(authorEl, author);
     if (publisherEl) {
         if (publisher) {
@@ -1612,6 +1612,17 @@ function resolveImageUrl(book) {
 function setTextIfValue(target, value) {
     if (!target || !value) return;
     target.textContent = value;
+}
+
+// html はビルド時に escWithWbr() でエスケープ済みの<wbr>入りHTMLのみを想定。
+// 生テキストを innerHTML に入れない（XSS防止）。無ければ従来どおり textContent。
+function setTitleHtmlIfValue(target, text, html) {
+    if (!target || !text) return;
+    if (html) {
+        target.innerHTML = html;
+    } else {
+        target.textContent = text;
+    }
 }
 
 function setImageIfSafe(target, url, alt) {

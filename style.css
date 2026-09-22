@@ -347,6 +347,7 @@ body {
 /* Book Info */
 .book-info {
     padding: 0;
+    min-width: 0;
 }
 
 /* 本文・CTAをグリッド外に出してページ中央に配置するコンテナ */
@@ -384,7 +385,7 @@ body {
     margin-bottom: var(--space-md);
     letter-spacing: 0.03em;
     word-break: keep-all;
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
 }
 
 .book-author {

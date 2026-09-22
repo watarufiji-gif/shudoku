@@ -721,6 +721,7 @@ function injectBooksDataToIndex(books) {
     publishedAt: book.publishedAt || '',
     createdAt:   book.createdAt   || '',
     revisedAt:   book.revisedAt   || '',
+    titleHtml:   escWithWbr(book.title || ''),
   }));
 
   const scriptTag = `<script id="books-data" type="application/json">\n${JSON.stringify(payload)}\n</script>`;
