@@ -722,6 +722,9 @@ function injectBooksDataToIndex(books) {
     createdAt:   book.createdAt   || '',
     revisedAt:   book.revisedAt   || '',
     titleHtml:   escWithWbr(book.title || ''),
+    quoteHtml:   escWithWbr(book.quote || ''),
+    descriptionHtml: (book.description || '').split('\n').filter(p => p.trim())
+      .map(p => `<p>${escWithWbr(p)}</p>`).join(''),
   }));
 
   const scriptTag = `<script id="books-data" type="application/json">\n${JSON.stringify(payload)}\n</script>`;

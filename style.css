@@ -419,6 +419,8 @@ body {
     line-height: 1.9;
     color: var(--color-text);
     text-align: center;
+    word-break: keep-all;
+    overflow-wrap: anywhere;
 }
 
 .book-description {
@@ -431,6 +433,8 @@ body {
     line-height: 2;
     color: var(--color-text-secondary);
     margin-bottom: var(--space-md);
+    word-break: keep-all;
+    overflow-wrap: anywhere;
 }
 
 /* CTA Button */

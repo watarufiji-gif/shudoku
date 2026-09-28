@@ -1158,9 +1158,9 @@ function applyMicroCMSBookToHome(book) {
         }
     }
     setTextIfValue(categoryEl, category);
-    setTextIfValue(quoteEl, quote);
+    setTitleHtmlIfValue(quoteEl, quote, book.quoteHtml);
     setTextIfValue(weekDateEl, weekDate);
-    setDescriptionParagraphs(descriptionEl, description);
+    setDescriptionParagraphs(descriptionEl, description, book.descriptionHtml);
     const imageApplied = setImageIfSafe(coverEl, coverUrl, title ? `今週の一冊: ${title}` : '');
     if (!imageApplied && coverUrl) {
         setCMSStatus('home', 'coverImageのURL形式またはドメインが許可条件外です。', true);
@@ -1884,8 +1884,14 @@ function setCMSStatus(scope, message, isError = false) {
     target.style.color = isError ? '#B00020' : 'var(--color-text-muted)';
 }
 
-function setDescriptionParagraphs(container, value) {
+// html はビルド時に escWithWbr() でエスケープ済みの<wbr>入りHTMLのみを想定。
+// 生テキストを innerHTML に入れない（XSS防止）。無ければ従来どおり textContent。
+function setDescriptionParagraphs(container, value, html) {
     if (!container || !value) return;
+    if (html) {
+        container.innerHTML = html;
+        return;
+    }
     const lines = String(value)
         .split(/\r?\n+/)
         .map((line) => line.trim())
