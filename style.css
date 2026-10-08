@@ -346,10 +346,19 @@ body {
 
 /* PC：書影を右寄せにして本文との距離を詰め、グリッド全体をページ中央に寄せる */
 @media (min-width: 901px) {
+    /* 高さ720px前後の画面でも書影とヒント文が収まるよう、上部の余白を少し詰める */
+    .hero {
+        padding-top: calc(70px + 2rem);
+    }
+
+    .week-badge {
+        margin-bottom: 2.5rem;
+    }
+
     .book-showcase {
-        grid-template-columns: 320px minmax(0, 1fr);
+        grid-template-columns: 300px minmax(0, 1fr);
         gap: 3rem;
-        max-width: 920px;
+        max-width: 900px;
         margin-inline: auto;
     }
 
@@ -358,7 +367,7 @@ body {
     }
 
     .book-cover {
-        max-width: 320px;
+        max-width: 300px;
     }
 }
 
