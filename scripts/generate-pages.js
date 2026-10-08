@@ -240,9 +240,9 @@ ${jsonLd}
               ? `<img src="${esc(resolvedCoverUrl)}" alt="${esc(title)}の表紙" class="book-cover${description ? ' is-reader-trigger' : ''}" loading="lazy">`
               : `<div class="book-cover" style="background:var(--color-bg-accent);display:flex;align-items:center;justify-content:center;"><span style="font-size:3rem;opacity:.3;">📖</span></div>`
             }
-            ${description ? `<span class="book-open-hint" aria-hidden="true">タップして読む↑</span>` : ''}
+            ${description ? `<span class="book-open-hint" aria-hidden="true"><span class="hint-touch">タップして読む</span><span class="hint-mouse">クリックして読む</span></span>` : ''}
+            <div class="book-shadow"></div>
           </div>
-          <div class="book-shadow"></div>
         </div>
 
         <!-- テキスト情報（見出し部分：カテゴリ・タイトル・著者・引用） -->
@@ -282,6 +282,12 @@ ${jsonLd}
             </a>
           </div>
         </div>` : ''}
+
+        <!-- 本文末の導線（購読 → 過去の本） -->
+        <div class="book-after">
+          <a href="#subscribe" class="book-after-subscribe"><span>毎週土曜、静かな朝に一冊を。</span><span>無料・広告なし。</span><span>メールで受け取る →</span></a>
+          <a href="/archive.html" class="book-after-archive">過去の本を見る →</a>
+        </div>
       </div>
 
       <!-- 戻るリンク -->
@@ -292,7 +298,7 @@ ${jsonLd}
   </main>
 
   <!-- 購読導線（検索流入を購読者に変換） -->
-  <section style="background:var(--color-bg-warm);border-top:1px solid var(--color-border);padding:60px 20px;">
+  <section id="subscribe" style="background:var(--color-bg-warm);border-top:1px solid var(--color-border);padding:60px 20px;">
     <div style="max-width:540px;margin:0 auto;text-align:center;">
       <p style="font-family:var(--font-serif);font-size:1.2rem;margin-bottom:12px;color:var(--color-text);">次の一冊も、毎週土曜日に届けます</p>
       <p style="font-size:0.85rem;color:var(--color-text-secondary);margin-bottom:28px;line-height:1.8;">

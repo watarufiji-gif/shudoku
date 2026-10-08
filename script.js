@@ -1179,7 +1179,9 @@ function applyMicroCMSBookToHome(book) {
         var readerImgEl = document.getElementById('home-book-cover');
         if (readerImgEl && !readerImgEl.classList.contains('is-reader-trigger')) {
             readerImgEl.classList.add('is-reader-trigger');
-            readerImgEl.addEventListener('click', function () {
+            readerImgEl.setAttribute('role', 'button');
+            readerImgEl.setAttribute('tabindex', '0');
+            var openHomeReader = function () {
                 if (window.bookReader && typeof window.bookReader.open === 'function') {
                     window.bookReader.open({
                         text: description,
@@ -1188,6 +1190,10 @@ function applyMicroCMSBookToHome(book) {
                         amazonUrl: normalized.amazonUrl || book.AmazonURL || ''
                     });
                 }
+            };
+            readerImgEl.addEventListener('click', openHomeReader);
+            readerImgEl.addEventListener('keydown', function (e) {
+                if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openHomeReader(); }
             });
             var hintEl = document.getElementById('home-book-open-hint');
             if (hintEl) hintEl.removeAttribute('hidden');
